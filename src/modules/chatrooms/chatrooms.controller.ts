@@ -1,4 +1,4 @@
-import { Body, Controller, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ChatroomSummary } from './types/chatroomSummary';
 import { GetChatroomSummariesDto } from './dto/get-chatroom-summary.dto';
@@ -16,11 +16,12 @@ export class ChatroomsController {
     protected readonly messagesService: MessagesService,
   ) {}
   @Post('summaries')
+  @HttpCode(200)
   @UseGuards(JwtGuard)
   @ApiBody({ type: GetChatroomSummariesDto })
   @ApiOperation({ summary: '获取聊天室信息概要' })
   @ApiResponse({
-    status: HttpStatus.OK,
+    status: HttpStatus.CREATED,
     description: '成功获取chatroomSummaries',
     type: [ChatroomSummary],
   })
