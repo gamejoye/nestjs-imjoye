@@ -1,7 +1,8 @@
-import { Controller, Get, HttpStatus, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Message } from './entities/message.entity';
 import { MessagesService } from './messages.service';
+import { IAddMessageDto } from './dto/add-message.dto';
 
 @ApiTags('messages')
 @Controller('messages')
@@ -25,9 +26,26 @@ export class MessagesController {
     status: HttpStatus.UNAUTHORIZED,
     description: '未认证用户',
   })
-  async getByChatroomId(
+  async getMessagesByChatroomId(
     @Query('room_id') roomId: number,
   ): Promise<Array<Message>> {
     return this.messagesService.getByPaging(roomId);
+  }
+
+  @Post()
+  @UseGuards()
+  @ApiOperation({ summary: '在聊天室中发送消息' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: '成功发送消息',
+    type: Message,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: '未认证用户',
+  })
+  async addMessage(@Body() partialMessage: IAddMessageDto): Promise<Message> {
+    const message = await this.messagesService.addMessage(partialMessage);
+    return message;
   }
 }
