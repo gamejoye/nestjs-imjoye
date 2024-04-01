@@ -19,12 +19,16 @@ export class Message {
   @JoinColumn({ name: 'chatroom_id' })
   @ApiProperty({
     description: '消息所属聊天室',
+    type: () => Chatroom,
   })
   chatroom: Chatroom;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'from' })
-  @ApiProperty({ description: '消息由谁发出' })
+  @ApiProperty({
+    description: '消息由谁发出',
+    type: () => User,
+  })
   from: User;
 
   @Column()

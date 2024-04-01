@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ChatroomType } from 'src/common/constants/chatroom';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { UserChatroom } from './user-chatroom.entity';
+import { Message } from 'src/modules/messages/entities/message.entity';
 
 @Entity()
 export class Chatroom {
@@ -29,4 +30,7 @@ export class Chatroom {
 
   @OneToMany(() => UserChatroom, (userChatroom) => userChatroom.chatroom)
   userChatrooms: Array<UserChatroom>;
+
+  @OneToMany(() => Message, (message) => message.chatroom)
+  messages: Array<Message>;
 }

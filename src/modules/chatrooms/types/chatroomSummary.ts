@@ -26,6 +26,7 @@ export class ChatroomSummary {
 
   @ApiProperty({
     description: '当前summary记录所对应的chatroom',
+    type: () => Chatroom,
   })
   chatroom: Chatroom;
 }
