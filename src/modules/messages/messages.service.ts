@@ -9,7 +9,7 @@ export class MessagesService implements IMessagesService {
   constructor(
     @Inject(MESSAGE_REPOSITORY)
     protected messagesRepository: Repository<Message>,
-  ) {}
+  ) { }
   async countByTime(time: string): Promise<number> {
     const count = await this.messagesRepository
       .createQueryBuilder('message')
@@ -24,7 +24,13 @@ export class MessagesService implements IMessagesService {
       .orderBy('message.createTime', 'DESC');
     return await query.getOne();
   }
-  async getByPaging(): Promise<Message[]> {
-    throw new Error('Method not implemented.');
+  async getByPaging(chatroomId: number): Promise<Message[]> {
+    const query = this.messagesRepository
+      .createQueryBuilder('message')
+      .innerJoinAndSelect('message.chatroom', 'chatroom')
+      .innerJoinAndSelect('message.from', 'user')
+      .where('chatroom.id = :chatroomId', { chatroomId })
+      .orderBy('message.createTime', 'DESC');
+    return await query.getMany();
   }
 }
