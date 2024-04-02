@@ -33,6 +33,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "cross-env": "^7.0.3",
+    "dayjs": "^1.11.10",
     "jsonwebtoken": "^9.0.2",
     "mysql": "^2.18.1",
     "passport-jwt": "^4.0.1",
