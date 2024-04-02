@@ -3,11 +3,15 @@ import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Message } from './entities/message.entity';
 import { MessagesService } from './messages.service';
 import { IAddMessageDto } from './dto/add-message.dto';
+import { WsGatewayService } from '../ws-gateway/ws-gateway.service';
 
 @ApiTags('messages')
 @Controller('messages')
 export class MessagesController {
-  constructor(protected readonly messagesService: MessagesService) {}
+  constructor(
+    protected readonly messagesService: MessagesService,
+    protected readonly wsService: WsGatewayService,
+  ) {}
   @Get()
   @UseGuards()
   @ApiQuery({
@@ -46,6 +50,7 @@ export class MessagesController {
   })
   async addMessage(@Body() partialMessage: IAddMessageDto): Promise<Message> {
     const message = await this.messagesService.addMessage(partialMessage);
+    await this.wsService.notifynChat(message.from.id, message);
     return message;
   }
 }
