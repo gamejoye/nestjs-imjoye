@@ -47,10 +47,11 @@ export class MessagesService implements IMessagesService {
     message.from = from;
     return message;
   }
-  async countByTime(time: string): Promise<number> {
+  async countByTime(chatroomId: number, time: string): Promise<number> {
     const count = await this.messagesRepository
       .createQueryBuilder('message')
       .where('message.createTime > :time', { time })
+      .andWhere('message.chatroom.id = :chatroomId', { chatroomId })
       .getCount();
     return count;
   }
