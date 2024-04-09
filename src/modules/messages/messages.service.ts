@@ -20,7 +20,7 @@ export class MessagesService implements IMessagesService {
     protected userRepository: Repository<User>,
     @Inject(CHATROOM_REPOSITORY)
     protected chatroomRepository: Repository<Chatroom>,
-  ) { }
+  ) {}
   async addMessage(partialMessage: DeepPartial<Message>): Promise<Message> {
     const chatroom = await this.chatroomRepository.findOne({
       where: {
