@@ -52,7 +52,10 @@ export class ChatroomsController {
     );
     const unreadMessageCounts = await Promise.all(
       chatrooms.map(({ id, createTime }) =>
-        this.messagesService.countByTime(latestTimesMap.get(id) || createTime),
+        this.messagesService.countByTime(
+          id,
+          latestTimesMap.get(id) || createTime,
+        ),
       ),
     );
 
