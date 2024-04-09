@@ -1,4 +1,3 @@
-import { Message } from 'src/modules/messages/entities/message.entity';
 import { Chatroom } from '../entities/chatroom.entity';
 
 export interface IChatroomsService {
