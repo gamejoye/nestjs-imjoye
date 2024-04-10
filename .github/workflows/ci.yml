@@ -17,6 +17,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: ${{secrets.TEST_DATABASE_PASSWORD}}
         ports:
           - 3306:3306
+        options: --default-authentication-plugin=mysql_native_password
     strategy:
       matrix:
         node-version: [20.x]
