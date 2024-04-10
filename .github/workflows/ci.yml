@@ -43,7 +43,7 @@ jobs:
         run: npm run test
         env:
           DATABASE_NAME: ${{secrets.TEST_DATABASE_DATABASE}}
-          DATABASE_USERNAME: ${{secrets.TEST_DATABASE_USERNAME}}
+          DATABASE_USERNAME: root
           DATABASE_PASSWORD: ${{secrets.TEST_DATABASE_PASSWORD}}
           DATABASE_ENDPOINT: ${{secrets.TEST_DATABASE_HOST}}
         
