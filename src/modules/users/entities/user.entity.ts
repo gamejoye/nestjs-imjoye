@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UserChatroom } from 'src/modules/chatrooms/entities/user-chatroom.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { UserFriendship } from './friendship.entity';
 
 @Entity()
 export class User {
@@ -43,4 +44,10 @@ export class User {
 
   @OneToMany(() => UserChatroom, (userChatroom) => userChatroom.user)
   userChatrooms: Array<UserChatroom>;
+
+  @OneToMany(() => UserFriendship, (friendship) => friendship.from)
+  fromFriendships: Array<UserFriendship>;
+
+  @OneToMany(() => UserFriendship, (friendship) => friendship.to)
+  toFriendships: Array<UserFriendship>;
 }
