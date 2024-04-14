@@ -9,4 +9,5 @@ export interface IUsersService {
     passwordHash: string,
     avatarUrl: string,
   ): Promise<User>;
+  getFriends(userId: number): Promise<Array<User>>;
 }
