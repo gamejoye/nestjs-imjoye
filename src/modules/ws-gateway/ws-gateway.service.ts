@@ -11,6 +11,9 @@ import { Message } from '../messages/entities/message.entity';
 import { USER_REPOSITORY } from 'src/common/constants/providers';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
+import { AUTHORIZATION } from 'src/common/constants/websocketHeaders';
+import * as jwt from 'jsonwebtoken';
+import { EnvConfigService } from '../env-config/env-config.service';
 
 @Injectable()
 export class WsGatewayService implements OnModuleInit, OnModuleDestroy {
@@ -19,17 +22,28 @@ export class WsGatewayService implements OnModuleInit, OnModuleDestroy {
   constructor(
     @Inject(USER_REPOSITORY)
     protected readonly userRepository: Repository<User>,
+    protected readonly envConfigService: EnvConfigService,
   ) {}
 
   onModuleInit() {
     this.onlineClients = new Map();
     this.wss = new Server({ port: 5173 });
     this.wss.on('connection', (ws, req) => {
-      /**
-       * TODO 身份验证 req.headers.authentication
-       */
-      console.log('用户连接过来了: ', req.headers);
-      this.onlineClients.set(1, ws);
+      const token = req.headers[AUTHORIZATION];
+      const payload = jwt.verify(
+        token,
+        this.envConfigService.getJwtConfig().secret,
+      );
+      if (
+        !payload ||
+        typeof payload === 'string' ||
+        typeof payload.id !== 'number'
+      )
+        return;
+      const userId = payload.id;
+      this.onlineClients.set(userId, ws);
+      console.log(`Client[${userId}] 建立连接`);
+
       ws.on('message', (rawData) => {
         const message: IWebSocketMessage<unknown> = JSON.parse(
           rawData.toString('utf-8'),
@@ -38,14 +52,24 @@ export class WsGatewayService implements OnModuleInit, OnModuleDestroy {
       });
 
       ws.on('close', () => {
-        console.log('Client disconnected');
+        let offlineUserId = -1;
+        for (const [userId, currentWs] of this.onlineClients.entries()) {
+          if (currentWs === ws) {
+            offlineUserId = userId;
+            break;
+          }
+        }
+        if (offlineUserId !== -1) {
+          this.onlineClients.delete(offlineUserId);
+        }
+        console.log(`Client[${offlineUserId}] 断开连接`);
       });
     });
   }
 
   onModuleDestroy() {
     this.wss.close(() => {
-      console.log('WebSocket server closed');
+      console.log('WebSocket 服务关闭');
     });
   }
 
