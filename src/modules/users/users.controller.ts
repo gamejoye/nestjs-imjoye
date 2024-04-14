@@ -24,4 +24,10 @@ export class UsersController {
     }
     return user;
   }
+  @Get(':id/friends')
+  @UseGuards(JwtGuard)
+  async getFriendsById(@Param('id') id: number) {
+    const friends = await this.usersService.getFriends(id);
+    return friends;
+  }
 }
