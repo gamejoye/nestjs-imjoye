@@ -38,10 +38,19 @@ export class UsersController {
     @Param('friendId') friendId: number,
     @Query('detail') detail: 'full' | 'basic',
   ) {
-    const friends = await this.usersService.getFriendInfoByUserIdAndFriendId(
-      id,
-      friendId,
-    );
-    return friends;
+    if (detail === 'full') {
+      const friends = await this.usersService.getFriendInfoByUserIdAndFriendId(
+        id,
+        friendId,
+      );
+      return friends;
+    } else {
+      // TODO 不获取friendInfo 而是只获取friend: IUser
+      const friends = await this.usersService.getFriendInfoByUserIdAndFriendId(
+        id,
+        friendId,
+      );
+      return friends;
+    }
   }
 }
