@@ -4,8 +4,6 @@ import { User } from 'src/modules/users/entities/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
   Column,
   ManyToOne,
   JoinColumn,
@@ -28,14 +26,14 @@ export class UserFriendship {
   })
   status: UserFriendshipType;
 
-  @CreateDateColumn({ name: 'create_time' })
+  @Column({ name: 'create_time' })
   @ApiProperty({
     example: '2024-03-23 19:12',
     description: 'friendship创建时间',
   })
   createTime: string;
 
-  @UpdateDateColumn({ name: 'update_time' })
+  @Column({ name: 'update_time' })
   @ApiProperty({
     example: '2024-03-23 19:15',
     description: 'friendship最后更新时间',
