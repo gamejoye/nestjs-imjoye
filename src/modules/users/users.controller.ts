@@ -4,6 +4,7 @@ import {
   HttpException,
   HttpStatus,
   Param,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -28,6 +29,19 @@ export class UsersController {
   @UseGuards(JwtGuard)
   async getFriendsById(@Param('id') id: number) {
     const friends = await this.usersService.getFriends(id);
+    return friends;
+  }
+  @Get(':id/friends/:friendId')
+  @UseGuards(JwtGuard)
+  async getFriendByUserIdAndFriendId(
+    @Param('id') id: number,
+    @Param('friendId') friendId: number,
+    @Query('detail') detail: 'full' | 'basic',
+  ) {
+    const friends = await this.usersService.getFriendInfoByUserIdAndFriendId(
+      id,
+      friendId,
+    );
     return friends;
   }
 }
