@@ -3,6 +3,6 @@ import { Chatroom } from '../entities/chatroom.entity';
 export interface IChatroomsService {
   countAll(userId: number): Promise<number>;
   getAll(userId: number): Promise<Array<Chatroom>>;
-  // getLatestMessage(userId: number, roomId: number): Promise<Message>;
-  // getLatestMessages(userId: number, roomIds: Array<number>): Promise<Array<Message>>;
+  getByChatroomId(userId: number, chatroomId: number): Promise<Chatroom>;
+  getByUserIdAndFriendId(userId: number, friendId: number): Promise<Chatroom>;
 }
