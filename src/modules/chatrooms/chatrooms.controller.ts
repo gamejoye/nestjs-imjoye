@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ChatroomSummary } from './types/chatroomSummary';
-import { GetChatroomSummariesDto } from './dto/get-chatroom-summary.dto';
+import { GetChatroomSummariesDto } from './dto/get-chatroom-summaries.dto';
 import { ChatroomsService } from './chatrooms.service';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { User } from '../users/entities/user.entity';
