@@ -1,9 +1,13 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
+  NotFoundException,
+  Param,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -14,6 +18,7 @@ import { GetUser } from '../auth/decorators/get-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { JwtGuard } from '../auth/jwt.guard';
 import { MessagesService } from '../messages/messages.service';
+import { Chatroom } from './entities/chatroom.entity';
 
 @ApiTags('chatrooms')
 @Controller('chatrooms')
@@ -22,13 +27,74 @@ export class ChatroomsController {
     protected readonly chatroomsService: ChatroomsService,
     protected readonly messagesService: MessagesService,
   ) {}
+
+  @Get(':id')
+  @UseGuards(JwtGuard)
+  @ApiOperation({ summary: '根据聊天室id获取单个聊天室' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '成功获取单个聊天室',
+    type: Chatroom,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: '未认证用户',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: '未找到聊天室',
+  })
+  async getChatroom(
+    @GetUser() user: User,
+    @Param('id') chatroomId: number,
+  ): Promise<Chatroom> {
+    const chatroom = await this.chatroomsService.getByChatroomId(
+      user.id,
+      chatroomId,
+    );
+    if (!chatroom) {
+      throw new NotFoundException('Chatroom not found');
+    }
+    return chatroom;
+  }
+
+  @Get('')
+  @UseGuards(JwtGuard)
+  @ApiOperation({ summary: '根据userId和friendId获取单个单聊聊天室' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '成功获取单个单聊聊天室',
+    type: Chatroom,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: '未认证用户',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: '未找到聊天室',
+  })
+  async getSingleChatroomByFriendId(
+    @GetUser() user: User,
+    @Query('friend_id') friendId: number,
+  ): Promise<Chatroom> {
+    const chatroom = await this.chatroomsService.getByUserIdAndFriendId(
+      user.id,
+      friendId,
+    );
+    if (!chatroom) {
+      throw new NotFoundException('Chatroom not found');
+    }
+    return chatroom;
+  }
+
   @Post('summaries')
   @HttpCode(200)
   @UseGuards(JwtGuard)
   @ApiBody({ type: GetChatroomSummariesDto })
   @ApiOperation({ summary: '获取聊天室信息概要' })
   @ApiResponse({
-    status: HttpStatus.CREATED,
+    status: HttpStatus.OK,
     description: '成功获取chatroomSummaries',
     type: [ChatroomSummary],
   })
