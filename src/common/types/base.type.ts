@@ -17,3 +17,8 @@ export interface IWebSocketMessage<T> {
   event: WebSocketEvent;
   payload: T;
 }
+
+export interface IAvatarConfig {
+  avatarDir: string;
+  avatarUrl: string;
+}
