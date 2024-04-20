@@ -5,7 +5,6 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { getCurrentDatetime } from '../utils/times';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -14,11 +13,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
-    response.status(status).json({
+    // 鸿蒙提供的request.uploadFile 无法获取后端的response 所以这里折中方案在response.headers提供返回值
+    const transformed = {
       statusCode: status,
-      timestamp: getCurrentDatetime(),
       path: request.url,
       message: exception.message,
-    });
+    };
+    if (request.path === '/users/avatar/upload') {
+      response.setHeader('status', JSON.stringify(transformed));
+    }
+    response.status(status).json(transformed);
   }
 }
