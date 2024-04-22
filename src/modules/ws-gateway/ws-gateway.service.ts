@@ -14,6 +14,7 @@ import { User } from '../users/entities/user.entity';
 import { AUTHORIZATION } from 'src/common/constants/websocketHeaders';
 import * as jwt from 'jsonwebtoken';
 import { EnvConfigService } from '../env-config/env-config.service';
+import { websocketRetry } from 'src/common/utils';
 
 @Injectable()
 export class WsGatewayService implements OnModuleInit, OnModuleDestroy {
@@ -44,13 +45,6 @@ export class WsGatewayService implements OnModuleInit, OnModuleDestroy {
       this.onlineClients.set(userId, ws);
       console.log(`Client[${userId}] 建立连接`);
 
-      ws.on('message', (rawData) => {
-        const message: IWebSocketMessage<unknown> = JSON.parse(
-          rawData.toString('utf-8'),
-        );
-        console.log('message: ', message);
-      });
-
       ws.on('close', () => {
         let offlineUserId = -1;
         for (const [userId, currentWs] of this.onlineClients.entries()) {
@@ -68,17 +62,10 @@ export class WsGatewayService implements OnModuleInit, OnModuleDestroy {
   }
 
   onModuleDestroy() {
-    this.wss.close(() => {
-      console.log('WebSocket 服务关闭');
-    });
+    this.wss.close(() => {});
   }
 
   async notifynChat(from: number, message: Message) {
-    /**
-     * TODO 为了消息的可靠性
-     * 在应用层提供向TCP协议一样的 syn/ack机制
-     * 确保每条消息都 成功发送 & 成功接收
-     */
     const users = await this.userRepository
       .createQueryBuilder('user')
       .innerJoin('user.userChatrooms', 'userChatroom')
@@ -86,15 +73,63 @@ export class WsGatewayService implements OnModuleInit, OnModuleDestroy {
       .where('chatroom.id = :chatroomId', { chatroomId: message.chatroom.id })
       .getMany();
     const currentOnlineClients: Array<[WebSocket, User]> = users
-      .filter((user) => this.onlineClients.has(user.id))
+      .filter((user) => user.id !== from && this.onlineClients.has(user.id))
       .map((user) => [this.onlineClients.get(user.id), user]);
-    currentOnlineClients.forEach(([client, user]) => {
-      const socketMessage: IWebSocketMessage<Message> = {
-        event: WebSocketEvent.NEW_MESSAGE,
+
+    /**
+     * 在应用层提供向TCP协议一样的 syn/ack机制
+     * 确保每条消息都 成功发送 & 成功接收
+     */
+    const senderClient = this.onlineClients.get(from);
+    if (senderClient) {
+      /**
+       * 通知消息发送者已经成功接收到发送的消息了
+       * TODO auto retry
+       */
+      const senderSocketMessage: IWebSocketMessage<Message> = {
+        event: WebSocketEvent.MESSAGE_ACK,
         payload: message,
       };
-      client.send(JSON.stringify(socketMessage));
-      console.log('成功向userId[' + user.id + ']的用户发送了[NEW_MESSAGE]事件');
+      const retryMessageAck = () => {
+        console.log(
+          `成功向在聊天室[${message.chatroom.id}]的发送者[${from}]发送MESSAGE_ACK事件`,
+        );
+        senderClient.send(JSON.stringify(senderSocketMessage));
+      };
+      const successCondition = (result: IWebSocketMessage<Message>) => {
+        return (
+          result.event === WebSocketEvent.MESSAGE_ACK_SYN &&
+          result.payload.id === message.id
+        );
+      };
+      websocketRetry<Message>(senderClient, retryMessageAck, successCondition);
+    }
+
+    currentOnlineClients.forEach(([receiverClient, user]) => {
+      /**
+       * 通知在聊天室中的所有用户需要接收新的消息
+       */
+      const socketMessage: IWebSocketMessage<Message> = {
+        event: WebSocketEvent.MESSAGE_NOTIFY_SYN,
+        payload: message,
+      };
+      const retryNotifyMessage = () => {
+        console.log(
+          `成功向在聊天室[${message.chatroom.id}]用户[${user.id}]发送[NOTIFY_MESSAGE_SYN]事件`,
+        );
+        receiverClient.send(JSON.stringify(socketMessage));
+      };
+      const successCondition = (result: IWebSocketMessage<Message>) => {
+        return (
+          result.event === WebSocketEvent.MESSAGE_NOTIFY_ACK &&
+          result.payload.id === message.id
+        );
+      };
+      websocketRetry<Message>(
+        receiverClient,
+        retryNotifyMessage,
+        successCondition,
+      );
     });
   }
 }
