@@ -45,10 +45,6 @@ describe('WsGatewayService', () => {
     const sqlFilePath = path.join(__dirname, '../../../test/testdb.sql');
     await new Promise<void>((resolve, reject) => {
       const databaseConfig = envConfigService.getDatabaseConfig();
-      Logger.test(databaseConfig);
-      Logger.test(
-        `mysql -h ${databaseConfig.host} --port ${databaseConfig.port} -u ${databaseConfig.username} -p${databaseConfig.password} ${databaseConfig.database} < ${sqlFilePath};`,
-      );
       exec(
         `mysql -h ${databaseConfig.host} --port ${databaseConfig.port} -u ${databaseConfig.username} -p${databaseConfig.password} ${databaseConfig.database} < ${sqlFilePath};`,
         (error) => {
