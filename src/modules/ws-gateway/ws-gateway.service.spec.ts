@@ -46,7 +46,7 @@ describe('WsGatewayService', () => {
     await new Promise<void>((resolve, reject) => {
       const databaseConfig = envConfigService.getDatabaseConfig();
       exec(
-        `mysql -u ${databaseConfig.username} -p${databaseConfig.password} ${databaseConfig.database} < ${sqlFilePath}`,
+        `mysql -h ${databaseConfig.host} -p ${databaseConfig.port} -u ${databaseConfig.username} -p${databaseConfig.password} ${databaseConfig.database} < ${sqlFilePath};`,
         (error) => {
           if (error) {
             console.error(`exec error: ${error}`);
