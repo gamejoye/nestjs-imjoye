@@ -47,7 +47,7 @@ describe('WsGatewayService', () => {
       const databaseConfig = envConfigService.getDatabaseConfig();
       Logger.test(databaseConfig);
       Logger.test(
-        `mysql -h ${databaseConfig.host} -port ${databaseConfig.port} -u ${databaseConfig.username} -p${databaseConfig.password} ${databaseConfig.database} < ${sqlFilePath};`,
+        `mysql -h ${databaseConfig.host} --port ${databaseConfig.port} -u ${databaseConfig.username} -p${databaseConfig.password} ${databaseConfig.database} < ${sqlFilePath};`,
       );
       exec(
         `mysql -h ${databaseConfig.host} --port ${databaseConfig.port} -u ${databaseConfig.username} -p${databaseConfig.password} ${databaseConfig.database} < ${sqlFilePath};`,
