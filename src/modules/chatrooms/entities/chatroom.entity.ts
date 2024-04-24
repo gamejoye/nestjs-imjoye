@@ -21,6 +21,13 @@ export class Chatroom {
   @ApiProperty({ example: 'chatroomName', description: '聊天室名字' })
   name: string;
 
+  @Column({ name: 'avatar_url' })
+  @ApiProperty({
+    example: 'https://avatars.githubusercontent.com/u/88575063?v=4',
+    description: '聊天室的头像 当为单聊的时候为对方的头像',
+  })
+  avatarUrl: string;
+
   @Column({ name: 'create_time' })
   @ApiProperty({
     example: '2024-03-23 19:12',
