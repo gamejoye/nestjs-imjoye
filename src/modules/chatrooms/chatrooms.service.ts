@@ -3,8 +3,9 @@ import { IChatroomsService } from './interface/chatrooms.service.interface';
 import { Chatroom } from './entities/chatroom.entity';
 import { CHATROOM_REPOSITORY } from 'src/common/constants/providers';
 import { Brackets, Repository } from 'typeorm';
-import { UserChatroom } from './entities/user-chatroom.entity';
 import { ChatroomType } from 'src/common/constants/chatroom';
+import { Logger } from 'src/common/utils';
+import { USER_CHATROOM } from 'src/common/constants/database-tables';
 
 @Injectable()
 export class ChatroomsService implements IChatroomsService {
@@ -19,16 +20,23 @@ export class ChatroomsService implements IChatroomsService {
     const chatroom = await this.chatroomsRepository
       .createQueryBuilder('chatroom')
       .innerJoinAndSelect('chatroom.userChatrooms', 'userChatroom')
+      .innerJoinAndSelect('userChatroom.user', 'user')
       .where('chatroom.type = :type', { type: ChatroomType.SINGLE })
       .andWhere(
         new Brackets((qb) => {
-          qb.where('userChatroom.user.id = :userId', { userId }).andWhere(
-            'chatroom.id IN (SELECT chatroom_id FROM user_chatroom WHERE user_id = :friendId)',
-            { friendId },
+          qb.where('userChatroom.user.id = :friendId', { friendId }).andWhere(
+            `chatroom.id IN (SELECT chatroom_id FROM ${USER_CHATROOM} WHERE user_id = :userId)`,
+            { userId },
           );
         }),
       )
       .getOne();
+    if (chatroom) {
+      const userChatroom = chatroom.userChatrooms[0];
+      chatroom.userChatrooms = undefined;
+      chatroom.avatarUrl = userChatroom.user.avatarUrl;
+      chatroom.name = userChatroom.user.username;
+    }
     return chatroom;
   }
   async getByChatroomId(userId: number, chatroomId: number): Promise<Chatroom> {
@@ -40,8 +48,22 @@ export class ChatroomsService implements IChatroomsService {
         'userChatroom.chatroom.id = :chatroomId',
         { chatroomId },
       )
-      .where('userChatroom.user.id = :userId', { userId });
-    return await query.getOne();
+      .innerJoinAndSelect('userChatroom.user', 'user')
+      .where('chatroom.id = :chatroomId', { chatroomId });
+    const chatroom = await query.getOne();
+    if (!chatroom.userChatrooms.some(({ user }) => user.id === userId)) {
+      return null;
+    }
+    Logger.log(userId, chatroomId, chatroom.userChatrooms);
+    if (chatroom && chatroom.type === ChatroomType.SINGLE) {
+      const friend = chatroom.userChatrooms
+        .map((userChatroom) => userChatroom.user)
+        .find((user) => user.id !== userId);
+      chatroom.avatarUrl = friend.avatarUrl;
+      chatroom.name = friend.username;
+    }
+    chatroom.userChatrooms = undefined;
+    return chatroom;
   }
   async countAll(userId: number): Promise<number> {
     return userId;
@@ -50,11 +72,26 @@ export class ChatroomsService implements IChatroomsService {
     const query = this.chatroomsRepository
       .createQueryBuilder('chatroom')
       .innerJoinAndSelect(
-        UserChatroom,
+        'chatroom.userChatrooms',
         'userChatroom',
         'userChatroom.chatroom.id = chatroom.id',
       )
-      .where('userChatroom.user.id = :userId', { userId });
-    return await query.getMany();
+      .innerJoinAndSelect('userChatroom.user', 'user')
+      .where(
+        `chatroom.id IN (SELECT chatroom_id FROM ${USER_CHATROOM} WHERE user_id = :userId)`,
+        { userId },
+      );
+    const chatrooms = await query.getMany();
+    chatrooms.forEach((chatroom) => {
+      if (chatroom.type === ChatroomType.SINGLE) {
+        const friend = chatroom.userChatrooms
+          .map((userChatroom) => userChatroom.user)
+          .find((user) => user.id !== userId);
+        chatroom.avatarUrl = friend.avatarUrl;
+        chatroom.name = friend.username;
+      }
+      chatroom.userChatrooms = undefined;
+    });
+    return chatrooms;
   }
 }
