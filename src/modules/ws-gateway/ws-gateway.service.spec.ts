@@ -14,7 +14,7 @@ import {
   USER_REPOSITORY,
 } from 'src/common/constants/providers';
 import { ChatroomType } from 'src/common/constants/chatroom';
-import { getCurrentDatetime, mockJwt } from 'src/common/utils';
+import { getCurrentDatetime, initDatabase, mockJwt } from 'src/common/utils';
 import { WebSocket } from 'ws';
 import { AUTHORIZATION } from 'src/common/constants/websocketHeaders';
 import { IWebSocketMessage } from 'src/common/types/base.type';
@@ -41,21 +41,7 @@ describe('WsGatewayService', () => {
     chatroomsRepository = module.get<Repository<Chatroom>>(CHATROOM_REPOSITORY);
 
     wsGatewayService.onModuleInit();
-
-    const sqlFilePath = path.join(__dirname, '../../../test/testdb.sql');
-    await new Promise<void>((resolve, reject) => {
-      const databaseConfig = envConfigService.getDatabaseConfig();
-      exec(
-        `mysql -h ${databaseConfig.host} --port ${databaseConfig.port} -u ${databaseConfig.username} -p${databaseConfig.password} ${databaseConfig.database} < ${sqlFilePath};`,
-        (error) => {
-          if (error) {
-            console.error(`exec error: ${error}`);
-            return reject(error);
-          }
-          resolve();
-        },
-      );
-    });
+    await initDatabase(envConfigService.getDatabaseConfig());
   });
 
   afterEach(async () => {
