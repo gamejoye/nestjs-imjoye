@@ -3,8 +3,6 @@ import { WsGatewayService } from './ws-gateway.service';
 import { wsGatewayProviders } from './ws-gateway.providers';
 import { DatabaseModule } from '../database/database.module';
 import { EnvConfigModule } from '../env-config/env-config.module';
-import * as path from 'path';
-import { exec } from 'child_process';
 import { EnvConfigService } from '../env-config/env-config.service';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';

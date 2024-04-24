@@ -26,7 +26,7 @@ export class UsersController {
   constructor(
     protected readonly usersService: UsersService,
     protected readonly envConfigService: EnvConfigService,
-  ) { }
+  ) {}
   @Get(':id')
   @UseGuards(JwtGuard)
   async getUserByid(@GetUser() user: User, @Param('id') id: number) {
