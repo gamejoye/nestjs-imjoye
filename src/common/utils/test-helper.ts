@@ -6,8 +6,7 @@ export async function initDatabase(
   databaseConfig: IDatabaseConfig,
 ): Promise<void> {
   const sqlFilePath = path.join(__dirname, '../../../test/testdb.sql');
-  console.log(sqlFilePath);
-  await new Promise<void>((resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     exec(
       `mysql -h ${databaseConfig.host} --port ${databaseConfig.port} -u ${databaseConfig.username} -p${databaseConfig.password} ${databaseConfig.database} < ${sqlFilePath};`,
       (error) => {
