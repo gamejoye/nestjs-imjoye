@@ -26,6 +26,13 @@ class IAddMessageFromDto {
 }
 
 export class IAddMessageDto {
+  @IsNumber()
+  @ApiProperty({
+    examples: [124, 5125],
+    description: '前端用于展示loading Message所需要使用的暂时id',
+  })
+  temporaryId: number;
+
   @ValidateNested()
   @Type(() => IAddMessageChatroomDto)
   @ApiProperty({

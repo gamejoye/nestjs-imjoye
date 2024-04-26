@@ -15,6 +15,9 @@ export class Message {
   @ApiProperty({ example: 987654321, description: '消息id' })
   id: number;
 
+  @ApiProperty({ example: 4751776, description: '消息的暂时id从前端传来' })
+  temporaryId?: number;
+
   @ManyToOne(() => Chatroom)
   @JoinColumn({ name: 'chatroom_id' })
   @ApiProperty({
