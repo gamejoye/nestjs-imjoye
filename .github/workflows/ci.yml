@@ -45,6 +45,15 @@ jobs:
   publish-sdk:
     needs: ci
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0.27
+        env:
+          MYSQL_DATABASE: ${{secrets.TEST_DATABASE_DATABASE}}
+          MYSQL_ROOT_PASSWORD: ${{secrets.TEST_DATABASE_PASSWORD}}
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     strategy:
       matrix:
         node-version: [20.x]
