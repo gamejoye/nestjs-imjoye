@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.27, for macos11 (arm64)
 --
--- Host: localhost    Database: imjoye_testdb
+-- Host: localhost    Database: testdb
 -- ------------------------------------------------------
 -- Server version	8.0.27
 
@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS `chatroom`;
 CREATE TABLE `chatroom` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `type` enum('SINGLE','MULTIPLE') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `name` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `name` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `avatar_url` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
@@ -38,7 +38,7 @@ CREATE TABLE `chatroom` (
 
 LOCK TABLES `chatroom` WRITE;
 /*!40000 ALTER TABLE `chatroom` DISABLE KEYS */;
-INSERT INTO `chatroom` VALUES (1,'SINGLE','gamejoye_mikasa',NULL,'2024-03-29 15:54:07'),(2,'MULTIPLE','爱之诗','https://avatars.githubusercontent.com/u/88575063?v=4','2024-03-29 15:55:20'),(3,'SINGLE','gamejoye_sakura',NULL,'2024-03-30 01:20:18');
+INSERT INTO `chatroom` VALUES (1,'SINGLE','gamejoye_mikasa',NULL,'2024-03-29 15:54:07'),(2,'MULTIPLE','爱之诗',NULL,'2024-03-29 15:55:20'),(3,'SINGLE','gamejoye_sakura',NULL,'2024-03-30 01:20:18');
 /*!40000 ALTER TABLE `chatroom` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -110,6 +110,7 @@ CREATE TABLE `user_chatroom` (
   `user_id` int unsigned NOT NULL,
   `chatroom_id` int unsigned NOT NULL,
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `latest_visit_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_id` (`user_id`,`chatroom_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -121,36 +122,8 @@ CREATE TABLE `user_chatroom` (
 
 LOCK TABLES `user_chatroom` WRITE;
 /*!40000 ALTER TABLE `user_chatroom` DISABLE KEYS */;
-INSERT INTO `user_chatroom` VALUES (1,1,1,'2024-03-29 15:55:52'),(2,1,2,'2024-03-29 15:56:09'),(3,2,1,'2024-03-29 15:55:55'),(4,2,2,'2024-03-29 15:56:28'),(5,3,2,'2024-03-29 15:56:32'),(6,1,3,'2024-03-30 01:20:34'),(7,3,3,'2024-03-30 01:20:40');
+INSERT INTO `user_chatroom` VALUES (1,1,1,'2024-03-29 15:55:52','2024-05-06 01:38:02'),(2,1,2,'2024-03-29 15:56:09','2024-05-06 01:38:02'),(3,2,1,'2024-03-29 15:55:55','2024-05-06 01:38:02'),(4,2,2,'2024-03-29 15:56:28','2024-05-06 01:38:02'),(5,3,2,'2024-03-29 15:56:32','2024-05-06 01:38:02'),(6,1,3,'2024-03-30 01:20:34','2024-05-06 01:38:02'),(7,3,3,'2024-03-30 01:20:40','2024-05-06 01:38:02');
 /*!40000 ALTER TABLE `user_chatroom` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `user_friendship`
---
-
-DROP TABLE IF EXISTS `user_friendship`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `user_friendship` (
-  `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `from_id` int unsigned NOT NULL,
-  `to_id` int unsigned NOT NULL,
-  `status` enum('PENDING','ACCEPT','REJECT') NOT NULL,
-  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `update_time` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user_friendship`
---
-
-LOCK TABLES `user_friendship` WRITE;
-/*!40000 ALTER TABLE `user_friendship` DISABLE KEYS */;
-INSERT INTO `user_friendship` VALUES (1,1,2,'ACCEPT','2024-04-14 19:34:12',NULL),(2,1,3,'ACCEPT','2024-04-14 21:54:53',NULL);
-/*!40000 ALTER TABLE `user_friendship` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -162,4 +135,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-04-24 18:23:11
+-- Dump completed on 2024-05-14 21:51:08
