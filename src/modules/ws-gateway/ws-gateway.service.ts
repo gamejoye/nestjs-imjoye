@@ -14,10 +14,12 @@ import { User } from '../users/entities/user.entity';
 import { AUTHORIZATION } from 'src/common/constants/websocketHeaders';
 import * as jwt from 'jsonwebtoken';
 import { EnvConfigService } from '../env-config/env-config.service';
-import { websocketRetry } from 'src/common/utils';
+import { Logger, websocketRetry } from 'src/common/utils';
+import { IWsGatewayService } from './interface/ws-gateway.interface.service';
 
 @Injectable()
-export class WsGatewayService implements OnModuleInit, OnModuleDestroy {
+export class WsGatewayService
+  implements OnModuleInit, OnModuleDestroy, IWsGatewayService {
   private wss: Server;
   private onlineClients: Map<number, WebSocket>;
   constructor(
@@ -43,7 +45,20 @@ export class WsGatewayService implements OnModuleInit, OnModuleDestroy {
         return;
       const userId = payload.id;
       this.onlineClients.set(userId, ws);
-      console.log(`Client[${userId}] 建立连接`);
+      Logger.log(`Client[${userId}] 建立连接`);
+
+      ws.on('message', (rawData) => {
+        const wsMessage: IWebSocketMessage<unknown> = JSON.parse(
+          rawData.toString('utf-8'),
+        );
+        switch (wsMessage.event) {
+          case WebSocketEvent.PING: {
+            const message = wsMessage.payload as string;
+            this.handleOnPing(ws, message);
+            break;
+          }
+        }
+      });
 
       ws.on('close', () => {
         let offlineUserId = -1;
@@ -56,13 +71,22 @@ export class WsGatewayService implements OnModuleInit, OnModuleDestroy {
         if (offlineUserId !== -1) {
           this.onlineClients.delete(offlineUserId);
         }
-        console.log(`Client[${offlineUserId}] 断开连接`);
+        Logger.log(`Client[${offlineUserId}] 断开连接`);
       });
     });
   }
 
   onModuleDestroy() {
     this.wss.close(() => {});
+  }
+
+  async handleOnPing(client: WebSocket, message: string) {
+    const pong: IWebSocketMessage<string> = {
+      event: WebSocketEvent.PONG,
+      payload: 'pong',
+    };
+    Logger.log(message, pong);
+    client.send(JSON.stringify(pong));
   }
 
   async notifynChat(from: number, message: Message) {
@@ -91,7 +115,7 @@ export class WsGatewayService implements OnModuleInit, OnModuleDestroy {
         payload: message,
       };
       const retryMessageAck = () => {
-        console.log(
+        Logger.log(
           `成功向在聊天室[${message.chatroom.id}]的发送者[${from}]发送MESSAGE_ACK事件`,
         );
         senderClient.send(JSON.stringify(senderSocketMessage));
@@ -114,7 +138,7 @@ export class WsGatewayService implements OnModuleInit, OnModuleDestroy {
         payload: message,
       };
       const retryNotifyMessage = () => {
-        console.log(
+        Logger.log(
           `成功向在聊天室[${message.chatroom.id}]用户[${user.id}]发送[NOTIFY_MESSAGE_SYN]事件`,
         );
         receiverClient.send(JSON.stringify(socketMessage));
