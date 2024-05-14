@@ -17,6 +17,7 @@ import {
 import { ChatroomType } from 'src/common/constants/chatroom';
 import { Chatroom } from './entities/chatroom.entity';
 import { User } from '../users/entities/user.entity';
+import { UserChatroomService } from './user-chatroom.service';
 
 describe('ChatroomsService', () => {
   let service: ChatroomsService;
@@ -29,7 +30,7 @@ describe('ChatroomsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [DatabaseModule, MessagesModule, EnvConfigModule],
       controllers: [ChatroomsController],
-      providers: [...chatroomsProviders, ChatroomsService],
+      providers: [...chatroomsProviders, ChatroomsService, UserChatroomService],
     }).compile();
 
     service = module.get<ChatroomsService>(ChatroomsService);

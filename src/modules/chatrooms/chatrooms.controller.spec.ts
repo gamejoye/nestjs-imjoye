@@ -5,6 +5,7 @@ import { MessagesModule } from '../messages/messages.module';
 import { chatroomsProviders } from './chatrooms.providers';
 import { ChatroomsService } from './chatrooms.service';
 import { EnvConfigModule } from '../env-config/env-config.module';
+import { UserChatroomService } from './user-chatroom.service';
 
 describe('ChatroomsController', () => {
   let controller: ChatroomsController;
@@ -13,7 +14,7 @@ describe('ChatroomsController', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [DatabaseModule, MessagesModule, EnvConfigModule],
       controllers: [ChatroomsController],
-      providers: [...chatroomsProviders, ChatroomsService],
+      providers: [...chatroomsProviders, ChatroomsService, UserChatroomService],
     }).compile();
 
     controller = module.get<ChatroomsController>(ChatroomsController);
