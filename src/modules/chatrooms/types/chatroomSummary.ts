@@ -8,9 +8,15 @@ export class ChatroomSummary {
 
   @ApiProperty({
     example: '2024-03-23 19:12',
-    description: '当前聊天室最后一次用户的访问时间',
+    description: '当前聊天室最后一次用户的访问时间 最早为用户加入聊天室的时间',
   })
   latestVisitTime: string;
+
+  @ApiProperty({
+    example: '2024-03-23 19:12',
+    description: '用户加入聊天室的时间',
+  })
+  joinTime: string;
 
   @ApiProperty({
     examples: [1, 55, 0, 199],
