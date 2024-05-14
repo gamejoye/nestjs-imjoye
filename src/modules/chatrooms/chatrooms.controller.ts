@@ -3,10 +3,12 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpException,
   HttpStatus,
   NotFoundException,
   Param,
   Post,
+  Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -19,16 +21,48 @@ import { User } from '../users/entities/user.entity';
 import { JwtGuard } from '../auth/jwt.guard';
 import { MessagesService } from '../messages/messages.service';
 import { Chatroom } from './entities/chatroom.entity';
+import { GetChatroomSummaryDto } from './dto/get-chatroom-summary.dto';
+import { GetSingleChatroomDto } from './dto/get-single-chatroom.dto';
+import { Logger } from 'src/common/utils';
+import { UserChatroomService } from './user-chatroom.service';
+import { VisitChatroomDto } from './dto/visit-chatroom.dto';
 
 @ApiTags('chatrooms')
 @Controller('chatrooms')
 export class ChatroomsController {
   constructor(
     protected readonly chatroomsService: ChatroomsService,
+    protected readonly userChatroomService: UserChatroomService,
     protected readonly messagesService: MessagesService,
   ) {}
 
-  @Get(':id')
+  @Put(':chatroomId/visit')
+  @UseGuards(JwtGuard)
+  @ApiOperation({ summary: '更新用户对于聊天室的最后访问时间' })
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: '成功更新用户访问聊天室的最后时间',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: '聊天室不存在或者无权访问',
+  })
+  async visitChatroom(
+    @GetUser() user: User,
+    @Query() { timestamp }: VisitChatroomDto,
+    @Param('chatroomId') chatroomId: number,
+  ): Promise<void> {
+    const userChatroom = await this.userChatroomService.updateLatestVisitTime(
+      user.id,
+      chatroomId,
+      timestamp,
+    );
+    if (!userChatroom) {
+      throw new NotFoundException('聊天室不存在或者无权访问');
+    }
+  }
+
+  @Get(':chatroomId')
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: '根据聊天室id获取单个聊天室' })
   @ApiResponse({
@@ -76,7 +110,7 @@ export class ChatroomsController {
   })
   async getSingleChatroomByFriendId(
     @GetUser() user: User,
-    @Query('friend_id') friendId: number,
+    @Query() { friend_id: friendId }: GetSingleChatroomDto,
   ): Promise<Chatroom> {
     const chatroom = await this.chatroomsService.getByUserIdAndFriendId(
       user.id,
@@ -86,6 +120,57 @@ export class ChatroomsController {
       throw new NotFoundException('Chatroom not found');
     }
     return chatroom;
+  }
+
+  @Get('summaries/:chatroomId')
+  @UseGuards(JwtGuard)
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '成功获取单个聊天室的chatroomSummaries',
+    type: ChatroomSummary,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: '未认证用户',
+    type: ChatroomSummary,
+  })
+  async getChatroomSummary(
+    @GetUser() user: User,
+    @Param('chatroomId') chatroomId: number,
+    @Query() { timestamp }: GetChatroomSummaryDto,
+  ): Promise<ChatroomSummary> {
+    Logger.log(chatroomId, timestamp);
+    const chatroom = await this.chatroomsService.getByChatroomId(
+      user.id,
+      chatroomId,
+    );
+    Logger.log(chatroom);
+    if (!chatroom) {
+      throw new HttpException(
+        '不存在或无权访问对应聊天室',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    const unreadMessageCount = await this.messagesService.countByTime(
+      chatroom.id,
+      timestamp,
+    );
+    const latestMessage =
+      await this.messagesService.getLatestMessageByChatroomId(chatroomId);
+    const userChatroom =
+      await this.userChatroomService.getByUserIdAndChatroomId(
+        user.id,
+        chatroomId,
+      );
+    const summary: ChatroomSummary = {
+      chatroom,
+      latestVisitTime: timestamp,
+      joinTime: userChatroom.createTime,
+      latestMessage,
+      unreadMessageCount,
+      onlineUserIds: [],
+    };
+    return summary;
   }
 
   @Post('summaries')
@@ -132,21 +217,30 @@ export class ChatroomsController {
       ),
     );
 
-    const summaries: Array<ChatroomSummary> = chatrooms.map(
-      (chatroom, index) => {
+    const summaries: Array<ChatroomSummary> = await Promise.all(
+      chatrooms.map(async (chatroom, index) => {
         const partialLatestMessage = latestMessages[index];
         if (partialLatestMessage) {
           partialLatestMessage.chatroom = chatroom;
         }
+        const userChatroom =
+          await this.userChatroomService.getByUserIdAndChatroomId(
+            user.id,
+            chatroom.id,
+          );
+        const latestVisitTime =
+          latestTimesMap.get(chatroom.id) || userChatroom.createTime;
         return {
           chatroom,
           latestMessage: partialLatestMessage,
-          latestVisitTime: latestTimesMap.get(chatroom.id) ?? null,
+          joinTime: userChatroom.createTime,
+          latestVisitTime,
           unreadMessageCount: unreadMessageCounts[index],
           onlineUserIds: [],
         };
-      },
+      }),
     );
+    Logger.log(summaries);
     return summaries;
   }
 }
