@@ -80,12 +80,15 @@ jobs:
       run: npm run generate:api-json
     - name: Generate api.d.ts
       run: npm run generate:api.d.ts
-    - name: Commit Sdk
+    - name: Set up Git
       run: |
         git config --global user.name 'gamejoye'
         git config --global user.email 'gamejoye@gmail.com'
+    - name: Add and Commit Sdk
+      run: |
         git add ./sdk
         git commit -m "chore(sdk): sdk";
-        git push -u origin master
+    - name: Push Sdk
+      run: git push -u https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/gamejoye/nestjs-imjoye.git master
         
       
