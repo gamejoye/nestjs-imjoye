@@ -8,7 +8,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-export class GetChatroomSummaryDto {
+class GetChatroomSummaryDto {
   @IsInt()
   @ApiProperty({ example: 11234889, description: '聊天室id' })
   readonly id: number;
