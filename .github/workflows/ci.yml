@@ -89,6 +89,6 @@ jobs:
         git add ./sdk
         git commit -m "chore(sdk): sdk";
     - name: Push Sdk
-      run: git push -u https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/gamejoye/nestjs-imjoye.git master
+      run: git push
         
       
