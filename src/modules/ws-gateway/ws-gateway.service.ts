@@ -77,7 +77,7 @@ export class WsGatewayService
   }
 
   onModuleDestroy() {
-    this.wss.close(() => {});
+    if (this.wss) this.wss.close(() => {});
   }
 
   async handleOnPing(client: WebSocket, message: string) {
