@@ -97,9 +97,9 @@ jobs:
       if: steps.commit_sdk.outcome == 'success'
       run: |
         curl -X POST \
-          -H "Authorization: token ${{ secrets.PAT }}" \
+          -H "Authorization: Bearer ${{ secrets.PAT }}" \
           -H "Accept: application/vnd.github.v3+json" \
-          "https://api.github.com/repos/ygamejoye/imjoye/dispatches" \
+          "https://api.github.com/repos/gamejoye/imjoye/dispatches" \
           -d '{"event_type": "sdk-update"}'
       env:
         PAT: ${{ secrets.PAT }}
