@@ -86,11 +86,23 @@ jobs:
         git config --global user.name 'gamejoye'
         git config --global user.email 'gamejoye@gmail.com'
     - name: Add and Commit Sdk
+      id: commit_sdk
       run: |
         git add ./sdk
-        git commit -m "chore(sdk): sdk";
+        git commit -m "chore(sdk): sdk"
+      continue-on-error: true
     - name: Check Status
       run: git status
+    - name: Dispatch "sdk-update" Event if Changes Committed
+      if: steps.commit_sdk.outcome == 'success'
+      run: |
+        curl -X POST \
+          -H "Authorization: token ${{ secrets.PAT }}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          "https://api.github.com/repos/ygamejoye/imjoye/dispatches" \
+          -d '{"event_type": "sdk-update"}'
+      env:
+        PAT: ${{ secrets.PAT }}
     - name: Push Sdk
       run: git push
         
