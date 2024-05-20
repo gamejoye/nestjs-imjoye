@@ -4,12 +4,14 @@ import { Message } from './entities/message.entity';
 import {
   CHATROOM_REPOSITORY,
   MESSAGE_REPOSITORY,
+  USER_CHATROOM_REPOSITORY,
   USER_REPOSITORY,
 } from 'src/common/constants/providers';
 import { DeepPartial, Repository } from 'typeorm';
 import { getCurrentDatetime } from 'src/common/utils/times';
 import { User } from '../users/entities/user.entity';
 import { Chatroom } from '../chatrooms/entities/chatroom.entity';
+import { UserChatroom } from '../chatrooms/entities/user-chatroom.entity';
 
 @Injectable()
 export class MessagesService implements IMessagesService {
@@ -20,6 +22,8 @@ export class MessagesService implements IMessagesService {
     protected userRepository: Repository<User>,
     @Inject(CHATROOM_REPOSITORY)
     protected chatroomRepository: Repository<Chatroom>,
+    @Inject(USER_CHATROOM_REPOSITORY)
+    protected userChatroomRepository: Repository<UserChatroom>,
   ) {}
   async addMessage(partialMessage: DeepPartial<Message>): Promise<Message> {
     const chatroom = await this.chatroomRepository.findOne({
@@ -38,6 +42,15 @@ export class MessagesService implements IMessagesService {
     if (!from) {
       throw new HttpException('未知的用户id', HttpStatus.NOT_FOUND);
     }
+    const userChatroom = await this.userChatroomRepository.findOne({
+      where: {
+        user: { id: from.id },
+        chatroom: { id: chatroom.id },
+      },
+    });
+    if (!userChatroom) {
+      throw new HttpException('未知的用户id', HttpStatus.FORBIDDEN);
+    }
     const messageToBeAdd: DeepPartial<Message> = {
       ...partialMessage,
       createTime: getCurrentDatetime(),
@@ -50,7 +63,7 @@ export class MessagesService implements IMessagesService {
   async countByTime(chatroomId: number, time: string): Promise<number> {
     const count = await this.messagesRepository
       .createQueryBuilder('message')
-      .where('message.createTime > :time', { time })
+      .where('message.createTime >= :time', { time })
       .andWhere('message.chatroom.id = :chatroomId', { chatroomId })
       .getCount();
     return count;
@@ -58,6 +71,8 @@ export class MessagesService implements IMessagesService {
   async getLatestMessageByChatroomId(chatroomId: number): Promise<Message> {
     const query = this.messagesRepository
       .createQueryBuilder('message')
+      .innerJoinAndSelect('message.chatroom', 'chatroom')
+      .innerJoinAndSelect('message.from', 'user')
       .where('message.chatroom.id = :chatroomId', { chatroomId })
       .orderBy('message.createTime', 'DESC');
     return await query.getOne();
