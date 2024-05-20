@@ -8,7 +8,7 @@ import {
 } from 'src/common/constants/providers';
 import { UserFriendship } from './entities/friendship.entity';
 import { UserFriendshipType } from 'src/common/constants/friendship';
-import { IFriendInfo } from './types/friend-info.type';
+import { FriendInfo } from './types/friend-info.type';
 
 @Injectable()
 export class UsersService implements IUsersService {
@@ -21,7 +21,7 @@ export class UsersService implements IUsersService {
   async getFriendInfoByUserIdAndFriendId(
     userId: number,
     friendId: number,
-  ): Promise<IFriendInfo> {
+  ): Promise<FriendInfo> {
     const friendship = await this.userFriendshipRepository
       .createQueryBuilder('friendship')
       .leftJoinAndSelect('friendship.from', 'fromUser')
@@ -39,7 +39,7 @@ export class UsersService implements IUsersService {
     const friendUser =
       friendship.from.id === userId ? friendship.to : friendship.from;
 
-    const friendInfo: IFriendInfo = {
+    const friendInfo: FriendInfo = {
       user: friendUser,
       status: friendship.status,
       createTime: friendship.createTime,
@@ -67,7 +67,6 @@ export class UsersService implements IUsersService {
       friendsWithoutDuplication.set(friend.id, friend),
     );
     return Array.from(friendsWithoutDuplication).map(([, friend]) => {
-      friend.passwordHash = '';
       return friend;
     });
   }
