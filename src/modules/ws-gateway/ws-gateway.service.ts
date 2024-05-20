@@ -19,7 +19,8 @@ import { IWsGatewayService } from './interface/ws-gateway.interface.service';
 
 @Injectable()
 export class WsGatewayService
-  implements OnModuleInit, OnModuleDestroy, IWsGatewayService {
+  implements OnModuleInit, OnModuleDestroy, IWsGatewayService
+{
   private wss: Server;
   private onlineClients: Map<number, WebSocket>;
   constructor(

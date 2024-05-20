@@ -37,7 +37,7 @@ export class ChatroomsController {
     protected readonly chatroomsService: ChatroomsService,
     protected readonly userChatroomService: UserChatroomService,
     protected readonly messagesService: MessagesService,
-  ) { }
+  ) {}
 
   @Put(':chatroomId/visit')
   @UseGuards(JwtGuard)

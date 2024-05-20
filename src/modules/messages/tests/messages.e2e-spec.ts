@@ -8,10 +8,7 @@ import * as request from 'supertest';
 import { Repository } from 'typeorm';
 import { MessagesModule } from '../messages.module';
 import { DatabaseModule } from 'src/modules/database/database.module';
-import { WsGatewayModule } from 'src/modules/ws-gateway/ws-gateway.module';
 import { AuthModule } from 'src/modules/auth/auth.module';
-import { PassportModule } from '@nestjs/passport';
-import { UsersModule } from 'src/modules/users/users.module';
 import { messagesProviders } from '../messages.providers';
 import { HttpExceptionFilter } from 'src/common/filters/http-exception.filter';
 import { ResTransformInterceptor } from 'src/common/interceptors/res-transform.interceptors';
@@ -28,7 +25,6 @@ import {
   getNonExistingUserChatroom,
   getUserNonExistingId,
   initDatabase,
-  usersLoginDto,
 } from 'src/common/utils';
 import { EnvConfigModule } from 'src/modules/env-config/env-config.module';
 import { Message } from '../entities/message.entity';

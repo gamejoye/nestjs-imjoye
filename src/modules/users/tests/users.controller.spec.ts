@@ -5,7 +5,6 @@ import { usersProviders } from '../users.providers';
 import { UsersService } from '../users.service';
 import { EnvConfigModule } from '../../env-config/env-config.module';
 import { IUsersService } from '../interface/users.service.interface';
-import { Logger, getCurrentDatetime } from 'src/common/utils';
 import { User } from '../entities/user.entity';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { transformFriendInfo, transformUser } from '../vo/utils/user-transform';
