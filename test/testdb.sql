@@ -126,6 +126,34 @@ LOCK TABLES `user_chatroom` WRITE;
 INSERT INTO `user_chatroom` VALUES (1,1,1,'2024-03-29 15:55:52','2024-05-06 01:38:02'),(2,1,2,'2024-03-29 15:56:09','2024-05-06 01:38:02'),(3,2,1,'2024-03-29 15:55:55','2024-05-06 01:38:02'),(4,2,2,'2024-03-29 15:56:28','2024-05-06 01:38:02'),(5,3,2,'2024-03-29 15:56:32','2024-05-06 01:38:02'),(6,1,3,'2024-03-30 01:20:34','2024-05-06 01:38:02'),(7,3,3,'2024-03-30 01:20:40','2024-05-06 01:38:02');
 /*!40000 ALTER TABLE `user_chatroom` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `user_friendship`
+--
+
+DROP TABLE IF EXISTS `user_friendship`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `user_friendship` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `from_id` int unsigned NOT NULL,
+  `to_id` int unsigned NOT NULL,
+  `status` enum('PENDING','ACCEPT','REJECT') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_friendship`
+--
+
+LOCK TABLES `user_friendship` WRITE;
+/*!40000 ALTER TABLE `user_friendship` DISABLE KEYS */;
+INSERT INTO `user_friendship` VALUES (1,1,2,'ACCEPT','2024-05-19 12:10:37','2024-05-19 17:32:37'),(2,1,3,'ACCEPT','2024-05-19 15:33:06','2024-05-19 17:33:06'),(3,2,3,'PENDING','2024-05-19 17:59:59',NULL);
+/*!40000 ALTER TABLE `user_friendship` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -136,4 +164,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-05-19 17:25:14
+-- Dump completed on 2024-05-20 18:41:05
