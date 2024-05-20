@@ -1,7 +1,7 @@
 import { UserFriendshipType } from 'src/common/constants/friendship';
 import { User } from '../entities/user.entity';
 
-export interface IFriendInfo {
+export interface FriendInfo {
   user: User;
   status: UserFriendshipType;
   createTime: string;
