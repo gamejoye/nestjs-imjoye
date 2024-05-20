@@ -43,6 +43,8 @@ jobs:
           echo "JWT_SECRET=${{secrets.TEST_JWT_SECRET}}" >> .env.test
       - name: Run the test
         run: npm run test
+      - name: Run e2e test
+        run: npm run test:e2e
   publish-sdk:
     needs: ci
     runs-on: ubuntu-latest
