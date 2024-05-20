@@ -1,5 +1,5 @@
 import { User } from '../entities/user.entity';
-import { IFriendInfo } from '../types/friend-info.type';
+import { FriendInfo } from '../types/friend-info.type';
 
 export interface IUsersService {
   getByEmail(email: string): Promise<User | null>;
@@ -14,5 +14,5 @@ export interface IUsersService {
   getFriendInfoByUserIdAndFriendId(
     userId: number,
     friendId: number,
-  ): Promise<IFriendInfo>;
+  ): Promise<FriendInfo>;
 }
