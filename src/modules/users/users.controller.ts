@@ -28,6 +28,7 @@ import { Response } from 'express';
 import { UserVo } from './vo/user.vo';
 import { transformFriendInfo, transformUser } from './vo/utils/user-transform';
 import { FriendInfoVo } from './vo/friend-info.vo';
+import { ApiResult } from 'src/common/types/response.type';
 
 @ApiTags('users')
 @Controller('users')
@@ -43,7 +44,7 @@ export class UsersController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: '成功获取用户信息',
-    type: UserVo,
+    type: ApiResult<UserVo>,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -60,7 +61,7 @@ export class UsersController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: '成功根据userId获取好友信息列表',
-    type: Array<UserVo>,
+    type: ApiResult<Array<UserVo>>,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -87,7 +88,7 @@ export class UsersController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: '成功获取好友信息',
-    type: FriendInfoVo,
+    type: ApiResult<FriendInfoVo>,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -131,7 +132,7 @@ export class UsersController {
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: '头像上传成功',
-    type: 'string',
+    type: ApiResult<string>,
   })
   @ApiResponse({
     status: HttpStatus.PAYLOAD_TOO_LARGE,

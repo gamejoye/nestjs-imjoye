@@ -19,6 +19,7 @@ import { JwtGuard } from '../auth/jwt.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { ChatroomsService } from '../chatrooms/chatrooms.service';
+import { ApiResult } from 'src/common/types/response.type';
 
 @ApiTags('messages')
 @Controller('messages')
@@ -34,7 +35,7 @@ export class MessagesController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: '成功获取聊天室消息',
-    type: Array<MessageVo>,
+    type: ApiResult<Array<MessageVo>>,
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
@@ -66,7 +67,7 @@ export class MessagesController {
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: '成功发送消息',
-    type: MessageVo,
+    type: ApiResult<MessageVo>,
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,

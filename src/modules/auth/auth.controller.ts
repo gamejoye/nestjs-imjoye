@@ -19,6 +19,7 @@ import { RegisterUserRequestDto } from './dto/register.dto';
 import { UsersService } from '../users/users.service';
 import { LoginVo } from './vo/login.vo';
 import { UserVo } from '../users/vo/user.vo';
+import { ApiResult } from 'src/common/types/response.type';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -36,7 +37,7 @@ export class AuthController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: '登录成功',
-    type: LoginVo,
+    type: ApiResult<LoginVo>,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -65,7 +66,7 @@ export class AuthController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: '注册成功',
-    type: UserVo,
+    type: ApiResult<UserVo>,
   })
   @ApiResponse({ status: HttpStatus.CONFLICT, description: '用户邮箱已经存在' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: '注册失败' })

@@ -29,6 +29,7 @@ import { ChatroomVo } from './vo/chatroom.vo';
 import { ChatroomSummaryVo } from './vo/chatroom-summary.vo';
 import { transformChatroom } from './vo/utils';
 import { transformMessage } from '../messages/vo/utils';
+import { ApiResult } from 'src/common/types/response.type';
 
 @ApiTags('chatrooms')
 @Controller('chatrooms')
@@ -71,7 +72,7 @@ export class ChatroomsController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: '成功获取单个聊天室',
-    type: ChatroomVo,
+    type: ApiResult<ChatroomVo>,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -101,7 +102,7 @@ export class ChatroomsController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: '成功获取单个单聊聊天室',
-    type: ChatroomVo,
+    type: ApiResult<ChatroomVo>,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -130,7 +131,7 @@ export class ChatroomsController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: '成功获取单个聊天室的chatroomSummaries',
-    type: ChatroomSummaryVo,
+    type: ApiResult<ChatroomSummaryVo>,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -185,7 +186,7 @@ export class ChatroomsController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: '成功获取chatroomSummaries',
-    type: Array<ChatroomSummaryVo>,
+    type: ApiResult<Array<ChatroomSummaryVo>>,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
