@@ -1,9 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsInt } from 'class-validator';
+import { canTransformToInt } from 'src/common/utils/number';
 
 export class GetSingleChatroomDto {
+  @Transform(({ value }: { value: string }) => {
+    if (canTransformToInt(value)) return Number(value);
+    return NaN;
+  })
   @IsInt()
-  @IsNotEmpty()
   @ApiProperty({
     example: 2,
     description: '好友id',
