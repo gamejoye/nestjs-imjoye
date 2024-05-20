@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EnvConfigService } from './env-config.service';
+import { EnvConfigService } from '../env-config.service';
 import { ConfigModule } from '@nestjs/config';
 
 describe('EnvConfigService', () => {

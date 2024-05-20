@@ -27,6 +27,7 @@ import { Chatroom } from 'src/modules/chatrooms/entities/chatroom.entity';
 import { IAddMessageDto } from '../dto/add-message.dto';
 import { UserChatroom } from 'src/modules/chatrooms/entities/user-chatroom.entity';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { ChatroomsService } from 'src/modules/chatrooms/chatrooms.service';
 
 describe('MessagesService', () => {
   let service: MessagesService;
@@ -40,8 +41,7 @@ describe('MessagesService', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [DatabaseModule, WsGatewayModule, EnvConfigModule],
       controllers: [MessagesController],
-      providers: [...messagesProviders, MessagesService],
-      exports: [MessagesService],
+      providers: [...messagesProviders, MessagesService, ChatroomsService],
     }).compile();
 
     service = module.get<MessagesService>(MessagesService);

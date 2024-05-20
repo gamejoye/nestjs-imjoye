@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { WsGatewayService } from './ws-gateway.service';
-import { wsGatewayProviders } from './ws-gateway.providers';
-import { DatabaseModule } from '../database/database.module';
-import { EnvConfigModule } from '../env-config/env-config.module';
-import { EnvConfigService } from '../env-config/env-config.service';
+import { WsGatewayService } from '../ws-gateway.service';
+import { wsGatewayProviders } from '../ws-gateway.providers';
+import { DatabaseModule } from '../../database/database.module';
+import { EnvConfigModule } from '../../env-config/env-config.module';
+import { EnvConfigService } from '../../env-config/env-config.service';
 import { Repository } from 'typeorm';
-import { User } from '../users/entities/user.entity';
-import { Chatroom } from '../chatrooms/entities/chatroom.entity';
+import { User } from '../../users/entities/user.entity';
+import { Chatroom } from '../../chatrooms/entities/chatroom.entity';
 import {
   CHATROOM_REPOSITORY,
   USER_REPOSITORY,
@@ -16,7 +16,7 @@ import { getCurrentDatetime, initDatabase, mockJwt } from 'src/common/utils';
 import { WebSocket } from 'ws';
 import { AUTHORIZATION } from 'src/common/constants/websocketHeaders';
 import { IWebSocketMessage } from 'src/common/types/base.type';
-import { Message } from '../messages/entities/message.entity';
+import { Message } from '../../messages/entities/message.entity';
 import { WebSocketEvent } from 'src/common/constants/websocketEvents';
 import { Logger } from 'src/common/utils';
 

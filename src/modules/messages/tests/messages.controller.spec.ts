@@ -13,6 +13,7 @@ import { Chatroom } from 'src/modules/chatrooms/entities/chatroom.entity';
 import { ChatroomType } from 'src/common/constants/chatroom';
 import { Message } from '../entities/message.entity';
 import { IAddMessageDto } from '../dto/add-message.dto';
+import { ChatroomsService } from 'src/modules/chatrooms/chatrooms.service';
 
 /**
  * 测试所需常量
@@ -85,7 +86,7 @@ describe('MessagesController', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [DatabaseModule, WsGatewayModule, EnvConfigModule],
       controllers: [MessagesController],
-      providers: [...messagesProviders, MessagesService],
+      providers: [...messagesProviders, MessagesService, ChatroomsService],
       exports: [MessagesService],
     })
       .overrideProvider(MessagesService)
