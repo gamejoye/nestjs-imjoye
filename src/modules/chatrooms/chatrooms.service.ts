@@ -1,17 +1,23 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IChatroomsService } from './interface/chatrooms.service.interface';
 import { Chatroom } from './entities/chatroom.entity';
-import { CHATROOM_REPOSITORY } from 'src/common/constants/providers';
+import {
+  CHATROOM_REPOSITORY,
+  USER_CHATROOM_REPOSITORY,
+} from 'src/common/constants/providers';
 import { Brackets, Repository } from 'typeorm';
 import { ChatroomType } from 'src/common/constants/chatroom';
 import { Logger } from 'src/common/utils';
 import { USER_CHATROOM } from 'src/common/constants/database-tables';
+import { UserChatroom } from './entities/user-chatroom.entity';
 
 @Injectable()
 export class ChatroomsService implements IChatroomsService {
   constructor(
     @Inject(CHATROOM_REPOSITORY)
     protected chatroomsRepository: Repository<Chatroom>,
+    @Inject(USER_CHATROOM_REPOSITORY)
+    protected userChatroomRepository: Repository<UserChatroom>,
   ) {}
   async getByUserIdAndFriendId(
     userId: number,
@@ -51,7 +57,10 @@ export class ChatroomsService implements IChatroomsService {
       .innerJoinAndSelect('userChatroom.user', 'user')
       .where('chatroom.id = :chatroomId', { chatroomId });
     const chatroom = await query.getOne();
-    if (!chatroom.userChatrooms.some(({ user }) => user.id === userId)) {
+    if (
+      !chatroom ||
+      !chatroom.userChatrooms.some(({ user }) => user.id === userId)
+    ) {
       return null;
     }
     Logger.log(userId, chatroomId, chatroom.userChatrooms);
@@ -66,7 +75,10 @@ export class ChatroomsService implements IChatroomsService {
     return chatroom;
   }
   async countAll(userId: number): Promise<number> {
-    return userId;
+    const all = this.userChatroomRepository.count({
+      where: { user: { id: userId } },
+    });
+    return all;
   }
   async getAll(userId: number): Promise<Array<Chatroom>> {
     const query = this.chatroomsRepository
