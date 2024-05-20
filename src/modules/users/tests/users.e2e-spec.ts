@@ -1,0 +1,272 @@
+import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { EnvConfigService } from 'src/modules/env-config/env-config.service';
+import { User } from 'src/modules/users/entities/user.entity';
+import * as request from 'supertest';
+import { Repository } from 'typeorm';
+import { DatabaseModule } from 'src/modules/database/database.module';
+import { AuthModule } from 'src/modules/auth/auth.module';
+import { UsersModule } from 'src/modules/users/users.module';
+import { HttpExceptionFilter } from 'src/common/filters/http-exception.filter';
+import { ResTransformInterceptor } from 'src/common/interceptors/res-transform.interceptors';
+import {
+  USER_FRIENDSHIP_REPOSITORY,
+  USER_REPOSITORY,
+} from 'src/common/constants/providers';
+import { LoginUserRequestDto } from 'src/modules/auth/dto/login.dto';
+import { Logger, dataForValidIsNumber, initDatabase } from 'src/common/utils';
+import { EnvConfigModule } from 'src/modules/env-config/env-config.module';
+import { usersProviders } from '../users.providers';
+import { UserFriendship } from '../entities/friendship.entity';
+import { transformUser } from '../vo/utils/user-transform';
+import { UserVo } from '../vo/user.vo';
+import { FriendInfoVo } from '../vo/friend-info.vo';
+import { UserFriendshipType } from 'src/common/constants/friendship';
+
+const userSorter = (user1: User, user2: User) => user1.id - user2.id;
+
+describe('UsersController (e2e)', () => {
+  let app: INestApplication;
+  let envConfigService: EnvConfigService;
+  let usersRepository: Repository<User>;
+  let userFriendshipsRepository: Repository<UserFriendship>;
+
+  let authorization: string;
+  let userId: number;
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [UsersModule, DatabaseModule, EnvConfigModule, AuthModule],
+      providers: [...usersProviders],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(
+      new ValidationPipe({
+        transform: true,
+        validateCustomDecorators: true,
+      }),
+    );
+    app.useGlobalFilters(new HttpExceptionFilter());
+    app.useGlobalInterceptors(new ResTransformInterceptor());
+    await app.init();
+
+    usersRepository = moduleFixture.get<Repository<User>>(USER_REPOSITORY);
+    userFriendshipsRepository = moduleFixture.get<Repository<UserFriendship>>(
+      USER_FRIENDSHIP_REPOSITORY,
+    );
+    envConfigService = moduleFixture.get<EnvConfigService>(EnvConfigService);
+
+    /**
+     * 登录获取token
+     */
+    const dto: LoginUserRequestDto = {
+      email: 'gamejoye@gmail.com',
+      password: '123456..',
+    };
+    const response = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send(dto);
+    const token = response.body.data.token;
+    userId = response.body.data.id;
+    authorization = 'Bearer ' + token;
+    Logger.test('token:', authorization);
+  });
+
+  beforeEach(async () => {
+    await initDatabase(envConfigService.getDatabaseConfig());
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('GET /users/:id', async () => {
+    /**
+     * 正常逻辑
+     */
+    const users = await usersRepository.find();
+    for (const user of users) {
+      const response = await request(app.getHttpServer())
+        .get(`/users/${user.id}`)
+        .set('Authorization', authorization);
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body.data).toMatchObject(transformUser(user));
+    }
+
+    /**
+     * Unauthorized逻辑
+     */
+    const unauthorizedResponse = await request(app.getHttpServer()).get(
+      `/users/${users[0].id}`,
+    );
+    expect(unauthorizedResponse.status).toBe(HttpStatus.UNAUTHORIZED);
+
+    /**
+     * BadReqeust逻辑
+     */
+    for (const invalidNumber of dataForValidIsNumber) {
+      const badRequestrRes = await request(app.getHttpServer())
+        .get(`/users/${invalidNumber}`)
+        .set('Authorization', authorization);
+      expect(badRequestrRes.status).toBe(HttpStatus.BAD_REQUEST);
+    }
+  });
+
+  it('GET /users/:id/friends', async () => {
+    /**
+     * 正常流程
+     */
+    const user = await usersRepository.findOne({
+      where: { id: userId },
+    });
+    const friendsUserSend = (
+      await userFriendshipsRepository.find({
+        where: { from: { id: userId } },
+        relations: ['to'],
+      })
+    ).map(({ to }) => to);
+    const friendsUserReceive = (
+      await userFriendshipsRepository.find({
+        where: { to: { id: userId } },
+        relations: ['from'],
+      })
+    ).map(({ to }) => to);
+    const friends = [...friendsUserSend, ...friendsUserReceive].sort(
+      userSorter,
+    );
+
+    const response = await request(app.getHttpServer())
+      .get(`/users/${user.id}/friends`)
+      .set('Authorization', authorization);
+    expect(response.status).toBe(HttpStatus.OK);
+    const friendVos = (response.body.data as Array<UserVo>).sort(userSorter);
+    expect(friendVos.length).toBeGreaterThan(0);
+    expect(friendVos).toMatchObject(
+      friends.map((friend) => transformUser(friend)),
+    );
+
+    /**
+     * Unauthorized流程
+     */
+    const unauthorizedResponse = await request(app.getHttpServer()).get(
+      `/users/${user.id}/friends`,
+    );
+    expect(unauthorizedResponse.status).toBe(HttpStatus.UNAUTHORIZED);
+
+    /**
+     * Forbidden流程
+     */
+    const users = await usersRepository.find();
+    const other = users.find((other) => other.id !== userId);
+    Logger.test('other: ', other);
+    const forbiddenResponse = await request(app.getHttpServer())
+      .get(`/users/${other.id}/friends`)
+      .set('Authorization', authorization);
+    expect(forbiddenResponse.status).toBe(HttpStatus.FORBIDDEN);
+
+    /**
+     * BadReqeust逻辑
+     */
+    for (const invalidNumber of dataForValidIsNumber) {
+      const badRequestrRes = await request(app.getHttpServer())
+        .get(`/users/${invalidNumber}/friends`)
+        .set('Authorization', authorization);
+      expect(badRequestrRes.status).toBe(HttpStatus.BAD_REQUEST);
+    }
+  });
+
+  it('GET /users/:id/friends/:friendId', async () => {
+    const user = await usersRepository.findOne({
+      where: { id: userId },
+    });
+    const friendsUserSend = (
+      await userFriendshipsRepository.find({
+        where: { from: { id: userId } },
+        relations: ['to'],
+      })
+    ).map(({ to }) => to);
+    const friendsUserReceive = (
+      await userFriendshipsRepository.find({
+        where: { to: { id: userId } },
+        relations: ['from'],
+      })
+    ).map(({ to }) => to);
+    const friends = [...friendsUserSend, ...friendsUserReceive].sort(
+      userSorter,
+    );
+    /**
+     * 正常流程
+     */
+    for (const friend of friends) {
+      const response = await request(app.getHttpServer())
+        .get(`/users/${user.id}/friends/${friend.id}`)
+        .set('Authorization', authorization);
+      expect(response.status).toBe(HttpStatus.OK);
+      const friendInfoVo = response.body.data as FriendInfoVo;
+      expect(friendInfoVo.user).toMatchObject(transformUser(friend));
+      const userFriendship =
+        (await userFriendshipsRepository.findOne({
+          where: { from: { id: user.id }, to: { id: friend.id } },
+        })) ||
+        (await userFriendshipsRepository.findOne({
+          where: { from: { id: friend.id }, to: { id: user.id } },
+        }));
+      expect(friendInfoVo.createTime).toBe(userFriendship.createTime);
+      expect(friendInfoVo.updateTime).toBe(userFriendship.updateTime);
+      expect(friendInfoVo.status).toBe(UserFriendshipType.ACCEPT);
+    }
+
+    /**
+     * Unauthorized流程
+     */
+    const unauthorizedResponse = await request(app.getHttpServer()).get(
+      `/users/${user.id}/friends/${friends[0].id}`,
+    );
+    expect(unauthorizedResponse.status).toBe(HttpStatus.UNAUTHORIZED);
+
+    /**
+     * Forbidden流程
+     */
+    const users = await usersRepository.find();
+    const other = users.find((other) => other.id !== userId);
+    const forbiddenResponse = await request(app.getHttpServer())
+      .get(`/users/${other.id}/friends/${friends[0].id}`)
+      .set('Authorization', authorization);
+    expect(forbiddenResponse.status).toBe(HttpStatus.FORBIDDEN);
+
+    /**
+     * BadRequest流程
+     */
+    for (const invalidNumber of dataForValidIsNumber) {
+      Logger.test('invalid: ', invalidNumber);
+      const userIdBadRequestRes = await request(app.getHttpServer())
+        .get(`/users/${invalidNumber}/friends/${friends[0].id}`)
+        .set('Authorization', authorization);
+      expect(userIdBadRequestRes.status).toBe(HttpStatus.BAD_REQUEST);
+      const friendIdBadRequestRes = await request(app.getHttpServer())
+        .get(`/users/${user.id}/friends/${invalidNumber}`)
+        .set('Authorization', authorization);
+      expect(friendIdBadRequestRes.status).toBe(HttpStatus.BAD_REQUEST);
+    }
+  });
+
+  it('POST /users/avatar/upload', async () => {
+    const totalImages = 2;
+    for (let i = 0; i < totalImages; i++) {
+      const response = await request(app.getHttpServer())
+        .post('/users/avatar/upload')
+        .set('Authorization', authorization)
+        .attach('file', `test/images/image${i}.jpg`);
+      expect(response.status).toBe(HttpStatus.CREATED);
+    }
+    const totalOversizeImages = 2;
+    for (let i = 0; i < totalOversizeImages; i++) {
+      const response = await request(app.getHttpServer())
+        .post('/users/avatar/upload')
+        .set('Authorization', authorization)
+        .attach('file', `test/oversize-images/image${i}.jpg`);
+      expect(response.status).toBe(HttpStatus.PAYLOAD_TOO_LARGE);
+    }
+  });
+});
