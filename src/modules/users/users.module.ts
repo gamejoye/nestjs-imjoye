@@ -25,6 +25,9 @@ import { EnvConfigService } from '../env-config/env-config.service';
             callback(null, `${randomName}.${fileExtName}`);
           },
         }),
+        limits: {
+          fileSize: 1024 * 1024 * 2, // 2MB
+        },
       }),
       inject: [EnvConfigService],
     }),
