@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiExtraModels, ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -24,7 +24,7 @@ class GetChatroomSummaryDto {
 
 export class GetChatroomSummariesDto {
   @IsArray()
-  @ValidateNested()
+  @ValidateNested({ each: true })
   @Type(() => GetChatroomSummaryDto)
   @ApiProperty({
     example: [
@@ -32,6 +32,8 @@ export class GetChatroomSummariesDto {
       { id: 12481287, latestVisitTime: '2024-03-21 14:55' },
     ],
     description: '最后一次用户访问各个聊天室的信息',
+    type: GetChatroomSummaryDto,
+    isArray: true,
   })
   latestVisitTimes: Array<GetChatroomSummaryDto>;
 }
