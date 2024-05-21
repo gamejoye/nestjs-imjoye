@@ -7,17 +7,17 @@ import {
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiResult } from '../types/response.type';
 import { Request, Response } from 'express';
+import { IApiResult } from '../types/response.type';
 
 @Injectable()
 export class ResTransformInterceptor<T>
-  implements NestInterceptor<T, ApiResult<T>>
+  implements NestInterceptor<T, IApiResult<T>>
 {
   intercept(
     context: ExecutionContext,
     next: CallHandler,
-  ): Observable<ApiResult<T>> {
+  ): Observable<IApiResult<T>> {
     const response: Response = context.switchToHttp().getResponse();
     const request: Request = context.switchToHttp().getRequest();
     return next.handle().pipe(

@@ -28,7 +28,10 @@ import { Response } from 'express';
 import { UserVo } from './vo/user.vo';
 import { transformFriendInfo, transformUser } from './vo/utils/user-transform';
 import { FriendInfoVo } from './vo/friend-info.vo';
-import { ApiResult } from 'src/common/types/response.type';
+import {
+  ApiCreatedResponseResult,
+  ApiOkResponseResult,
+} from 'src/common/types/response.type';
 
 @ApiTags('users')
 @Controller('users')
@@ -40,11 +43,10 @@ export class UsersController {
 
   @Get(':id')
   @UseGuards(JwtGuard)
-  @ApiOperation({ summary: '根据userId获取用户信息' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: '成功获取用户信息',
-    type: ApiResult<UserVo>,
+  @ApiOperation({ summary: '根据userId获取用户' })
+  @ApiOkResponseResult({
+    model: UserVo,
+    description: '成功获取用户',
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -57,11 +59,11 @@ export class UsersController {
 
   @Get(':id/friends')
   @UseGuards(JwtGuard)
-  @ApiOperation({ summary: '根据userId获取好友信息列表' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: '成功根据userId获取好友信息列表',
-    type: ApiResult<Array<UserVo>>,
+  @ApiOperation({ summary: '根据userId获取好友列表' })
+  @ApiOkResponseResult({
+    model: UserVo,
+    description: '成功根据userId获取好友列表',
+    isArray: true,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -85,10 +87,9 @@ export class UsersController {
   @Get(':id/friends/:friendId')
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: '获取好友信息' })
-  @ApiResponse({
-    status: HttpStatus.OK,
+  @ApiOkResponseResult({
+    model: FriendInfoVo,
     description: '成功获取好友信息',
-    type: ApiResult<FriendInfoVo>,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -129,10 +130,9 @@ export class UsersController {
       },
     },
   })
-  @ApiResponse({
-    status: HttpStatus.CREATED,
+  @ApiCreatedResponseResult({
+    model: String,
     description: '头像上传成功',
-    type: ApiResult<string>,
   })
   @ApiResponse({
     status: HttpStatus.PAYLOAD_TOO_LARGE,

@@ -7,7 +7,13 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiExtraModels,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { LocalGuard } from './local.guard';
 import { GetUser } from './decorators/get-user.decorator';
 import { EnvConfigService } from '../env-config/env-config.service';
@@ -19,8 +25,12 @@ import { RegisterUserRequestDto } from './dto/register.dto';
 import { UsersService } from '../users/users.service';
 import { LoginVo } from './vo/login.vo';
 import { UserVo } from '../users/vo/user.vo';
-import { ApiResult } from 'src/common/types/response.type';
+import {
+  ApiBaseResult,
+  ApiCreatedResponseResult,
+} from 'src/common/types/response.type';
 
+@ApiExtraModels(ApiBaseResult)
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -34,11 +44,7 @@ export class AuthController {
   @UseGuards(LocalGuard)
   @ApiBody({ type: LoginUserRequestDto })
   @ApiOperation({ summary: '用户登录' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: '登录成功',
-    type: ApiResult<LoginVo>,
-  })
+  @ApiCreatedResponseResult({ model: LoginVo, description: '登录成功' })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
     description: '登录失败',
@@ -63,11 +69,7 @@ export class AuthController {
   @Post('register')
   @ApiBody({ type: RegisterUserRequestDto })
   @ApiOperation({ summary: '用户注册' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: '注册成功',
-    type: ApiResult<UserVo>,
-  })
+  @ApiCreatedResponseResult({ model: UserVo, description: '注册成功' })
   @ApiResponse({ status: HttpStatus.CONFLICT, description: '用户邮箱已经存在' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: '注册失败' })
   async register(@Body() registerDto: RegisterUserRequestDto): Promise<UserVo> {

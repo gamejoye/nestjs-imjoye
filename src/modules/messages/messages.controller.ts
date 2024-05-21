@@ -8,7 +8,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiExtraModels, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MessagesService } from './messages.service';
 import { IAddMessageDto } from './dto/add-message.dto';
 import { WsGatewayService } from '../ws-gateway/ws-gateway.service';
@@ -19,8 +19,13 @@ import { JwtGuard } from '../auth/jwt.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { ChatroomsService } from '../chatrooms/chatrooms.service';
-import { ApiResult } from 'src/common/types/response.type';
+import {
+  ApiBaseResult,
+  ApiCreatedResponseResult,
+  ApiOkResponseResult,
+} from 'src/common/types/response.type';
 
+@ApiExtraModels(ApiBaseResult)
 @ApiTags('messages')
 @Controller('messages')
 export class MessagesController {
@@ -32,10 +37,10 @@ export class MessagesController {
   @Get()
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: '根据roomId获取消息' })
-  @ApiResponse({
-    status: HttpStatus.OK,
+  @ApiOkResponseResult({
+    model: MessageVo,
     description: '成功获取聊天室消息',
-    type: ApiResult<Array<MessageVo>>,
+    isArray: true,
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
@@ -64,10 +69,9 @@ export class MessagesController {
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: '在聊天室中发送消息' })
   @ApiBody({ type: IAddMessageDto })
-  @ApiResponse({
-    status: HttpStatus.CREATED,
+  @ApiCreatedResponseResult({
+    model: MessageVo,
     description: '成功发送消息',
-    type: ApiResult<MessageVo>,
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,

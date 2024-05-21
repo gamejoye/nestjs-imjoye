@@ -13,7 +13,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiExtraModels, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetChatroomSummariesDto } from './dto/get-chatroom-summaries.dto';
 import { ChatroomsService } from './chatrooms.service';
 import { GetUser } from '../auth/decorators/get-user.decorator';
@@ -29,8 +29,12 @@ import { ChatroomVo } from './vo/chatroom.vo';
 import { ChatroomSummaryVo } from './vo/chatroom-summary.vo';
 import { transformChatroom } from './vo/utils';
 import { transformMessage } from '../messages/vo/utils';
-import { ApiResult } from 'src/common/types/response.type';
+import {
+  ApiBaseResult,
+  ApiOkResponseResult,
+} from 'src/common/types/response.type';
 
+@ApiExtraModels(ApiBaseResult)
 @ApiTags('chatrooms')
 @Controller('chatrooms')
 export class ChatroomsController {
@@ -69,10 +73,9 @@ export class ChatroomsController {
   @Get(':chatroomId')
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: '根据聊天室id获取单个聊天室' })
-  @ApiResponse({
-    status: HttpStatus.OK,
+  @ApiOkResponseResult({
+    model: ChatroomVo,
     description: '成功获取单个聊天室',
-    type: ApiResult<ChatroomVo>,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -99,10 +102,9 @@ export class ChatroomsController {
   @Get('')
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: '根据userId和friendId获取单个单聊聊天室' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: '成功获取单个单聊聊天室',
-    type: ApiResult<ChatroomVo>,
+  @ApiOkResponseResult({
+    model: ChatroomVo,
+    description: '成功获取单个聊天室',
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -128,10 +130,9 @@ export class ChatroomsController {
 
   @Get('summaries/:chatroomId')
   @UseGuards(JwtGuard)
-  @ApiResponse({
-    status: HttpStatus.OK,
+  @ApiOkResponseResult({
+    model: ChatroomSummaryVo,
     description: '成功获取单个聊天室的chatroomSummaries',
-    type: ApiResult<ChatroomSummaryVo>,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
@@ -183,10 +184,10 @@ export class ChatroomsController {
   @UseGuards(JwtGuard)
   @ApiBody({ type: GetChatroomSummariesDto })
   @ApiOperation({ summary: '获取聊天室信息概要' })
-  @ApiResponse({
-    status: HttpStatus.OK,
+  @ApiOkResponseResult({
+    model: ChatroomSummaryVo,
     description: '成功获取chatroomSummaries',
-    type: ApiResult<Array<ChatroomSummaryVo>>,
+    isArray: true,
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,
