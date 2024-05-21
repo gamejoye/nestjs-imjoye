@@ -10,11 +10,8 @@ export class FriendInfoVo {
   user: UserVo;
   @ApiProperty({
     description: '好友请求状态',
-    examples: [
-      UserFriendshipType.ACCEPT,
-      UserFriendshipType.PENDING,
-      UserFriendshipType.REJECT,
-    ],
+    example: UserFriendshipType.PENDING,
+    enum: UserFriendshipType,
   })
   status: UserFriendshipType;
   @ApiProperty({

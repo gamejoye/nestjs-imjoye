@@ -14,6 +14,7 @@ export class Chatroom {
   @ApiProperty({
     example: ChatroomType.SINGLE,
     description: '聊天室类型(单聊、多聊)',
+    enum: ChatroomType,
   })
   type: ChatroomType;
 

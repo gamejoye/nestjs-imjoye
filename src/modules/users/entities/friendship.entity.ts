@@ -23,6 +23,7 @@ export class UserFriendship {
   @ApiProperty({
     example: UserFriendshipType.PENDING,
     description: '好友之间的关系',
+    enum: UserFriendshipType,
   })
   status: UserFriendshipType;
 
