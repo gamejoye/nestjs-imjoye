@@ -26,8 +26,6 @@ async function bootstrap() {
     SwaggerModule.setup('api', app, document);
   }
 
-  fs.writeFileSync('./api.json', JSON.stringify(document, null, 2));
-
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
