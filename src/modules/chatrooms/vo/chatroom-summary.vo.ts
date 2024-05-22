@@ -24,6 +24,8 @@ export class ChatroomSummaryVo {
   @ApiProperty({
     example: [21, 2642, 366, 4453, 576, 641, 712],
     description: '当前聊天室在线用户的id数组',
+    type: Number,
+    isArray: true,
   })
   onlineUserIds: Array<number>;
 
