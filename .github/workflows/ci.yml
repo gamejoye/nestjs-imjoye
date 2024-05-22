@@ -79,10 +79,8 @@ jobs:
         echo "JWT_SECRET=${{secrets.TEST_JWT_SECRET}}" >> .env.test
     - name: Build
       run: npm run build
-    - name: Generate api.json
-      run: npm run generate:api-json
-    - name: Generate api.d.ts
-      run: npm run generate:api.d.ts
+    - name: Generate OpenApi
+      run: npm run generate:openapi
     - name: Set up Git
       run: |
         git config --global user.name 'gamejoye'
