@@ -87,6 +87,8 @@ jobs:
       run: |
         git config --global user.name 'gamejoye'
         git config --global user.email 'gamejoye@gmail.com'
+    - name: Pull Sdk
+      run: git pull
     - name: Add and Commit Sdk
       id: commit_sdk
       run: |
