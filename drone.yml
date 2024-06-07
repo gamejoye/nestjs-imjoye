@@ -3,7 +3,7 @@ type: docker
 name: test
 steps:
   - name: install
-    image: node:2O
+    image: node
     commands:
       - npm ci
 
@@ -22,13 +22,13 @@ steps:
       DATABASE_HOST:
         from_secret: database_host
       DATABASE_USERNAME:
-        from_secret:: database_username
+        from_secret: database_username
       DATABASE_PASSWORD:
-        from_secret:: database_password
+        from_secret: database_password
       DATABASE_DATABASE:
-        from_secret:: database_database
+        from_secret: database_database
       JWT_SECRET:
-        from_secret:: jwt_secret
+        from_secret: jwt_secret
     commands:
       - echo "DATABASE_TYPE=$DATABASE_TYPE" >> .env.test
       - echo "DATABASE_PORT=$DATABASE_PORT" >> .env.test
@@ -39,12 +39,12 @@ steps:
       - echo "JWT_SECRET=$JWT_SECRET" >> .env.test
 
   - name: run test
-    image: node:20
+    image: node
     commands:
       - npm test
 
   - name: run e2e test
-    image: node:20
+    image: node
     commands:
       - npm run test:e2e
 
