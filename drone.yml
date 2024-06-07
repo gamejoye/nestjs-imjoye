@@ -8,7 +8,7 @@ steps:
       - npm ci
 
   - name: lint
-    image: node:20
+    image: node
     commands:
       - npm run lint
 
