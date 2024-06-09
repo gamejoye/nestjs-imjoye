@@ -1,11 +1,12 @@
 import * as path from 'path';
 import { IDatabaseConfig } from '../types/base.type';
-import { exec } from 'child_process';
 import { Repository } from 'typeorm';
 import { Chatroom } from 'src/modules/chatrooms/entities/chatroom.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 import { UserChatroom } from 'src/modules/chatrooms/entities/user-chatroom.entity';
 import { LoginUserRequestDto } from 'src/modules/auth/dto/login.dto';
+import * as mysql from 'mysql2/promise';
+import * as fs from 'fs';
 
 export const dataForValidIsNumber = ['not a number', NaN, undefined, null];
 export const usersLoginDto: Array<LoginUserRequestDto> = [
@@ -23,22 +24,25 @@ export const usersLoginDto: Array<LoginUserRequestDto> = [
   },
 ];
 
-export async function initDatabase(
-  databaseConfig: IDatabaseConfig,
-): Promise<void> {
+export async function initDatabase(databaseConfig: IDatabaseConfig) {
   const sqlFilePath = path.join(__dirname, '../../../test/testdb.sql');
-  return new Promise<void>((resolve, reject) => {
-    exec(
-      `mysql -h ${databaseConfig.host} --port ${databaseConfig.port} -u ${databaseConfig.username} -p${databaseConfig.password} ${databaseConfig.database} < ${sqlFilePath};`,
-      (error) => {
-        if (error) {
-          console.error(`exec error: ${error}`);
-          return reject(error);
-        }
-        resolve();
-      },
-    );
+  const connection = await mysql.createConnection({
+    host: databaseConfig.host,
+    port: databaseConfig.port,
+    user: databaseConfig.username,
+    password: databaseConfig.password,
+    database: databaseConfig.database,
   });
+  const sqls = fs.readFileSync(sqlFilePath, 'utf8').split(/;/m);
+  for (const sql of sqls) {
+    if (sql.trim()) {
+      // 失败直接跳过
+      try {
+        await connection.execute(sql);
+      } catch (_) {}
+    }
+  }
+  await connection.end();
 }
 
 export function getNonExsitingId(existingIds: Array<number>): number {
