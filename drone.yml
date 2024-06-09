@@ -16,12 +16,9 @@ steps:
     image: alpine/git
     environment:
       DATABASE_TYPE: mysql
-      DATABASE_PORT:
-        from_secret: 3306
-      DATABASE_HOST:
-        from_secret: database
-      DATABASE_USERNAME:
-        from_secret: root
+      DATABASE_PORT: 3306
+      DATABASE_HOST: database
+      DATABASE_USERNAME: root
       DATABASE_PASSWORD:
         from_secret: database_password
       DATABASE_DATABASE:
