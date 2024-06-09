@@ -15,14 +15,13 @@ steps:
   - name: transfer .env.test file
     image: alpine/git
     environment:
-      DATABASE_TYPE:
-        from_secret: database_type
+      DATABASE_TYPE: mysql
       DATABASE_PORT:
-        from_secret: database_port
+        from_secret: 3306
       DATABASE_HOST:
-        from_secret: database_host
+        from_secret: database
       DATABASE_USERNAME:
-        from_secret: database_username
+        from_secret: root
       DATABASE_PASSWORD:
         from_secret: database_password
       DATABASE_DATABASE:
@@ -50,14 +49,9 @@ steps:
 
 services:
 - name: database
-  image: mysql:8.27
+  image: mysql:8.0.27
   environment:
-    MYSQL_USERNAME: 
-      from_secret: database_username
-    MYSQL_PASSWORD: 
+    MYSQL_ROOT_PASSWORD: 
       from_secret: database_password
     MYSQL_DATABASE:
       from_secret: database_database
-    MYSQL_ALLOW_EMPTY_PASSWORD: 'no'
-  commands:
-    - sleep 15
