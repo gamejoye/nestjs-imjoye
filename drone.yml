@@ -3,12 +3,12 @@ type: docker
 name: test
 steps:
   - name: install
-    image: node
+    image: node:20
     commands:
       - npm ci
 
   - name: lint
-    image: node
+    image: node:20
     commands:
       - npm run lint
 
@@ -39,12 +39,12 @@ steps:
       - echo "JWT_SECRET=$JWT_SECRET" >> .env.test
 
   - name: run test
-    image: node
+    image: node:20
     commands:
       - npm test
 
   - name: run e2e test
-    image: node
+    image: node:20
     commands:
       - npm run test:e2e
 
