@@ -44,6 +44,22 @@ steps:
     commands:
       - npm run test:e2e
 
+  - name: Generate OpenApi
+    image: node:20
+    commands: 
+      - npm run build
+      - npm run generate:openapi
+  
+  - name: Push Sdk
+    failure: ignore
+    image: alpine/git
+    commands:
+      - git config --global user.name 'gamejoye'
+      - git config --global user.email 'gamejoye@gmail.com'
+      - git add ./sdk
+      - git commit -m 'chore(sdk): sdk'
+      - git push
+
 services:
 - name: database
   image: mysql:8.0.27
