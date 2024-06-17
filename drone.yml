@@ -58,7 +58,7 @@ steps:
       - git config --global user.email 'gamejoye@gmail.com'
       - git add ./sdk
       - git commit -m 'chore(sdk):sdk'
-      - git push
+      - git push -u origin master
 
 services:
 - name: database
