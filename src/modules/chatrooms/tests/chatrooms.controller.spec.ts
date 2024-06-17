@@ -272,7 +272,7 @@ describe('ChatroomsController', () => {
       mockUserChatroomService.getByUserIdAndChatroomId as jest.Mock
     ).mockResolvedValue(userChatroom);
     const timestamp = getCurrentDatetime();
-    await controller.getChatroomSummary(user, chatroom.id, { timestamp });
+    await controller.getChatroomSummary(user, chatroom.id);
     expect(mockChatroomsService.getByChatroomId).toHaveBeenCalledWith(
       user.id,
       chatroom.id,
@@ -288,7 +288,7 @@ describe('ChatroomsController', () => {
     // 没有获取到chatroom的逻辑
     (mockChatroomsService.getByChatroomId as jest.Mock).mockResolvedValue(null);
     await controller
-      .getChatroomSummary(user, chatroom.id, { timestamp })
+      .getChatroomSummary(user, chatroom.id)
       .then(() => {
         expect(true).toBe(false);
       })
@@ -321,7 +321,7 @@ describe('ChatroomsController', () => {
       return userChatroom;
     });
 
-    await controller.getChatroomSummaries(user, { latestVisitTimes: [] });
+    await controller.getChatroomSummaries(user);
     // 函数调用次数
     expect(mockChatroomsService.getAll).toHaveBeenCalledTimes(1);
     expect(

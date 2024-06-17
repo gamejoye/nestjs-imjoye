@@ -30,9 +30,7 @@ import { ChatroomVo } from '../vo/chatroom.vo';
 import { ChatroomType } from 'src/common/constants/chatroom';
 import { GetSingleChatroomDto } from '../dto/get-single-chatroom.dto';
 import { User } from 'src/modules/users/entities/user.entity';
-import { GetChatroomSummaryDto } from '../dto/get-chatroom-summary.dto';
 import { ChatroomSummaryVo } from '../vo/chatroom-summary.vo';
-import { GetChatroomSummariesDto } from '../dto/get-chatroom-summaries.dto';
 import { AuthModule } from 'src/modules/auth/auth.module';
 import { transformChatroom } from '../vo/utils';
 
@@ -271,14 +269,10 @@ describe('ChatroomController (e2e)', () => {
       where: { user: { id: userId } },
       relations: ['user', 'chatroom'],
     });
-    const query: GetChatroomSummaryDto = {
-      timestamp: getCurrentDatetime(),
-    };
     for (const userChatroom of userChatrooms) {
       const chatroom = userChatroom.chatroom;
       let response = await request(app.getHttpServer())
         .get(`/chatrooms/summaries/${chatroom.id}`)
-        .query(query)
         .set('Authorization', authorization);
       expect(response.status).toBe(HttpStatus.OK);
 
@@ -302,44 +296,25 @@ describe('ChatroomController (e2e)', () => {
     }
 
     /**
-     * BadRequest流程
-     */
-    const chatroom = userChatrooms[0].chatroom;
-    const badQuery: GetChatroomSummaryDto = { timestamp: 'not a date string' };
-    const queryBadRequestResponse = await request(app.getHttpServer())
-      .get(`/chatrooms/summaries/${chatroom.id}`)
-      .query(badQuery)
-      .set('Authorization', authorization);
-    expect(queryBadRequestResponse.status).toBe(HttpStatus.BAD_REQUEST);
-    const paramBadRequestResponse = await request(app.getHttpServer())
-      .get(`/chatrooms/summaries/notANumber`)
-      .query(query)
-      .set('Authorization', authorization);
-    expect(paramBadRequestResponse.status).toBe(HttpStatus.BAD_REQUEST);
-
-    /**
      * NotFound流程
      */
     const nonExistingId = await getChatroomNonExistingId(chatroomsRepository);
     const notFoundResponse = await request(app.getHttpServer())
       .get(`/chatrooms/summaries/${nonExistingId}`)
-      .query(query)
       .set('Authorization', authorization);
     expect(notFoundResponse.status).toBe(HttpStatus.NOT_FOUND);
   });
 
-  it('POST /chatrooms/summaries', async () => {
+  it('GET /chatrooms/summaries', async () => {
     const chatrooms = (
       await userChatroomRepository.find({
         where: { user: { id: userId } },
         relations: ['chatroom'],
       })
     ).map(({ chatroom }) => chatroom);
-    const dto: GetChatroomSummariesDto = { latestVisitTimes: [] };
     const response = await request(app.getHttpServer())
-      .post('/chatrooms/summaries')
-      .set('Authorization', authorization)
-      .send(dto);
+      .get('/chatrooms/summaries')
+      .set('Authorization', authorization);
     expect(response.status).toBe(HttpStatus.OK);
     const summaries: Array<ChatroomSummaryVo> = response.body.data;
     chatrooms.sort((chatroom1, chatroom2) => chatroom1.id - chatroom2.id);
@@ -368,7 +343,7 @@ describe('ChatroomController (e2e)', () => {
     }
   });
 
-  it('POST /chatrooms/summaries And GET /chatrooms/summaries/:chatroomId shoudle Idenmpotent', async () => {
+  it('GET /chatrooms/summaries And GET /chatrooms/summaries/:chatroomId shoudle Idenmpotent', async () => {
     const chatrooms = (
       await userChatroomRepository.find({
         where: { user: { id: userId } },
@@ -376,33 +351,23 @@ describe('ChatroomController (e2e)', () => {
       })
     ).map(({ chatroom }) => chatroom);
     expect(chatrooms.length).toBeGreaterThan(0);
-    const chatroomWithTimestamp = chatrooms[0];
-    const timestamp = getCurrentDatetime();
     const responsesFromGetByChatroomId = await Promise.all(
       chatrooms.map((chatroom) => {
         const response = request(app.getHttpServer())
           .get(`/chatrooms/summaries/${chatroom.id}`)
           .set('Authorization', authorization);
-        if (chatroom.id === chatroomWithTimestamp.id) {
-          const query: GetChatroomSummaryDto = { timestamp };
-          response.query(query);
-        }
         return response;
       }),
     );
     responsesFromGetByChatroomId.forEach((response) => {
       expect(response.status).toBe(HttpStatus.OK);
     });
-    const dto: GetChatroomSummariesDto = {
-      latestVisitTimes: [
-        { id: chatroomWithTimestamp.id, latestVisitTime: timestamp },
-      ],
-    };
 
     const responseFromGetAll = await request(app.getHttpServer())
-      .post('/chatrooms/summaries')
-      .set('Authorization', authorization)
-      .send(dto);
+      .get('/chatrooms/summaries')
+      .set('Authorization', authorization);
+    Logger.test('responseFromGetAll body', responseFromGetAll.body);
+    Logger.test('responseFromGetAll headers', responseFromGetAll.headers);
     expect(responseFromGetAll.status).toBe(HttpStatus.OK);
 
     const summariesFromGetByChatroomId =
