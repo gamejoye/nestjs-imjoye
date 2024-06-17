@@ -82,6 +82,7 @@ export const ApiCreatedResponseResult = <T extends Type>(options: {
             properties: {
               data: isArray ? { type: 'array', items: ref } : ref,
             },
+            required: ['data'],
           },
         ],
       },
