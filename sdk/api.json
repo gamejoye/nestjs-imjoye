@@ -198,7 +198,10 @@
                         "data": {
                           "$ref": "#/components/schemas/String"
                         }
-                      }
+                      },
+                      "required": [
+                        "data"
+                      ]
                     }
                   ]
                 }
@@ -244,7 +247,10 @@
                         "data": {
                           "$ref": "#/components/schemas/LoginVo"
                         }
-                      }
+                      },
+                      "required": [
+                        "data"
+                      ]
                     }
                   ]
                 }
@@ -290,7 +296,10 @@
                         "data": {
                           "$ref": "#/components/schemas/UserVo"
                         }
-                      }
+                      },
+                      "required": [
+                        "data"
+                      ]
                     }
                   ]
                 }
@@ -623,7 +632,10 @@
                         "data": {
                           "$ref": "#/components/schemas/MessageVo"
                         }
-                      }
+                      },
+                      "required": [
+                        "data"
+                      ]
                     }
                   ]
                 }

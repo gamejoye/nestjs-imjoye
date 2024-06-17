@@ -366,7 +366,7 @@ export interface operations {
       201: {
         content: {
           "application/json": components["schemas"]["ApiBaseResult"] & {
-            data?: components["schemas"]["String"];
+            data: components["schemas"]["String"];
           };
         };
       };
@@ -388,7 +388,7 @@ export interface operations {
       201: {
         content: {
           "application/json": components["schemas"]["ApiBaseResult"] & {
-            data?: components["schemas"]["LoginVo"];
+            data: components["schemas"]["LoginVo"];
           };
         };
       };
@@ -410,7 +410,7 @@ export interface operations {
       201: {
         content: {
           "application/json": components["schemas"]["ApiBaseResult"] & {
-            data?: components["schemas"]["UserVo"];
+            data: components["schemas"]["UserVo"];
           };
         };
       };
@@ -585,7 +585,7 @@ export interface operations {
       201: {
         content: {
           "application/json": components["schemas"]["ApiBaseResult"] & {
-            data?: components["schemas"]["MessageVo"];
+            data: components["schemas"]["MessageVo"];
           };
         };
       };
