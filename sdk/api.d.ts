@@ -33,20 +33,20 @@ export interface paths {
     /** 更新用户对于聊天室的最后访问时间 */
     put: operations["ChatroomsController_visitChatroom"];
   };
-  "/chatrooms/{chatroomId}": {
-    /** 根据聊天室id获取单个聊天室 */
-    get: operations["ChatroomsController_getChatroom"];
-  };
   "/chatrooms": {
     /** 根据userId和friendId获取单个单聊聊天室 */
     get: operations["ChatroomsController_getSingleChatroomByFriendId"];
   };
-  "/chatrooms/summaries/{chatroomId}": {
-    get: operations["ChatroomsController_getChatroomSummary"];
-  };
   "/chatrooms/summaries": {
     /** 获取聊天室信息概要 */
-    post: operations["ChatroomsController_getChatroomSummaries"];
+    get: operations["ChatroomsController_getChatroomSummaries"];
+  };
+  "/chatrooms/{chatroomId}": {
+    /** 根据聊天室id获取单个聊天室 */
+    get: operations["ChatroomsController_getChatroom"];
+  };
+  "/chatrooms/summaries/{chatroomId}": {
+    get: operations["ChatroomsController_getChatroomSummary"];
   };
   "/messages": {
     /** 根据roomId获取消息 */
@@ -244,34 +244,6 @@ export interface components {
       /** @description 当前聊天室的最新一条消息 */
       latestMessage: components["schemas"]["MessageVo"];
     };
-    GetChatroomSummaryDto: {
-      /**
-       * @description 聊天室id
-       * @example 11234889
-       */
-      id: number;
-      /**
-       * @description 最后一次用户访问当前聊天室的时间
-       * @example 2024-03-23 19:12
-       */
-      latestVisitTime: string;
-    };
-    GetChatroomSummariesDto: {
-      /**
-       * @description 最后一次用户访问各个聊天室的信息
-       * @example [
-       *   {
-       *     "id": 11234889,
-       *     "latestVisitTime": "2024-03-23 19:12"
-       *   },
-       *   {
-       *     "id": 12481287,
-       *     "latestVisitTime": "2024-03-21 14:55"
-       *   }
-       * ]
-       */
-      latestVisitTimes: components["schemas"]["GetChatroomSummaryDto"][];
-    };
     IAddMessageChatroomDto: {
       /** @description 待添加消息所属聊天室id */
       id: number;
@@ -316,7 +288,7 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ApiBaseResult"] & {
-            data?: components["schemas"]["UserVo"];
+            data: components["schemas"]["UserVo"];
           };
         };
       };
@@ -338,7 +310,7 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ApiBaseResult"] & {
-            data?: components["schemas"]["UserVo"][];
+            data: components["schemas"]["UserVo"][];
           };
         };
       };
@@ -365,7 +337,7 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ApiBaseResult"] & {
-            data?: components["schemas"]["FriendInfoVo"];
+            data: components["schemas"]["FriendInfoVo"];
           };
         };
       };
@@ -477,32 +449,6 @@ export interface operations {
       };
     };
   };
-  /** 根据聊天室id获取单个聊天室 */
-  ChatroomsController_getChatroom: {
-    parameters: {
-      path: {
-        chatroomId: number;
-      };
-    };
-    responses: {
-      /** @description 成功获取单个聊天室 */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ApiBaseResult"] & {
-            data?: components["schemas"]["ChatroomVo"];
-          };
-        };
-      };
-      /** @description 未认证用户 */
-      401: {
-        content: never;
-      };
-      /** @description 未找到聊天室 */
-      404: {
-        content: never;
-      };
-    };
-  };
   /** 根据userId和friendId获取单个单聊聊天室 */
   ChatroomsController_getSingleChatroomByFriendId: {
     parameters: {
@@ -519,7 +465,50 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ApiBaseResult"] & {
-            data?: components["schemas"]["ChatroomVo"];
+            data: components["schemas"]["ChatroomVo"];
+          };
+        };
+      };
+      /** @description 未认证用户 */
+      401: {
+        content: never;
+      };
+      /** @description 未找到聊天室 */
+      404: {
+        content: never;
+      };
+    };
+  };
+  /** 获取聊天室信息概要 */
+  ChatroomsController_getChatroomSummaries: {
+    responses: {
+      /** @description 成功获取chatroomSummaries */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ApiBaseResult"] & {
+            data: components["schemas"]["ChatroomSummaryVo"][];
+          };
+        };
+      };
+      /** @description 未认证用户 */
+      401: {
+        content: never;
+      };
+    };
+  };
+  /** 根据聊天室id获取单个聊天室 */
+  ChatroomsController_getChatroom: {
+    parameters: {
+      path: {
+        chatroomId: number;
+      };
+    };
+    responses: {
+      /** @description 成功获取单个聊天室 */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ApiBaseResult"] & {
+            data: components["schemas"]["ChatroomVo"];
           };
         };
       };
@@ -535,13 +524,6 @@ export interface operations {
   };
   ChatroomsController_getChatroomSummary: {
     parameters: {
-      query: {
-        /**
-         * @description 最后一次访问聊天室的时间戳
-         * @example 2024-04-23 21:45
-         */
-        timestamp: string;
-      };
       path: {
         chatroomId: number;
       };
@@ -551,29 +533,7 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ApiBaseResult"] & {
-            data?: components["schemas"]["ChatroomSummaryVo"];
-          };
-        };
-      };
-      /** @description 未认证用户 */
-      401: {
-        content: never;
-      };
-    };
-  };
-  /** 获取聊天室信息概要 */
-  ChatroomsController_getChatroomSummaries: {
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GetChatroomSummariesDto"];
-      };
-    };
-    responses: {
-      /** @description 成功获取chatroomSummaries */
-      200: {
-        content: {
-          "application/json": components["schemas"]["ApiBaseResult"] & {
-            data?: components["schemas"]["ChatroomSummaryVo"][];
+            data: components["schemas"]["ChatroomSummaryVo"];
           };
         };
       };
@@ -599,7 +559,7 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ApiBaseResult"] & {
-            data?: components["schemas"]["MessageVo"][];
+            data: components["schemas"]["MessageVo"][];
           };
         };
       };

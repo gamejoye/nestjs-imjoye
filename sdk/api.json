@@ -30,7 +30,10 @@
                         "data": {
                           "$ref": "#/components/schemas/UserVo"
                         }
-                      }
+                      },
+                      "required": [
+                        "data"
+                      ]
                     }
                   ]
                 }
@@ -78,7 +81,10 @@
                             "$ref": "#/components/schemas/UserVo"
                           }
                         }
-                      }
+                      },
+                      "required": [
+                        "data"
+                      ]
                     }
                   ]
                 }
@@ -134,7 +140,10 @@
                         "data": {
                           "$ref": "#/components/schemas/FriendInfoVo"
                         }
-                      }
+                      },
+                      "required": [
+                        "data"
+                      ]
                     }
                   ]
                 }
@@ -337,54 +346,6 @@
         ]
       }
     },
-    "/chatrooms/{chatroomId}": {
-      "get": {
-        "operationId": "ChatroomsController_getChatroom",
-        "summary": "根据聊天室id获取单个聊天室",
-        "parameters": [
-          {
-            "name": "chatroomId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "成功获取单个聊天室",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiBaseResult"
-                    },
-                    {
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/ChatroomVo"
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "未认证用户"
-          },
-          "404": {
-            "description": "未找到聊天室"
-          }
-        },
-        "tags": [
-          "chatrooms"
-        ]
-      }
-    },
     "/chatrooms": {
       "get": {
         "operationId": "ChatroomsController_getSingleChatroomByFriendId",
@@ -416,7 +377,103 @@
                         "data": {
                           "$ref": "#/components/schemas/ChatroomVo"
                         }
-                      }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未认证用户"
+          },
+          "404": {
+            "description": "未找到聊天室"
+          }
+        },
+        "tags": [
+          "chatrooms"
+        ]
+      }
+    },
+    "/chatrooms/summaries": {
+      "get": {
+        "operationId": "ChatroomsController_getChatroomSummaries",
+        "summary": "获取聊天室信息概要",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功获取chatroomSummaries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiBaseResult"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/ChatroomSummaryVo"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未认证用户"
+          }
+        },
+        "tags": [
+          "chatrooms"
+        ]
+      }
+    },
+    "/chatrooms/{chatroomId}": {
+      "get": {
+        "operationId": "ChatroomsController_getChatroom",
+        "summary": "根据聊天室id获取单个聊天室",
+        "parameters": [
+          {
+            "name": "chatroomId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功获取单个聊天室",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiBaseResult"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ChatroomVo"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
                     }
                   ]
                 }
@@ -446,16 +503,6 @@
             "schema": {
               "type": "number"
             }
-          },
-          {
-            "name": "timestamp",
-            "required": true,
-            "in": "query",
-            "example": "2024-04-23 21:45",
-            "description": "最后一次访问聊天室的时间戳",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -473,56 +520,10 @@
                         "data": {
                           "$ref": "#/components/schemas/ChatroomSummaryVo"
                         }
-                      }
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "未认证用户"
-          }
-        },
-        "tags": [
-          "chatrooms"
-        ]
-      }
-    },
-    "/chatrooms/summaries": {
-      "post": {
-        "operationId": "ChatroomsController_getChatroomSummaries",
-        "summary": "获取聊天室信息概要",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetChatroomSummariesDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "成功获取chatroomSummaries",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiBaseResult"
-                    },
-                    {
-                      "properties": {
-                        "data": {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/components/schemas/ChatroomSummaryVo"
-                          }
-                        }
-                      }
+                      },
+                      "required": [
+                        "data"
+                      ]
                     }
                   ]
                 }
@@ -572,7 +573,10 @@
                             "$ref": "#/components/schemas/MessageVo"
                           }
                         }
-                      }
+                      },
+                      "required": [
+                        "data"
+                      ]
                     }
                   ]
                 }
@@ -997,50 +1001,6 @@
           "onlineUserIds",
           "chatroom",
           "latestMessage"
-        ]
-      },
-      "GetChatroomSummaryDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number",
-            "example": 11234889,
-            "description": "聊天室id"
-          },
-          "latestVisitTime": {
-            "type": "string",
-            "example": "2024-03-23 19:12",
-            "description": "最后一次用户访问当前聊天室的时间"
-          }
-        },
-        "required": [
-          "id",
-          "latestVisitTime"
-        ]
-      },
-      "GetChatroomSummariesDto": {
-        "type": "object",
-        "properties": {
-          "latestVisitTimes": {
-            "example": [
-              {
-                "id": 11234889,
-                "latestVisitTime": "2024-03-23 19:12"
-              },
-              {
-                "id": 12481287,
-                "latestVisitTime": "2024-03-21 14:55"
-              }
-            ],
-            "description": "最后一次用户访问各个聊天室的信息",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GetChatroomSummaryDto"
-            }
-          }
-        },
-        "required": [
-          "latestVisitTimes"
         ]
       },
       "IAddMessageChatroomDto": {
