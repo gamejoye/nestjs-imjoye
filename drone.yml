@@ -57,7 +57,7 @@ steps:
       - git config --global user.name 'gamejoye'
       - git config --global user.email 'gamejoye@gmail.com'
       - git add ./sdk
-      - git commit -m 'chore(sdk): sdk'
+      - git commit -m 'chore(sdk):sdk'
       - git push
 
 services:
