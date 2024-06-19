@@ -115,7 +115,6 @@ export class UsersController {
   }
 
   @Post('avatar/upload')
-  @UseGuards(JwtGuard)
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: '上传头像' })
   @ApiConsumes('multipart/form-data')

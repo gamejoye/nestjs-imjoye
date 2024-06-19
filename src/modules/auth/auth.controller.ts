@@ -29,6 +29,7 @@ import {
   ApiBaseResult,
   ApiCreatedResponseResult,
 } from 'src/common/types/response.type';
+import { Logger } from 'src/common/utils';
 
 @ApiExtraModels(ApiBaseResult)
 @ApiTags('auth')
@@ -74,7 +75,9 @@ export class AuthController {
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: '注册失败' })
   async register(@Body() registerDto: RegisterUserRequestDto): Promise<UserVo> {
     const { email, password, username, avatarUrl } = registerDto;
+    Logger.log(registerDto);
     const existing = await this.usersService.getByEmail(email);
+    console.log('ex: ', existing);
     if (existing) {
       throw new HttpException('email already exists', HttpStatus.CONFLICT);
     }
