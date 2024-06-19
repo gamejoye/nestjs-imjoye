@@ -442,7 +442,7 @@ export interface operations {
       200: {
         content: {
           "application/json": components["schemas"]["ApiBaseResult"] & {
-            data: components["schemas"]["ChatroomVo"];
+            data: string;
           };
         };
       };

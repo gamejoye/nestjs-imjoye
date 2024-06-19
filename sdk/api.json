@@ -358,7 +358,7 @@
                     {
                       "properties": {
                         "data": {
-                          "$ref": "#/components/schemas/ChatroomVo"
+                          "type": "string"
                         }
                       },
                       "required": [
