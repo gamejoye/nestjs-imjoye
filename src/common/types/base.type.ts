@@ -1,4 +1,4 @@
-import { WebSocketEvent } from '../constants/websocketEvents';
+import { WebSocketEventType } from '../constants/websocketEvents';
 
 export interface IDatabaseConfig {
   host: string;
@@ -14,7 +14,7 @@ export interface IJwtConfig {
 }
 
 export interface IWebSocketMessage<T> {
-  event: WebSocketEvent;
+  event: WebSocketEventType;
   payload: T;
 }
 
