@@ -439,8 +439,12 @@ export interface operations {
     };
     responses: {
       /** @description 成功更新用户访问聊天室的最后时间 */
-      204: {
-        content: never;
+      200: {
+        content: {
+          "application/json": components["schemas"]["ApiBaseResult"] & {
+            data: components["schemas"]["ChatroomVo"];
+          };
+        };
       };
       /** @description 聊天室不存在或者无权访问 */
       404: {

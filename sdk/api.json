@@ -346,8 +346,29 @@
           }
         ],
         "responses": {
-          "204": {
-            "description": "成功更新用户访问聊天室的最后时间"
+          "200": {
+            "description": "成功更新用户访问聊天室的最后时间",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiBaseResult"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ChatroomVo"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
           },
           "404": {
             "description": "聊天室不存在或者无权访问"
