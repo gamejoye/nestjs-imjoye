@@ -17,7 +17,7 @@ import { WebSocket } from 'ws';
 import { AUTHORIZATION } from 'src/common/constants/websocketHeaders';
 import { IWebSocketMessage } from 'src/common/types/base.type';
 import { Message } from '../../messages/entities/message.entity';
-import { WebSocketEvent } from 'src/common/constants/websocketEvents';
+import { WebSocketEventType } from 'src/common/constants/websocketEvents';
 import { Logger } from 'src/common/utils';
 
 describe('WsGatewayService', () => {
@@ -110,7 +110,7 @@ describe('WsGatewayService', () => {
                 resolve();
               }
             });
-            client.off('close', () => {
+            client.on('close', () => {
               count--;
             });
           });
@@ -119,7 +119,7 @@ describe('WsGatewayService', () => {
         expect(true).toBe(false);
       }
 
-      // 4. users[0] 发送消息 users[1..x]确认接收消息
+      // 4. users[0..x]确认接收消息
       const message: Message = {
         id: 1,
         chatroom: multipleChatroom,
@@ -127,7 +127,7 @@ describe('WsGatewayService', () => {
         content: `test content from user ${users[0].username}`,
         createTime: getCurrentDatetime(),
       };
-      wsGatewayService.notifynChat(users[0].id, message);
+      await wsGatewayService.notifynChat(users[0].id, message);
       let websocketMessages: Array<IWebSocketMessage<Message>>;
       try {
         websocketMessages = await new Promise<
@@ -155,17 +155,12 @@ describe('WsGatewayService', () => {
         expect(true).toBe(false);
       }
 
-      // 5. 保证userClient[0]收到的是MESSAGE_ACK 其他的收到的是NOTIFY_SYN
+      // 5. 保证userClient收到的是 NEW_MESSAGE
       expect(websocketMessages.length).toBe(userClients.length);
       for (let i = 0; i < websocketMessages.length; i++) {
         const wsMessage = websocketMessages[i];
-        if (i === 0) {
-          // sender
-          expect(wsMessage.event).toBe(WebSocketEvent.MESSAGE_ACK);
-        } else {
-          // receiver
-          expect(wsMessage.event).toBe(WebSocketEvent.MESSAGE_NOTIFY_SYN);
-        }
+        // receiver
+        expect(wsMessage.event).toBe(WebSocketEventType.NEW_MESSAGE);
         expect(wsMessage.payload).toBeDefined();
         expect(wsMessage.payload).toEqual(message);
       }
