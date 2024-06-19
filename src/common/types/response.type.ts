@@ -6,7 +6,6 @@ import {
   getSchemaPath,
 } from '@nestjs/swagger';
 import { ApiExtraModels } from '@nestjs/swagger';
-import type { ReferenceObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 import type { Type } from '@nestjs/common';
 import { applyDecorators } from '@nestjs/common';
 
@@ -32,60 +31,76 @@ export interface IApiResult<T> extends ApiBaseResult {
   data: T;
 }
 
-export const ApiOkResponseResult = <T extends Type>(options: {
+export const ApiOkResponseResult = <
+  T extends Type | 'string' | 'number' | 'boolean',
+>(options: {
   model: T;
   description?: string;
   isArray?: boolean;
 }) => {
   const { model, description, isArray } = options;
-  const ref: ReferenceObject = { $ref: getSchemaPath(model) };
-  return applyDecorators(
+  const isPrimitive = ['string', 'number', 'boolean'].includes(model as string);
+  const schema = isPrimitive
+    ? { type: model as string }
+    : { $ref: getSchemaPath(model as Type) };
+  const decorators = [
     ApiExtraModels(ApiBaseResult),
-    ApiExtraModels(model),
     ApiOkResponse({
       description,
       schema: {
         allOf: [
-          {
-            $ref: getSchemaPath(ApiBaseResult),
-          },
+          { $ref: getSchemaPath(ApiBaseResult) },
           {
             properties: {
-              data: isArray ? { type: 'array', items: ref } : ref,
+              data: isArray ? { type: 'array', items: schema } : schema,
             },
             required: ['data'],
           },
         ],
       },
     }),
-  );
+  ];
+
+  if (!isPrimitive) {
+    decorators.unshift(ApiExtraModels(model as Type));
+  }
+
+  return applyDecorators(...decorators);
 };
 
-export const ApiCreatedResponseResult = <T extends Type>(options: {
+export const ApiCreatedResponseResult = <
+  T extends Type | 'string' | 'number' | 'boolean',
+>(options: {
   model: T;
   description?: string;
   isArray?: boolean;
 }) => {
   const { model, description, isArray } = options;
-  const ref: ReferenceObject = { $ref: getSchemaPath(model) };
-  return applyDecorators(
+  const isPrimitive = ['string', 'number', 'boolean'].includes(model as string);
+  const schema = isPrimitive
+    ? { type: model as string }
+    : { $ref: getSchemaPath(model as Type) };
+  const decorators = [
     ApiExtraModels(ApiBaseResult),
-    ApiExtraModels(model),
     ApiCreatedResponse({
       description,
       schema: {
         allOf: [
-          {
-            $ref: getSchemaPath(ApiBaseResult),
-          },
+          { $ref: getSchemaPath(ApiBaseResult) },
           {
             properties: {
-              data: isArray ? { type: 'array', items: ref } : ref,
+              data: isArray ? { type: 'array', items: schema } : schema,
             },
             required: ['data'],
           },
         ],
       },
     }),
-  );
+  ];
+
+  if (!isPrimitive) {
+    decorators.unshift(ApiExtraModels(model as Type));
+  }
+
+  return applyDecorators(...decorators);
 };

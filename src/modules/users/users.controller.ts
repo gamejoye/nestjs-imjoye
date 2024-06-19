@@ -132,7 +132,7 @@ export class UsersController {
     },
   })
   @ApiCreatedResponseResult({
-    model: String,
+    model: 'string',
     description: '头像上传成功',
   })
   @ApiResponse({
