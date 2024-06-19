@@ -19,14 +19,15 @@ import { IWsGatewayService } from './interface/ws-gateway.interface.service';
 
 @Injectable()
 export class WsGatewayService
-  implements OnModuleInit, OnModuleDestroy, IWsGatewayService {
+  implements OnModuleInit, OnModuleDestroy, IWsGatewayService
+{
   private wss: Server;
   private onlineClients: Map<number, WebSocket>;
   constructor(
     @Inject(USER_REPOSITORY)
     protected readonly userRepository: Repository<User>,
     protected readonly envConfigService: EnvConfigService,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.onlineClients = new Map();
@@ -47,18 +48,18 @@ export class WsGatewayService
       this.onlineClients.set(userId, ws);
       Logger.log(`Client[${userId}] 建立连接`);
 
-      ws.on('message', (rawData) => {
-        const wsMessage: IWebSocketMessage<unknown> = JSON.parse(
-          rawData.toString('utf-8'),
-        );
-        // switch (wsMessage.event) {
-        //   case WebSocketEvent.PING: {
-        //     const message = wsMessage.payload as string;
-        //     this.handleOnPing(ws, message);
-        //     break;
-        //   }
-        // }
-      });
+      // ws.on('message', (rawData) => {
+      //   const wsMessage: IWebSocketMessage<unknown> = JSON.parse(
+      //     rawData.toString('utf-8'),
+      //   );
+      //   switch (wsMessage.event) {
+      //     case WebSocketEvent.PING: {
+      //       const message = wsMessage.payload as string;
+      //       this.handleOnPing(ws, message);
+      //       break;
+      //     }
+      //   }
+      // });
 
       ws.on('close', () => {
         let offlineUserId = -1;

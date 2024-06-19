@@ -8,7 +8,13 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiExtraModels, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiExtraModels,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { MessagesService } from './messages.service';
 import { IAddMessageDto } from './dto/add-message.dto';
 import { WsGatewayService } from '../ws-gateway/ws-gateway.service';
