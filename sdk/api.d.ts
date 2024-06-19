@@ -60,12 +60,6 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
-    ApiBaseResult: {
-      /** @description Http状态码 */
-      statusCode: number;
-      /** @description Http内容的简要概述 */
-      message: string;
-    };
     UserVo: {
       /**
        * @description 唯一主键
@@ -98,6 +92,12 @@ export interface components {
        */
       createTime: string;
     };
+    ApiBaseResult: {
+      /** @description Http状态码 */
+      statusCode: number;
+      /** @description Http内容的简要概述 */
+      message: string;
+    };
     FriendInfoVo: {
       /** @description 好友的基本信息 */
       user: components["schemas"]["UserVo"];
@@ -118,7 +118,6 @@ export interface components {
        */
       updateTime: string;
     };
-    String: Record<string, never>;
     LoginVo: {
       /** @description 用户id */
       id: number;
@@ -366,7 +365,7 @@ export interface operations {
       201: {
         content: {
           "application/json": components["schemas"]["ApiBaseResult"] & {
-            data: components["schemas"]["String"];
+            data: string;
           };
         };
       };

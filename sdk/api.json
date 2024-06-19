@@ -199,7 +199,7 @@
                     {
                       "properties": {
                         "data": {
-                          "$ref": "#/components/schemas/String"
+                          "type": "string"
                         }
                       },
                       "required": [
@@ -676,33 +676,6 @@
   "servers": [],
   "components": {
     "schemas": {
-      "ApiBaseResult": {
-        "type": "object",
-        "properties": {
-          "statusCode": {
-            "type": "number",
-            "description": "Http状态码",
-            "examples": [
-              200,
-              201,
-              404,
-              403
-            ]
-          },
-          "message": {
-            "type": "string",
-            "description": "Http内容的简要概述",
-            "examples": [
-              "用户权限不足",
-              "未找到资源"
-            ]
-          }
-        },
-        "required": [
-          "statusCode",
-          "message"
-        ]
-      },
       "UserVo": {
         "type": "object",
         "properties": {
@@ -746,6 +719,33 @@
           "createTime"
         ]
       },
+      "ApiBaseResult": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "description": "Http状态码",
+            "examples": [
+              200,
+              201,
+              404,
+              403
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Http内容的简要概述",
+            "examples": [
+              "用户权限不足",
+              "未找到资源"
+            ]
+          }
+        },
+        "required": [
+          "statusCode",
+          "message"
+        ]
+      },
       "FriendInfoVo": {
         "type": "object",
         "properties": {
@@ -784,10 +784,6 @@
           "createTime",
           "updateTime"
         ]
-      },
-      "String": {
-        "type": "object",
-        "properties": {}
       },
       "LoginVo": {
         "type": "object",
