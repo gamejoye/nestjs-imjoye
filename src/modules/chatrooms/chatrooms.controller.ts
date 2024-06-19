@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  HttpCode,
   HttpException,
   HttpStatus,
   NotFoundException,
@@ -47,8 +48,8 @@ export class ChatroomsController {
   @Put(':chatroomId/visit')
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: '更新用户对于聊天室的最后访问时间' })
-  @ApiResponse({
-    status: HttpStatus.NO_CONTENT,
+  @ApiOkResponseResult({
+    model: ChatroomVo,
     description: '成功更新用户访问聊天室的最后时间',
   })
   @ApiResponse({
