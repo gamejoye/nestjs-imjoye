@@ -48,7 +48,7 @@ export class ChatroomsController {
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: '更新用户对于聊天室的最后访问时间' })
   @ApiOkResponseResult({
-    model: ChatroomVo,
+    model: 'string',
     description: '成功更新用户访问聊天室的最后时间',
   })
   @ApiResponse({
@@ -59,7 +59,7 @@ export class ChatroomsController {
     @GetUser() user: User,
     @Query() { timestamp }: VisitChatroomDto,
     @Param('chatroomId', ParseIntPipe) chatroomId: number,
-  ): Promise<void> {
+  ): Promise<string> {
     const userChatroom = await this.userChatroomService.updateLatestVisitTime(
       user.id,
       chatroomId,
@@ -68,6 +68,7 @@ export class ChatroomsController {
     if (!userChatroom) {
       throw new NotFoundException('聊天室不存在或者无权访问');
     }
+    return '';
   }
 
   @Get('')
