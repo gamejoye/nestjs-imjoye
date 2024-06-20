@@ -1,10 +1,8 @@
 name: Build And Deploy To Aliyun Ecs
 
 on:
-  push: 
-    branches: [master]
-  pull_request: 
-    branches: [master]
+  release:
+    types: [created]
 
 jobs:
   build:
