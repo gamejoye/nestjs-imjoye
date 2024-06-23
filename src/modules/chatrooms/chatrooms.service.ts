@@ -23,7 +23,7 @@ export class ChatroomsService implements IChatroomsService {
     protected userChatroomRepository: Repository<UserChatroom>,
     @Inject(USER_FRIENDSHIP_REPOSITORY)
     protected userFriendshipRepository: Repository<UserFriendship>,
-  ) { }
+  ) {}
   async getByUserIdAndFriendId(
     userId: number,
     friendId: number,

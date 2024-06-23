@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ChatroomsController } from '../chatrooms.controller';
 import { DatabaseModule } from '../../database/database.module';
-import { MessagesModule } from '../../messages/messages.module';
 import { chatroomsProviders } from '../chatrooms.providers';
 import { ChatroomsService } from '../chatrooms.service';
 import { EnvConfigModule } from '../../env-config/env-config.module';
