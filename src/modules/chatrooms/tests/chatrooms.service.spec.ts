@@ -5,7 +5,7 @@ import { MessagesModule } from '../../messages/messages.module';
 import { EnvConfigModule } from '../../env-config/env-config.module';
 import { ChatroomsController } from '../chatrooms.controller';
 import { chatroomsProviders } from '../chatrooms.providers';
-import { Logger, initDatabase, getUserNonExistingId } from 'src/common/utils';
+import { initDatabase, getUserNonExistingId } from 'src/common/utils';
 import { EnvConfigService } from '../../env-config/env-config.service';
 import { Repository } from 'typeorm';
 import { UserChatroom } from '../entities/user-chatroom.entity';

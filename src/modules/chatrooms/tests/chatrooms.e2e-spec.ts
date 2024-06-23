@@ -7,7 +7,6 @@ import { EnvConfigModule } from 'src/modules/env-config/env-config.module';
 import { HttpExceptionFilter } from 'src/common/filters/http-exception.filter';
 import { ResTransformInterceptor } from 'src/common/interceptors/res-transform.interceptors';
 import {
-  Logger,
   dataForValidIsNumber,
   getChatroomNonExistingId,
   getCurrentDatetime,
@@ -19,7 +18,6 @@ import { Not, Repository } from 'typeorm';
 import { Chatroom } from '../entities/chatroom.entity';
 import { DatabaseModule } from 'src/modules/database/database.module';
 import { chatroomsProviders } from '../chatrooms.providers';
-import * as jwt from 'jsonwebtoken';
 import {
   CHATROOM_REPOSITORY,
   USER_CHATROOM_REPOSITORY,

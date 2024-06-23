@@ -14,7 +14,7 @@ import {
   USER_REPOSITORY,
 } from 'src/common/constants/providers';
 import { LoginUserRequestDto } from 'src/modules/auth/dto/login.dto';
-import { Logger, dataForValidIsNumber, initDatabase } from 'src/common/utils';
+import { dataForValidIsNumber, initDatabase } from 'src/common/utils';
 import { EnvConfigModule } from 'src/modules/env-config/env-config.module';
 import { usersProviders } from '../users.providers';
 import { UserFriendship } from '../entities/friendship.entity';
