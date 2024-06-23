@@ -5,7 +5,7 @@ import { AuthModule } from '../auth.module';
 import { UsersModule } from '../../users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { EnvConfigModule } from '../../env-config/env-config.module';
-import { Logger, initDatabase } from 'src/common/utils';
+import { initDatabase } from 'src/common/utils';
 import { EnvConfigService } from '../../env-config/env-config.service';
 import { RegisterUserRequestDto } from '../dto/register.dto';
 import { UserVo } from '../../users/vo/user.vo';
@@ -48,13 +48,14 @@ describe('AuthController (e2e)', () => {
   });
 
   afterAll(async () => {
+    await initDatabase(envConfigService.getDatabaseConfig());
     await app.close();
   });
 
   it('/register', async () => {
     const username = 'nil';
     const email = 'nilnilnil@gmail.com';
-    const password = '123456test';
+    const password = '123456..';
     const avatarUrl = 'https://test.com/avatar.jpg';
 
     const dto: RegisterUserRequestDto = {
@@ -73,7 +74,6 @@ describe('AuthController (e2e)', () => {
     const response = await request(app.getHttpServer())
       .post('/auth/register')
       .send(dto);
-    Logger.test(response.body);
     const userVo = response.body.data;
     expect(response.status).toBe(HttpStatus.CREATED);
     expect(userVo).toMatchObject(partialUserVo);
@@ -103,7 +103,7 @@ describe('AuthController (e2e)', () => {
   it('/login', async () => {
     const username = 'nil';
     const email = 'nilnilnil@gmail.com';
-    const password = '123456test';
+    const password = '123456..';
     const avatarUrl = 'https://test.com/avatar.jpg';
 
     const registerDto: RegisterUserRequestDto = {

@@ -20,7 +20,6 @@ import {
 } from 'src/common/constants/providers';
 import { LoginUserRequestDto } from 'src/modules/auth/dto/login.dto';
 import {
-  Logger,
   getChatroomNonExistingId,
   getNonExistingUserChatroom,
   getUserNonExistingId,
@@ -40,9 +39,7 @@ describe('ChatroomController (e2e)', () => {
   let usersRepository: Repository<User>;
   let chatroomsRepository: Repository<Chatroom>;
   let userChatroomRepository: Repository<UserChatroom>;
-
-  let authorization: string;
-  let userId: number;
+  let authorizations: Map<number, string>;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -74,24 +71,33 @@ describe('ChatroomController (e2e)', () => {
     /**
      * 登录获取token
      */
-    const dto: LoginUserRequestDto = {
-      email: 'gamejoye@gmail.com',
-      password: '123456..',
-    };
-    const response = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send(dto);
-    const token = response.body.data.token;
-    userId = response.body.data.id;
-    authorization = 'Bearer ' + token;
-    Logger.test('token:', authorization);
+    const users = await usersRepository.find();
+    authorizations = new Map();
+    for (const user of users) {
+      const dto: LoginUserRequestDto = {
+        email: user.email,
+        password: '123456..',
+      };
+      const response = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send(dto);
+      const token = response.body.data.token;
+      const userId = response.body.data.id;
+      const authorization = 'Bearer ' + token;
+      authorizations.set(userId, authorization);
+    }
   });
+
+  function getAuthorization(userId: number): string {
+    return authorizations.get(userId);
+  }
 
   beforeEach(async () => {
     await initDatabase(envConfigService.getDatabaseConfig());
   });
 
   afterAll(async () => {
+    await initDatabase(envConfigService.getDatabaseConfig());
     await app.close();
   });
 
@@ -101,6 +107,12 @@ describe('ChatroomController (e2e)', () => {
      */
     const chatrooms = await chatroomsRepository.find();
     for (const chatroom of chatrooms) {
+      const uc = await userChatroomRepository.findOne({
+        where: { chatroom: { id: chatroom.id } },
+        relations: ['user'],
+      });
+      const userId = uc.user.id;
+      const authorization = getAuthorization(userId);
       const query: GetMessagesByChatroomIdDto = {
         room_id: chatroom.id,
       };
@@ -125,6 +137,8 @@ describe('ChatroomController (e2e)', () => {
       ).toMatchObject(messageVos);
     }
 
+    const user = (await usersRepository.find()).at(0);
+    const authorization = getAuthorization(user.id);
     /**
      * NotFound流程
      */
@@ -147,20 +161,8 @@ describe('ChatroomController (e2e)', () => {
     );
     expect(nonExistingUserChatrooms.length).toBeGreaterThan(0);
     for (const { userId, chatroomId } of nonExistingUserChatrooms) {
-      // 根据userId获取email用户登录
-      const { email } = await usersRepository.findOne({
-        where: { id: userId },
-      });
-      // loginDto 提供email和password
-      const loginDto: LoginUserRequestDto = { password: '123456..', email };
-      // 登录获取该userId的token
-      const loginRes = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send(loginDto);
-      const { token } = loginRes.body.data;
-
       const dto: GetMessagesByChatroomIdDto = { room_id: chatroomId };
-      const authorization = 'Bearer ' + token;
+      const authorization = getAuthorization(userId);
       const notFoundResponse = await request(app.getHttpServer())
         .get(`/messages`)
         .query(dto)
@@ -192,68 +194,68 @@ describe('ChatroomController (e2e)', () => {
   });
 
   it('POST /messages', async () => {
-    /**
-     * 正常流程
-     */
-    const { user, chatroom } = await userChatroomRepository.findOne({
-      where: { user: { id: userId } },
+    const ucs = await userChatroomRepository.find({
       relations: ['user', 'chatroom'],
     });
-    const dto: IAddMessageDto = {
-      temporaryId: -1,
-      chatroom: { id: chatroom.id },
-      from: { id: user.id },
-      content: 'test content',
-    };
-    const response = await request(app.getHttpServer())
-      .post(`/messages`)
-      .set('Authorization', authorization)
-      .send(dto);
-    expect(response.status).toBe(HttpStatus.CREATED);
-    const message: Message = response.body.data;
-    expect(message.content).toBe(dto.content);
-    expect(message.temporaryId).toBe(dto.temporaryId);
-    expect(message.from.id).toBe(dto.from.id);
-    expect(message.chatroom.id).toBe(dto.chatroom.id);
+    for (const { user, chatroom } of ucs) {
+      /**
+       * 正常流程
+       */
+      const authorization = getAuthorization(user.id);
+      const dto: IAddMessageDto = {
+        temporaryId: -1,
+        chatroom: { id: chatroom.id },
+        from: { id: user.id },
+        content: 'test content',
+      };
+      const response = await request(app.getHttpServer())
+        .post(`/messages`)
+        .set('Authorization', authorization)
+        .send(dto);
+      expect(response.status).toBe(HttpStatus.CREATED);
+      const message: Message = response.body.data;
+      expect(message.content).toBe(dto.content);
+      expect(message.temporaryId).toBe(dto.temporaryId);
+      expect(message.from.id).toBe(dto.from.id);
+      expect(message.chatroom.id).toBe(dto.chatroom.id);
 
-    /**
-     * NotFound流程
-     */
-    // 1. chatroom not found
-    const nonExisintChatroomid =
-      await getChatroomNonExistingId(chatroomsRepository);
-    const chatroomNotFoundDto: IAddMessageDto = {
-      ...dto,
-      chatroom: { id: nonExisintChatroomid },
-    };
-    const chatroomNotFonudResponse = await request(app.getHttpServer())
-      .post(`/messages`)
-      .set('Authorization', authorization)
-      .send(chatroomNotFoundDto);
-    expect(chatroomNotFonudResponse.status).toBe(HttpStatus.NOT_FOUND);
-    // 2. user not found
-    const nonExisintUsreId = await getUserNonExistingId(usersRepository);
-    const userNotFoundDto: IAddMessageDto = {
-      ...dto,
-      from: { id: nonExisintUsreId },
-    };
-    const userNotFoundResponse = await request(app.getHttpServer())
-      .post(`/messages`)
-      .set('Authorization', authorization)
-      .send(userNotFoundDto);
-    expect(userNotFoundResponse.status).toBe(HttpStatus.NOT_FOUND);
+      /**
+       * NotFound流程
+       */
+      // 1. chatroom not found
+      const nonExisintChatroomid =
+        await getChatroomNonExistingId(chatroomsRepository);
+      const chatroomNotFoundDto: IAddMessageDto = {
+        ...dto,
+        chatroom: { id: nonExisintChatroomid },
+      };
+      const chatroomNotFonudResponse = await request(app.getHttpServer())
+        .post(`/messages`)
+        .set('Authorization', authorization)
+        .send(chatroomNotFoundDto);
+      expect(chatroomNotFonudResponse.status).toBe(HttpStatus.NOT_FOUND);
+      // 2. user not found
+      const nonExisintUsreId = await getUserNonExistingId(usersRepository);
+      const userNotFoundDto: IAddMessageDto = {
+        ...dto,
+        from: { id: nonExisintUsreId },
+      };
+      const userNotFoundResponse = await request(app.getHttpServer())
+        .post(`/messages`)
+        .set('Authorization', authorization)
+        .send(userNotFoundDto);
+      expect(userNotFoundResponse.status).toBe(HttpStatus.NOT_FOUND);
 
-    /**
-     * Forbidden流程
-     */
-    const nonExistingUserChatrooms = await getNonExistingUserChatroom(
-      usersRepository,
-      chatroomsRepository,
-      userChatroomRepository,
-    );
-    expect(nonExistingUserChatrooms.length).toBeGreaterThan(0);
-    Logger.test(nonExistingUserChatrooms);
-    for (const nonExistingUserChatroom of nonExistingUserChatrooms) {
+      /**
+       * Forbidden流程
+       */
+      const nonExistingUserChatrooms = await getNonExistingUserChatroom(
+        usersRepository,
+        chatroomsRepository,
+        userChatroomRepository,
+      );
+      expect(nonExistingUserChatrooms.length).toBeGreaterThan(0);
+      const nonExistingUserChatroom = nonExistingUserChatrooms[0];
       const { userId, chatroomId } = nonExistingUserChatroom;
       const forbiddentDto: IAddMessageDto = {
         temporaryId: -1,
@@ -266,14 +268,14 @@ describe('ChatroomController (e2e)', () => {
         .set('Authorization', authorization)
         .send(forbiddentDto);
       expect(forbiddenResponse.status).toBe(HttpStatus.FORBIDDEN);
-    }
 
-    /**
-     * Unauthorized流程
-     */
-    const unauthorizedResponse = await request(app.getHttpServer())
-      .post(`/messages`)
-      .send(dto);
-    expect(unauthorizedResponse.status).toBe(HttpStatus.UNAUTHORIZED);
+      /**
+       * Unauthorized流程
+       */
+      const unauthorizedResponse = await request(app.getHttpServer())
+        .post(`/messages`)
+        .send(dto);
+      expect(unauthorizedResponse.status).toBe(HttpStatus.UNAUTHORIZED);
+    }
   });
 });

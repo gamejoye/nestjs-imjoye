@@ -79,6 +79,10 @@ const mockWsGatewayService: Partial<WsGatewayService> = {
   notifynChat: jest.fn(),
 };
 
+const mockChatroomsService: Partial<ChatroomsService> = {
+  getByChatroomId: jest.fn(),
+};
+
 describe('MessagesController', () => {
   let controller: MessagesController;
 
@@ -93,6 +97,8 @@ describe('MessagesController', () => {
       .useValue(mockMessagesService)
       .overrideProvider(WsGatewayService)
       .useValue(mockWsGatewayService)
+      .overrideProvider(ChatroomsService)
+      .useValue(mockChatroomsService)
       .compile();
 
     controller = module.get<MessagesController>(MessagesController);
@@ -108,6 +114,9 @@ describe('MessagesController', () => {
 
   it('getMessagesByChatroomId逻辑验证', async () => {
     (mockMessagesService.getByPaging as jest.Mock).mockResolvedValue(messages);
+    (mockChatroomsService.getByChatroomId as jest.Mock).mockResolvedValue(
+      chatroom,
+    );
     await controller.getMessagesByChatroomId(user, { room_id: chatroom.id });
     expect(mockMessagesService.getByPaging).toHaveBeenCalledTimes(1);
     expect(mockMessagesService.getByPaging).toHaveBeenCalledWith(chatroom.id);

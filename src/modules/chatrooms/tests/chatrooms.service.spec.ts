@@ -149,7 +149,6 @@ describe('ChatroomsService', () => {
       expect(chatroomBeToTested.name).toBe(friend.username);
 
       const nonExistingId = await getUserNonExistingId(usersRepository);
-      Logger.test('nonExistingId', nonExistingId);
       const chatroomToBeNull = await service.getByUserIdAndFriendId(
         nonExistingId,
         userId,
@@ -162,23 +161,18 @@ describe('ChatroomsService', () => {
     const userChatrooms = await userChatroomsRepository.find({
       relations: ['user', 'chatroom'],
     });
-    const chatroomToUsers: Array<[Chatroom, Array<User>]> = [];
-    const allUserIds: Array<number> = [];
+    const chatroomToUsers: Map<number, [Chatroom, Array<User>]> = new Map();
     for (let i = 0; i < userChatrooms.length; i++) {
       const { user, chatroom } = userChatrooms[i];
-      const index = chatroomToUsers.findIndex(
-        ([currentChatroom]) => currentChatroom.id === chatroom.id,
-      );
-      allUserIds.push(user.id);
-      if (index === -1) {
-        chatroomToUsers.push([chatroom, [user]]);
+
+      if (!chatroomToUsers.has(chatroom.id)) {
+        chatroomToUsers.set(chatroom.id, [chatroom, [user]]);
       } else {
-        chatroomToUsers[index][1].push(user);
+        chatroomToUsers.get(chatroom.id)[1].push(user);
       }
     }
 
-    for (let i = 0; i < chatroomToUsers.length; i++) {
-      const [chatroom, users] = chatroomToUsers[i];
+    for (const [chatroom, users] of chatroomToUsers.values()) {
       for (let j = 0; j < users.length; j++) {
         const user = users[j];
         const chatroomToBeTested = await service.getByChatroomId(
@@ -201,7 +195,6 @@ describe('ChatroomsService', () => {
         nonExistingId,
         chatroom.id,
       );
-      Logger.test(nonExistingId, users);
       expect(chatroomToBeNull).not.toBeTruthy();
     }
   });
