@@ -138,9 +138,14 @@ describe('ChatroomsController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DatabaseModule, MessagesModule, EnvConfigModule],
+      imports: [DatabaseModule, EnvConfigModule],
       controllers: [ChatroomsController],
-      providers: [...chatroomsProviders, ChatroomsService, UserChatroomService],
+      providers: [
+        ...chatroomsProviders,
+        ChatroomsService,
+        UserChatroomService,
+        MessagesService,
+      ],
     })
       .overrideProvider(UserChatroomService)
       .useValue(mockUserChatroomService)

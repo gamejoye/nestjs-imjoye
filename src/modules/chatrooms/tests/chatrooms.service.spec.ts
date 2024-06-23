@@ -28,9 +28,8 @@ describe('ChatroomsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DatabaseModule, MessagesModule, EnvConfigModule],
-      controllers: [ChatroomsController],
-      providers: [...chatroomsProviders, ChatroomsService, UserChatroomService],
+      imports: [DatabaseModule, EnvConfigModule],
+      providers: [ChatroomsService, UserChatroomService, ...chatroomsProviders],
     }).compile();
 
     service = module.get<ChatroomsService>(ChatroomsService);

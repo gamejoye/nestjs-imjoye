@@ -3,12 +3,17 @@ import { ChatroomsController } from './chatrooms.controller';
 import { ChatroomsService } from './chatrooms.service';
 import { DatabaseModule } from '../database/database.module';
 import { chatroomsProviders } from './chatrooms.providers';
-import { MessagesModule } from '../messages/messages.module';
 import { UserChatroomService } from './user-chatroom.service';
+import { MessagesService } from '../messages/messages.service';
 
 @Module({
-  imports: [DatabaseModule, MessagesModule],
+  imports: [DatabaseModule],
   controllers: [ChatroomsController],
-  providers: [...chatroomsProviders, ChatroomsService, UserChatroomService],
+  providers: [
+    ...chatroomsProviders,
+    ChatroomsService,
+    UserChatroomService,
+    MessagesService,
+  ],
 })
 export class ChatroomsModule {}

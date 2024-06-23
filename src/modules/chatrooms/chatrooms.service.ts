@@ -4,12 +4,15 @@ import { Chatroom } from './entities/chatroom.entity';
 import {
   CHATROOM_REPOSITORY,
   USER_CHATROOM_REPOSITORY,
+  USER_FRIENDSHIP_REPOSITORY,
 } from 'src/common/constants/providers';
-import { Brackets, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ChatroomType } from 'src/common/constants/chatroom';
 import { Logger } from 'src/common/utils';
 import { USER_CHATROOM } from 'src/common/constants/database-tables';
 import { UserChatroom } from './entities/user-chatroom.entity';
+import { UserFriendship } from '../users/entities/friendship.entity';
+import { UserFriendshipType } from 'src/common/constants/friendship';
 
 @Injectable()
 export class ChatroomsService implements IChatroomsService {
@@ -18,32 +21,63 @@ export class ChatroomsService implements IChatroomsService {
     protected chatroomsRepository: Repository<Chatroom>,
     @Inject(USER_CHATROOM_REPOSITORY)
     protected userChatroomRepository: Repository<UserChatroom>,
-  ) {}
+    @Inject(USER_FRIENDSHIP_REPOSITORY)
+    protected userFriendshipRepository: Repository<UserFriendship>,
+  ) { }
   async getByUserIdAndFriendId(
     userId: number,
     friendId: number,
   ): Promise<Chatroom> {
-    const chatroom = await this.chatroomsRepository
-      .createQueryBuilder('chatroom')
-      .innerJoinAndSelect('chatroom.userChatrooms', 'userChatroom')
-      .innerJoinAndSelect('userChatroom.user', 'user')
-      .where('chatroom.type = :type', { type: ChatroomType.SINGLE })
-      .andWhere(
-        new Brackets((qb) => {
-          qb.where('userChatroom.user.id = :friendId', { friendId }).andWhere(
-            `chatroom.id IN (SELECT chatroom_id FROM ${USER_CHATROOM} WHERE user_id = :userId)`,
-            { userId },
-          );
-        }),
-      )
-      .getOne();
-    if (chatroom) {
-      const userChatroom = chatroom.userChatrooms[0];
-      chatroom.userChatrooms = undefined;
-      chatroom.avatarUrl = userChatroom.user.avatarUrl;
-      chatroom.name = userChatroom.user.username;
+    let ufs = await this.userFriendshipRepository.findOne({
+      where: {
+        from: { id: userId },
+        to: { id: friendId },
+        status: UserFriendshipType.ACCEPT,
+      },
+      relations: ['chatroom', 'from', 'to'],
+    });
+    if (!ufs) {
+      ufs = await this.userFriendshipRepository.findOne({
+        where: {
+          from: { id: friendId },
+          to: { id: userId },
+          status: UserFriendshipType.ACCEPT,
+        },
+        relations: ['chatroom', 'from', 'to'],
+      });
     }
-    return chatroom;
+    if (ufs) {
+      const chatroom = ufs.chatroom;
+      if (chatroom) {
+        const friend = ufs.from.id === userId ? ufs.to : ufs.from;
+        chatroom.userChatrooms = undefined;
+        chatroom.avatarUrl = friend.avatarUrl;
+        chatroom.name = friend.username;
+      }
+      return chatroom;
+    }
+    return null;
+    // const chatroom = await this.chatroomsRepository
+    //   .createQueryBuilder('chatroom')
+    //   .innerJoinAndSelect('chatroom.userChatrooms', 'userChatroom')
+    //   .innerJoinAndSelect('userChatroom.user', 'user')
+    //   .where('chatroom.type = :type', { type: ChatroomType.SINGLE })
+    //   .andWhere(
+    //     new Brackets((qb) => {
+    //       qb.where('userChatroom.user.id = :friendId', { friendId }).andWhere(
+    //         `chatroom.id IN (SELECT chatroom_id FROM ${USER_CHATROOM} WHERE user_id = :userId)`,
+    //         { userId },
+    //       );
+    //     }),
+    //   )
+    //   .getOne();
+    // if (chatroom) {
+    //   const userChatroom = chatroom.userChatrooms[0];
+    //   chatroom.userChatrooms = undefined;
+    //   chatroom.avatarUrl = userChatroom.user.avatarUrl;
+    //   chatroom.name = userChatroom.user.username;
+    // }
+    // return chatroom;
   }
   async getByChatroomId(userId: number, chatroomId: number): Promise<Chatroom> {
     const query = this.chatroomsRepository
