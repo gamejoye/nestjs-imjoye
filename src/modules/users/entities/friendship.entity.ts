@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UserFriendshipType } from 'src/common/constants/friendship';
+import { Chatroom } from 'src/modules/chatrooms/entities/chatroom.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 import {
   Entity,
@@ -7,6 +8,7 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  OneToOne,
 } from 'typeorm';
 
 @Entity()
@@ -40,6 +42,14 @@ export class UserFriendship {
     description: 'friendship最后更新时间',
   })
   updateTime: string;
+
+  @OneToOne(() => Chatroom)
+  @JoinColumn({ name: 'chatroom_id' })
+  @ApiProperty({
+    description: '好友关系关联的单聊聊天室',
+    type: () => Chatroom,
+  })
+  chatroom: Chatroom;
 
   @ManyToOne(() => User, (user) => user.fromFriendships)
   @JoinColumn({ name: 'from_id' })
