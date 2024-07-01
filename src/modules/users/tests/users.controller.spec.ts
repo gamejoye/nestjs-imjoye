@@ -12,6 +12,8 @@ import { FriendInfo } from '../types/friend-info.type';
 import { Response } from 'express';
 import { EnvConfigService } from 'src/modules/env-config/env-config.service';
 import { getCurrentDatetime } from 'src/common/utils';
+import { FriendRequest } from '../entities/friendrequest.entity';
+import { FriendRequestType } from 'src/common/constants/friendrequest';
 
 /**
  * 数据
@@ -49,6 +51,7 @@ const mockUsersService: Partial<IUsersService> = {
   getById: jest.fn(),
   getFriends: jest.fn(),
   getFriendInfoByUserIdAndFriendId: jest.fn(),
+  getFriendRqeusts: jest.fn(),
 };
 
 describe('UserController', () => {
@@ -76,6 +79,42 @@ describe('UserController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  it('getFriendRequestsById', async () => {
+    const current = getCurrentDatetime();
+    const fqs: Array<FriendRequest> = [
+      {
+        id: 1,
+        createTime: current,
+        updateTime: current,
+        status: FriendRequestType.ACCEPT,
+        from: user1,
+        to: user2,
+      },
+    ];
+    (mockUsersService.getFriendRqeusts as jest.Mock).mockResolvedValue(fqs);
+
+    /**
+     * 异常流程
+     */
+    await controller
+      .getFriendRequestsById(user1, user2.id)
+      .then(() => {
+        expect(true).toBe(false);
+      })
+      .catch((e) => {
+        expect(e).toBeInstanceOf(HttpException);
+        expect((e as HttpException).getStatus()).toBe(HttpStatus.FORBIDDEN);
+      });
+    expect(mockUsersService.getFriends).toHaveBeenCalledTimes(0);
+
+    /**
+     * 正常流程
+     */
+    await controller.getFriendRequestsById(user1, user1.id);
+    expect(mockUsersService.getFriendRqeusts).toHaveBeenCalledTimes(1);
+    expect(mockUsersService.getFriendRqeusts).toHaveBeenCalledWith(user1.id);
   });
 
   it('getUserByid work correctly', async () => {

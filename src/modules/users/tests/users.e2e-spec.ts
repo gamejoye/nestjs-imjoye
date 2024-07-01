@@ -10,6 +10,7 @@ import { UsersModule } from 'src/modules/users/users.module';
 import { HttpExceptionFilter } from 'src/common/filters/http-exception.filter';
 import { ResTransformInterceptor } from 'src/common/interceptors/res-transform.interceptors';
 import {
+  FRIEND_REQUEST_REPOSITORY,
   USER_FRIENDSHIP_REPOSITORY,
   USER_REPOSITORY,
 } from 'src/common/constants/providers';
@@ -18,17 +19,29 @@ import { dataForValidIsNumber, initDatabase } from 'src/common/utils';
 import { EnvConfigModule } from 'src/modules/env-config/env-config.module';
 import { usersProviders } from '../users.providers';
 import { UserFriendship } from '../entities/friendship.entity';
-import { transformUser } from '../vo/utils/user-transform';
+import {
+  transformFriendRequest,
+  transformUser,
+} from '../vo/utils/user-transform';
 import { UserVo } from '../vo/user.vo';
 import { FriendInfoVo } from '../vo/friend-info.vo';
+import { FriendRequest } from '../entities/friendrequest.entity';
+import { FriendRequestVo } from '../vo/friendrequest.vo';
 
 const userSorter = (user1: User, user2: User) => user1.id - user2.id;
+const descRequestSorter = (fq1: FriendRequest, fq2: FriendRequest) => {
+  const t1 = new Date(fq1.createTime).getTime();
+  const t2 = new Date(fq2.createTime).getTime();
+  if (t1 === t2) return fq2.id - fq1.id;
+  return t2 - t1;
+};
 
 describe('UsersController (e2e)', () => {
   let app: INestApplication;
   let envConfigService: EnvConfigService;
   let usersRepository: Repository<User>;
   let userFriendshipsRepository: Repository<UserFriendship>;
+  let friendRequestsRepository: Repository<FriendRequest>;
 
   let authorizations: Map<number, string>;
 
@@ -52,6 +65,9 @@ describe('UsersController (e2e)', () => {
     usersRepository = moduleFixture.get<Repository<User>>(USER_REPOSITORY);
     userFriendshipsRepository = moduleFixture.get<Repository<UserFriendship>>(
       USER_FRIENDSHIP_REPOSITORY,
+    );
+    friendRequestsRepository = moduleFixture.get<Repository<FriendRequest>>(
+      FRIEND_REQUEST_REPOSITORY,
     );
     envConfigService = moduleFixture.get<EnvConfigService>(EnvConfigService);
 
@@ -86,6 +102,34 @@ describe('UsersController (e2e)', () => {
   afterAll(async () => {
     await initDatabase(envConfigService.getDatabaseConfig());
     await app.close();
+  });
+
+  it('GET /users/:id/friends/requests', async () => {
+    const users = await usersRepository.find();
+    const allFqs = (
+      await friendRequestsRepository.find({
+        relations: ['from', 'to'],
+      })
+    ).sort(descRequestSorter);
+    for (const user of users) {
+      const authorization = getAuthorization(user.id);
+      const response = await request(app.getHttpServer())
+        .get(`/users/${user.id}/friends/requests`)
+        .set('Authorization', authorization);
+      expect(response.status).toBe(HttpStatus.OK);
+      const fqVoss = allFqs
+        .filter((fq) => fq.from.id === user.id || fq.to.id === user.id)
+        .map((fq) => transformFriendRequest(fq));
+      const fqVos = response.body.data as Array<FriendRequestVo>;
+      for (let i = 0; i < fqVos.length - 1; i++) {
+        const vo1 = fqVos[i];
+        const vo2 = fqVos[i + 1];
+        expect(new Date(vo1.createTime).getTime()).toBeGreaterThanOrEqual(
+          new Date(vo2.createTime).getTime(),
+        );
+      }
+      expect(response.body.data).toMatchObject(fqVoss);
+    }
   });
 
   it('GET /users/:id', async () => {
