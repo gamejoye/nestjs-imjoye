@@ -103,6 +103,60 @@
         ]
       }
     },
+    "/users/{id}/friends/requests": {
+      "get": {
+        "operationId": "UsersController_getFriendRequestsById",
+        "summary": "根据userId获取好友请求列表",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功获取好友请求列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiBaseResult"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/FriendRequestVo"
+                          }
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未认证用户"
+          },
+          "403": {
+            "description": "权限不足"
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
     "/users/{id}/friends/{friendId}": {
       "get": {
         "operationId": "UsersController_getFriendInfoByUserIdAndFriendId",
@@ -765,6 +819,60 @@
         "required": [
           "statusCode",
           "message"
+        ]
+      },
+      "FriendRequestVo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1,
+            "description": "FriendRequest ID"
+          },
+          "createTime": {
+            "type": "string",
+            "example": "2024-03-23 19:12",
+            "description": "friendrequest创建时间"
+          },
+          "updateTime": {
+            "type": "string",
+            "example": "2024-03-23 19:15",
+            "description": "friendrequest更新时间"
+          },
+          "status": {
+            "type": "string",
+            "example": "PENDING",
+            "description": "好友之间的关系",
+            "enum": [
+              "PENDING",
+              "ACCEPT",
+              "REJECT"
+            ]
+          },
+          "from": {
+            "description": "好友请求发送者",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserVo"
+              }
+            ]
+          },
+          "to": {
+            "description": "好友请求接收者",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserVo"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "createTime",
+          "updateTime",
+          "status",
+          "from",
+          "to"
         ]
       },
       "FriendInfoVo": {

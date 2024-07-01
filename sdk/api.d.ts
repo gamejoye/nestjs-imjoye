@@ -13,6 +13,10 @@ export interface paths {
     /** 根据userId获取好友列表 */
     get: operations["UsersController_getFriendsById"];
   };
+  "/users/{id}/friends/requests": {
+    /** 根据userId获取好友请求列表 */
+    get: operations["UsersController_getFriendRequestsById"];
+  };
   "/users/{id}/friends/{friendId}": {
     /** 获取好友信息 */
     get: operations["UsersController_getFriendInfoByUserIdAndFriendId"];
@@ -97,6 +101,33 @@ export interface components {
       statusCode: number;
       /** @description Http内容的简要概述 */
       message: string;
+    };
+    FriendRequestVo: {
+      /**
+       * @description FriendRequest ID
+       * @example 1
+       */
+      id: number;
+      /**
+       * @description friendrequest创建时间
+       * @example 2024-03-23 19:12
+       */
+      createTime: string;
+      /**
+       * @description friendrequest更新时间
+       * @example 2024-03-23 19:15
+       */
+      updateTime: string;
+      /**
+       * @description 好友之间的关系
+       * @example PENDING
+       * @enum {string}
+       */
+      status: "PENDING" | "ACCEPT" | "REJECT";
+      /** @description 好友请求发送者 */
+      from: components["schemas"]["UserVo"];
+      /** @description 好友请求接收者 */
+      to: components["schemas"]["UserVo"];
     };
     FriendInfoVo: {
       /** @description 好友的基本信息 */
@@ -299,6 +330,32 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["ApiBaseResult"] & {
             data: components["schemas"]["UserVo"][];
+          };
+        };
+      };
+      /** @description 未认证用户 */
+      401: {
+        content: never;
+      };
+      /** @description 权限不足 */
+      403: {
+        content: never;
+      };
+    };
+  };
+  /** 根据userId获取好友请求列表 */
+  UsersController_getFriendRequestsById: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    responses: {
+      /** @description 成功获取好友请求列表 */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ApiBaseResult"] & {
+            data: components["schemas"]["FriendRequestVo"][];
           };
         };
       };
