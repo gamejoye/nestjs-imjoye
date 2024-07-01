@@ -19,31 +19,48 @@ import { IWsGatewayService } from './interface/ws-gateway.interface.service';
 
 @Injectable()
 export class WsGatewayService
-  implements OnModuleInit, OnModuleDestroy, IWsGatewayService
-{
+  implements OnModuleInit, OnModuleDestroy, IWsGatewayService {
   private wss: Server;
   private onlineClients: Map<number, WebSocket>;
   constructor(
     @Inject(USER_REPOSITORY)
     protected readonly userRepository: Repository<User>,
     protected readonly envConfigService: EnvConfigService,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.onlineClients = new Map();
     this.wss = new Server({ port: 5173 });
     this.wss.on('connection', (ws, req) => {
-      const token = req.headers[AUTHORIZATION];
-      const payload = jwt.verify(
-        token,
-        this.envConfigService.getJwtConfig().secret,
-      );
-      if (
-        !payload ||
-        typeof payload === 'string' ||
-        typeof payload.id !== 'number'
-      )
+      let token = req.headers[AUTHORIZATION];
+      if (!token) {
+        const searchParams = req.url.substring(
+          Math.max(req.url.indexOf(AUTHORIZATION), 0),
+        );
+        const params = new URLSearchParams(searchParams);
+        token = params.get(AUTHORIZATION);
+      }
+      if (!token) {
+        ws.close();
         return;
+      }
+      let payload: jwt.JwtPayload;
+      try {
+        payload = jwt.verify(
+          token,
+          this.envConfigService.getJwtConfig().secret,
+        ) as jwt.JwtPayload;
+        if (
+          !payload ||
+          typeof payload === 'string' ||
+          typeof payload.id !== 'number'
+        ) {
+          throw new Error('invalid token');
+        }
+      } catch (e) {
+        ws.close();
+        return;
+      }
       const userId = payload.id;
       this.onlineClients.set(userId, ws);
       Logger.log(`Client[${userId}] 建立连接`);
@@ -78,7 +95,7 @@ export class WsGatewayService
   }
 
   onModuleDestroy() {
-    if (this.wss) this.wss.close(() => {});
+    if (this.wss) this.wss.close(() => { });
   }
 
   // async handleOnPing(client: WebSocket, message: string) {
