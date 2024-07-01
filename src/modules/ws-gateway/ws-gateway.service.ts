@@ -19,14 +19,15 @@ import { IWsGatewayService } from './interface/ws-gateway.interface.service';
 
 @Injectable()
 export class WsGatewayService
-  implements OnModuleInit, OnModuleDestroy, IWsGatewayService {
+  implements OnModuleInit, OnModuleDestroy, IWsGatewayService
+{
   private wss: Server;
   private onlineClients: Map<number, WebSocket>;
   constructor(
     @Inject(USER_REPOSITORY)
     protected readonly userRepository: Repository<User>,
     protected readonly envConfigService: EnvConfigService,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.onlineClients = new Map();
@@ -95,7 +96,7 @@ export class WsGatewayService
   }
 
   onModuleDestroy() {
-    if (this.wss) this.wss.close(() => { });
+    if (this.wss) this.wss.close(() => {});
   }
 
   // async handleOnPing(client: WebSocket, message: string) {

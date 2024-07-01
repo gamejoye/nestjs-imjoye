@@ -88,7 +88,7 @@ describe('MessagesService', () => {
           new Date(msg1.createTime).getTime() >=
             new Date(msg2.createTime).getTime(),
         );
-      };
+      }
       messagesToBeTested.sort(messageSorter);
       expect(messagesToBeTested).toMatchObject(messages);
     }

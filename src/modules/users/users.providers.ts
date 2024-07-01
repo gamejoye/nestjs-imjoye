@@ -26,5 +26,5 @@ export const usersProviders = [
     useFactory: (dataSource: DataSource) =>
       dataSource.getRepository(FriendRequest),
     inject: [DATA_SOURCE],
-  }
+  },
 ];

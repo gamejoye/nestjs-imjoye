@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { IUsersService } from './interface/users.service.interface';
 import { User } from './entities/user.entity';
-import { Or, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import {
   FRIEND_REQUEST_REPOSITORY,
   USER_FRIENDSHIP_REPOSITORY,
@@ -21,7 +21,7 @@ export class UsersService implements IUsersService {
     protected userFriendshipRepository: Repository<UserFriendship>,
     @Inject(FRIEND_REQUEST_REPOSITORY)
     protected friendRequestRepository: Repository<FriendRequest>,
-  ) { }
+  ) {}
   async updateFriendRequestStatus(
     id: number,
     status: FriendRequestType,

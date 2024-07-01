@@ -16,7 +16,6 @@ import {
   getUserNonExistingEmail,
   getUserNonExistingId,
   initDatabase,
-  Logger,
 } from 'src/common/utils';
 import { UserFriendship } from '../entities/friendship.entity';
 import * as bcrypt from 'bcrypt';
