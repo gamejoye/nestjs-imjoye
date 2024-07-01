@@ -5,13 +5,13 @@
  Source Server Type    : MySQL
  Source Server Version : 80027 (8.0.27)
  Source Host           : localhost:3306
- Source Schema         : testdb
+ Source Schema         : imjoye
 
  Target Server Type    : MySQL
  Target Server Version : 80027 (8.0.27)
  File Encoding         : 65001
 
- Date: 23/06/2024 15:12:57
+ Date: 01/07/2024 23:03:17
 */
 
 SET NAMES utf8mb4;
@@ -50,6 +50,36 @@ INSERT INTO `chatroom` (`id`, `type`, `name`, `avatar_url`, `create_time`) VALUE
 COMMIT;
 
 -- ----------------------------
+-- Table structure for friend_request
+-- ----------------------------
+DROP TABLE IF EXISTS `friend_request`;
+CREATE TABLE `friend_request` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `from_id` int unsigned NOT NULL,
+  `to_id` int unsigned NOT NULL,
+  `status` enum('PENDING','REJECT','ACCEPT') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'PENDING',
+  `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ----------------------------
+-- Records of friend_request
+-- ----------------------------
+BEGIN;
+INSERT INTO `friend_request` (`id`, `from_id`, `to_id`, `status`, `create_time`, `update_time`) VALUES (1, 521, 505, 'ACCEPT', '2024-04-17 08:52:40', '2024-04-17 08:52:41');
+INSERT INTO `friend_request` (`id`, `from_id`, `to_id`, `status`, `create_time`, `update_time`) VALUES (2, 519, 505, 'ACCEPT', '2024-04-17 17:39:58', '2024-04-17 17:39:59');
+INSERT INTO `friend_request` (`id`, `from_id`, `to_id`, `status`, `create_time`, `update_time`) VALUES (3, 522, 505, 'ACCEPT', '2024-04-17 17:43:47', '2024-04-17 17:43:48');
+INSERT INTO `friend_request` (`id`, `from_id`, `to_id`, `status`, `create_time`, `update_time`) VALUES (4, 513, 505, 'ACCEPT', '2024-04-16 14:43:44', '2024-04-16 14:43:45');
+INSERT INTO `friend_request` (`id`, `from_id`, `to_id`, `status`, `create_time`, `update_time`) VALUES (5, 515, 505, 'ACCEPT', '2024-04-17 02:55:46', '2024-04-17 02:55:47');
+INSERT INTO `friend_request` (`id`, `from_id`, `to_id`, `status`, `create_time`, `update_time`) VALUES (6, 505, 506, 'ACCEPT', '2024-04-17 20:10:46', '2024-04-17 20:10:47');
+INSERT INTO `friend_request` (`id`, `from_id`, `to_id`, `status`, `create_time`, `update_time`) VALUES (7, 517, 506, 'ACCEPT', '2024-04-16 16:16:33', '2024-04-16 16:16:34');
+INSERT INTO `friend_request` (`id`, `from_id`, `to_id`, `status`, `create_time`, `update_time`) VALUES (8, 522, 506, 'ACCEPT', '2024-04-16 05:59:50', '2024-04-16 05:59:51');
+INSERT INTO `friend_request` (`id`, `from_id`, `to_id`, `status`, `create_time`, `update_time`) VALUES (9, 512, 506, 'ACCEPT', '2024-04-16 11:21:26', '2024-04-16 11:21:27');
+INSERT INTO `friend_request` (`id`, `from_id`, `to_id`, `status`, `create_time`, `update_time`) VALUES (10, 516, 506, 'ACCEPT', '2024-04-16 01:46:17', '2024-04-16 01:46:18');
+COMMIT;
+
+-- ----------------------------
 -- Table structure for message
 -- ----------------------------
 DROP TABLE IF EXISTS `message`;
@@ -60,7 +90,7 @@ CREATE TABLE `message` (
   `content` text NOT NULL,
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10588 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10700 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ----------------------------
 -- Records of message
@@ -566,6 +596,118 @@ INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VA
 INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10585, 1813, 506, 'Flexible settings enable you to set up a custom key for comparison and synchronization.', '2024-04-25 22:47:12');
 INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10586, 1808, 505, 'I may not have gone where I intended to go, but I think I have ended up where I needed to be.', '2024-04-25 23:41:26');
 INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10587, 1817, 521, 'Always keep your eyes open. Keep watching. Because whatever you see can inspire you.', '2024-04-25 00:17:25');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10588, 1816, 507, '消息', '2024-06-26 23:27:49');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10589, 1816, 507, '可以吗', '2024-06-26 23:28:00');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10590, 1816, 507, '可以吗', '2024-06-26 23:28:03');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10591, 1811, 505, 'hello', '2024-06-30 02:27:40');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10592, 1811, 505, 'hello', '2024-06-30 02:27:42');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10593, 1811, 505, 'hello', '2024-06-30 02:27:43');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10594, 1811, 505, 'fasfasfsfaasfa\n', '2024-06-30 02:32:11');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10595, 1811, 505, '你好\n', '2024-06-30 02:32:47');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10596, 1811, 505, '测试\n', '2024-06-30 02:33:34');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10597, 1811, 505, 'try\n', '2024-06-30 02:34:35');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10598, 1811, 505, '我测试一下咯\n', '2024-06-30 02:45:29');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10599, 1811, 505, '再测试一下\n', '2024-06-30 02:46:00');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10600, 1811, 505, '怎么养呢\n', '2024-06-30 02:46:58');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10601, 1811, 505, '嘶\n', '2024-06-30 02:47:07');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10602, 1811, 505, '可以吗\n', '2024-06-30 02:47:46');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10603, 1811, 505, '可以吗\n\n\n\ntest', '2024-06-30 02:47:55');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10604, 1811, 505, '可以吗\n\n\n\ntest\n', '2024-06-30 02:47:55');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10605, 1811, 505, '12\n', '2024-06-30 02:49:52');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10606, 1811, 505, '123\n', '2024-06-30 02:50:09');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10607, 1811, 505, '测试哦\n', '2024-06-30 02:50:22');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10608, 1811, 505, '再测试一下\n', '2024-06-30 02:50:55');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10609, 1811, 505, '可以吗\n\n\n\n可以哦\n', '2024-06-30 02:51:01');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10610, 1811, 505, '可以的呢\n', '2024-06-30 02:51:54');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10611, 1811, 505, '可以了\n', '2024-06-30 02:54:35');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10612, 1811, 505, '我在看看呢\n', '2024-06-30 02:54:52');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10613, 1808, 505, '再测试！\n', '2024-06-30 02:56:01');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10614, 1808, 505, '可以啦\n', '2024-06-30 02:56:04');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10615, 1811, 505, '可以吗\n', '2024-06-30 18:43:08');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10616, 1811, 505, '可以的！nice', '2024-06-30 18:43:15');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10617, 1811, 505, '\n', '2024-06-30 18:43:16');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10618, 1811, 505, 'test\n', '2024-06-30 18:49:24');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10619, 1811, 505, 'test 可以的呢\n可以的呢\n', '2024-06-30 18:49:35');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10620, 1807, 519, '发送！\n', '2024-06-30 22:46:34');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10621, 1807, 505, 'test\n', '2024-06-30 23:14:24');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10622, 1807, 505, '你好 徐璐\n', '2024-06-30 23:15:19');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10623, 1807, 505, '很高兴认识你\n', '2024-06-30 23:16:47');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10624, 1807, 505, '能看见吗\n', '2024-06-30 23:17:37');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10625, 1807, 519, '什么情况呢\n', '2024-06-30 23:19:03');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10626, 1807, 505, '消息\n', '2024-07-01 00:07:38');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10627, 1807, 519, '测试\n', '2024-07-01 00:08:41');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10628, 1807, 519, '你好\n', '2024-07-01 00:09:38');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10629, 1807, 519, '再度测试\n', '2024-07-01 00:11:41');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10630, 1807, 519, '你好呢\n', '2024-07-01 00:13:41');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10631, 1807, 519, '什么情况呢\n', '2024-07-01 00:14:39');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10632, 1807, 519, '有收到吗\n', '2024-07-01 00:27:10');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10633, 1807, 519, '触发\n', '2024-07-01 00:34:39');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10634, 1807, 519, '触发了吗\n', '2024-07-01 00:36:57');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10635, 1807, 519, '有了\n', '2024-07-01 00:37:15');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10636, 1807, 519, '123\n', '2024-07-01 00:38:27');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10637, 1807, 519, '456\n', '2024-07-01 00:39:17');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10638, 1807, 519, '789\n', '2024-07-01 00:40:43');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10639, 1807, 519, '890\n', '2024-07-01 00:41:36');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10640, 1807, 519, 'try', '2024-07-01 00:41:52');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10641, 1807, 519, 'rrr\n', '2024-07-01 00:42:15');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10642, 1807, 505, 'hi\n', '2024-07-01 00:44:47');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10643, 1807, 519, '什么？\n', '2024-07-01 00:45:18');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10644, 1807, 519, '这次应该没问题了\n', '2024-07-01 00:47:01');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10645, 1807, 519, '可以了\n', '2024-07-01 00:48:19');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10646, 1807, 505, 'test', '2024-07-01 00:48:45');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10647, 1807, 519, '1111\n', '2024-07-01 00:48:52');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10648, 1807, 505, '41242144124\n1', '2024-07-01 00:48:56');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10649, 1807, 505, '24\n', '2024-07-01 00:48:56');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10650, 1807, 505, '\n12', '2024-07-01 00:48:56');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10651, 1807, 505, '4\n', '2024-07-01 00:48:56');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10652, 1807, 505, '2\n1', '2024-07-01 00:48:56');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10653, 1807, 505, '\n2', '2024-07-01 00:48:56');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10654, 1807, 505, '1\n14', '2024-07-01 00:48:56');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10655, 1807, 505, '2\n', '2024-07-01 00:48:57');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10656, 1807, 505, '嗯\n', '2024-07-01 00:49:02');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10657, 1807, 505, 'rqwrqrw\n', '2024-07-01 00:49:23');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10658, 1807, 505, 'qw\n', '2024-07-01 00:49:23');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10659, 1807, 505, 'qw\n', '2024-07-01 00:49:23');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10660, 1807, 505, 'rqw\nr', '2024-07-01 00:49:24');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10661, 1807, 505, 'qw\nr', '2024-07-01 00:49:25');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10662, 1807, 505, 'qw\nr', '2024-07-01 00:49:25');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10663, 1807, 505, 'qwr\n', '2024-07-01 00:49:25');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10664, 1807, 505, 'sadf\n', '2024-07-01 00:50:09');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10665, 1807, 505, '\nsadf', '2024-07-01 00:50:09');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10666, 1807, 505, 'sad\n', '2024-07-01 00:50:09');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10667, 1807, 505, '\nas', '2024-07-01 00:50:10');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10668, 1807, 505, 'fd\n', '2024-07-01 00:50:10');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10669, 1807, 505, 'adsf\n', '2024-07-01 00:50:10');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10670, 1807, 505, 'sad\nf', '2024-07-01 00:50:10');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10671, 1807, 505, 'sda\n', '2024-07-01 00:50:11');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10672, 1807, 505, '1\n', '2024-07-01 00:50:13');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10673, 1807, 505, '2\n', '2024-07-01 00:50:14');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10674, 1807, 505, '3\n', '2024-07-01 00:50:14');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10675, 1807, 505, '4\n', '2024-07-01 00:50:14');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10676, 1807, 505, '5\n', '2024-07-01 00:50:15');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10677, 1807, 505, '6\n', '2024-07-01 00:50:15');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10678, 1807, 505, '7\n', '2024-07-01 00:50:15');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10679, 1807, 505, '8\n', '2024-07-01 00:50:16');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10680, 1807, 505, '9\n', '2024-07-01 00:50:16');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10681, 1807, 505, '10\n', '2024-07-01 00:50:18');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10682, 1807, 505, '11\n', '2024-07-01 00:50:18');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10683, 1807, 505, '12\n', '2024-07-01 00:50:19');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10684, 1807, 505, '13\n', '2024-07-01 00:50:20');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10685, 1807, 505, '14\n', '2024-07-01 00:50:21');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10686, 1807, 505, '15\n', '2024-07-01 00:50:21');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10687, 1807, 505, '16\n', '2024-07-01 00:50:22');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10688, 1807, 505, '17\n', '2024-07-01 00:50:22');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10689, 1807, 505, 'q\n', '2024-07-01 00:50:26');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10690, 1807, 505, 'w\n', '2024-07-01 00:50:27');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10691, 1807, 505, 'e\n', '2024-07-01 00:50:27');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10692, 1807, 505, 'r\n', '2024-07-01 00:50:27');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10693, 1807, 505, 't\n', '2024-07-01 00:50:27');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10694, 1807, 505, 'y\n', '2024-07-01 00:50:28');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10695, 1807, 505, 'u\n', '2024-07-01 00:50:28');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10696, 1807, 505, '\ni', '2024-07-01 00:50:28');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10697, 1807, 505, 'o\n', '2024-07-01 00:50:28');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10698, 1807, 505, '\np', '2024-07-01 00:50:29');
+INSERT INTO `message` (`id`, `chatroom_id`, `from`, `content`, `create_time`) VALUES (10699, 1808, 505, '可以发送吗\n', '2024-07-01 01:42:54');
 COMMIT;
 
 -- ----------------------------
@@ -582,32 +724,34 @@ CREATE TABLE `user` (
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UNIQUE_EMAIL` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=525 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=527 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ----------------------------
 -- Records of user
 -- ----------------------------
 BEGIN;
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (505, 'Nakajima Takuya', 'takunakajima@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'https://auth.zhennanw9.net/SportsOutdoor', 'To open a query using an external editor, control-click it and select Open with External            ', '2024-04-07 19:15:53');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (506, 'Amanda Mason', 'amandamas8@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'https://www.yfat.cn/BeautyPersonalCare', 'Sometimes you win, sometimes you learn. Navicat Monitor requires a repository to                    ', '2024-04-14 19:27:19');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (507, 'Josephine Graham', 'graj@icloud.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://drive.samomoe.com/VideoGames', 'If the Show objects under schema in navigation pane option is checked at the Preferences            ', '2024-04-09 16:37:04');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (508, 'Kevin Mendoza', 'mendozakevi822@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://video.emiyamoto521.xyz/CollectiblesFineArt', 'If it scares you, it might be a good thing to try.', '2024-04-10 22:48:07');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (509, 'Sakamoto Mitsuki', 'sakmitsuki6@gmail.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'https://drive.cdouglas14.xyz/Appliances', 'If the Show objects under schema in navigation pane option is checked at the Preferences            ', '2024-04-11 08:02:39');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (510, '高安琪', 'gao7@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://video.onsi.cn/ToysGames', 'Sometimes you win, sometimes you learn. Anyone who has never made a mistake has never               ', '2024-04-02 01:05:53');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (511, 'Tamura Daichi', 'daichitamur@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://drive.sunyuning1217.cn/ToysGames', 'After comparing data, the window shows the number of records that will be inserted,                 ', '2024-04-07 11:03:43');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (512, 'Ng Chiu Wai', 'ngchiuwai@gmail.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://auth.kwawh1998.com/CollectiblesFineArt', 'Navicat Data Modeler enables you to build high-quality conceptual, logical and physical             ', '2024-04-03 23:55:25');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (513, 'Melissa Lopez', 'lopemelissa@gmail.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://www.jz323.cn/Others', 'To clear or reload various internal caches, flush tables, or acquire locks, control-click           ', '2024-04-01 02:53:04');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (514, 'Matsuda Sakura', 'sakma67@gmail.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://drive.aoshk.org/Beauty', 'Navicat 15 has added support for the system-wide dark mode.', '2024-04-14 22:08:32');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (515, 'John Kelly', 'kelljohn3@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'https://www.yaoxiaoming.info/ToysGames', 'The first step is as good as half over. Creativity is intelligence having fun.', '2024-04-01 00:02:34');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (516, 'Liao Jiehong', 'jiehliao@yahoo.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://video.bobbp51.biz/HealthBabyCare', 'You cannot save people, you can just love them. Sometimes you win, sometimes you learn.', '2024-04-02 02:34:48');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (517, '何杰宏', 'hej418@yahoo.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://www.hop3.biz/CellPhonesAccessories', 'Navicat Cloud could not connect and access your databases. By which it means, it                    ', '2024-04-04 23:58:04');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (518, 'Ma Lan', 'lan909@mail.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://drive.ziy.com/AppsGames', 'Anyone who has ever made anything of importance was disciplined. Such sessions are                  ', '2024-04-05 23:59:08');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (519, '徐璐', 'lux8@gmail.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'https://drive.rinakayama1.cn/Others', 'It collects process metrics such as CPU load, RAM usage, and a variety of other resources           ', '2024-04-06 16:58:32');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (520, 'Yu Xiuying', 'xiuyiyu525@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'https://www.tuckerde.net/ClothingShoesandJewelry', 'All the Navicat Cloud objects are located under different projects. You can share                   ', '2024-04-09 03:37:59');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (521, 'Norma Stephens', 'stephensnorma@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://auth.maiyam48.info/AutomotivePartsAccessories', 'Navicat Data Modeler is a powerful and cost-effective database design tool which                    ', '2024-04-09 11:41:26');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (522, 'Yan Shihan', 'yans@icloud.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'https://image.jeffreycollins7.org/ClothingShoesandJewelry', 'If opportunity doesn’t knock, build a door. A comfort zone is a beautiful place,                  ', '2024-04-13 11:12:54');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (523, '贾岚', 'jiala4@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://www.tingfung10.us/HealthBabyCare', 'Navicat provides powerful tools for working with queries: Query Editor for editing                  ', '2024-04-03 17:04:18');
-INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (524, 'Yue Wing Sze', 'wingsze7@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'https://video.twlo423.jp/ToysGames', 'The first step is as good as half over.', '2024-04-14 21:12:29');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (505, 'Nakajima Takuya', 'takunakajima@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'To open a query using an external editor, control-click it and select Open with External            ', '2024-04-07 19:15:53');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (506, 'Amanda Mason', 'amandamas8@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'Sometimes you win, sometimes you learn. Navicat Monitor requires a repository to                    ', '2024-04-14 19:27:19');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (507, 'Josephine Graham', 'graj@icloud.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'If the Show objects under schema in navigation pane option is checked at the Preferences            ', '2024-04-09 16:37:04');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (508, 'Kevin Mendoza', 'mendozakevi822@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'If it scares you, it might be a good thing to try.', '2024-04-10 22:48:07');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (509, 'Sakamoto Mitsuki', 'sakmitsuki6@gmail.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'If the Show objects under schema in navigation pane option is checked at the Preferences            ', '2024-04-11 08:02:39');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (510, '高安琪', 'gao7@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'Sometimes you win, sometimes you learn. Anyone who has never made a mistake has never               ', '2024-04-02 01:05:53');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (511, 'Tamura Daichi', 'daichitamur@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'After comparing data, the window shows the number of records that will be inserted,                 ', '2024-04-07 11:03:43');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (512, 'Ng Chiu Wai', 'ngchiuwai@gmail.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'Navicat Data Modeler enables you to build high-quality conceptual, logical and physical             ', '2024-04-03 23:55:25');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (513, 'Melissa Lopez', 'lopemelissa@gmail.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'To clear or reload various internal caches, flush tables, or acquire locks, control-click           ', '2024-04-01 02:53:04');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (514, 'Matsuda Sakura', 'sakma67@gmail.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'Navicat 15 has added support for the system-wide dark mode.', '2024-04-14 22:08:32');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (515, 'John Kelly', 'kelljohn3@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'The first step is as good as half over. Creativity is intelligence having fun.', '2024-04-01 00:02:34');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (516, 'Liao Jiehong', 'jiehliao@yahoo.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'You cannot save people, you can just love them. Sometimes you win, sometimes you learn.', '2024-04-02 02:34:48');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (517, '何杰宏', 'hej418@yahoo.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'Navicat Cloud could not connect and access your databases. By which it means, it                    ', '2024-04-04 23:58:04');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (518, 'Ma Lan', 'lan909@mail.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'Anyone who has ever made anything of importance was disciplined. Such sessions are                  ', '2024-04-05 23:59:08');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (519, '徐璐', 'lux8@gmail.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'It collects process metrics such as CPU load, RAM usage, and a variety of other resources           ', '2024-04-06 16:58:32');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (520, 'Yu Xiuying', 'xiuyiyu525@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'All the Navicat Cloud objects are located under different projects. You can share                   ', '2024-04-09 03:37:59');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (521, 'Norma Stephens', 'stephensnorma@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'Navicat Data Modeler is a powerful and cost-effective database design tool which                    ', '2024-04-09 11:41:26');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (522, 'Yan Shihan', 'yans@icloud.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'If opportunity doesn’t knock, build a door. A comfort zone is a beautiful place,                  ', '2024-04-13 11:12:54');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (523, '贾岚', 'jiala4@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'Navicat provides powerful tools for working with queries: Query Editor for editing                  ', '2024-04-03 17:04:18');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (524, 'Yue Wing Sze', 'wingsze7@outlook.com', '$2b$10$TANlyb1owgNPLbTZv9.i2ehqubUqNIwWZK4ESvD9lbgc5aWgjt4Ru', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', 'The first step is as good as half over.', '2024-04-14 21:12:29');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (525, 'gamejoye', 'gamejoye@gmail.com', '$2b$10$.wMyvS0C4iTzDRu1dVf3ZObazuX2jtMsMGXAhlhleygscoFeLLEkO', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', '', '2024-06-28 00:13:23');
+INSERT INTO `user` (`id`, `username`, `email`, `password_hash`, `avatar_url`, `description`, `create_time`) VALUES (526, 'coke', 'coke@gmail.com', '$2b$10$jVMr8uq2/sm2serrjKRBE.rVWfa/706KQG0BY/Hxc3zp4mDBzIxFi', 'http://localhost:8081/avatars/440395aae304e3daf589afb78a67469c.jpg', '', '2024-06-28 00:16:47');
 COMMIT;
 
 -- ----------------------------
@@ -629,16 +773,16 @@ CREATE TABLE `user_chatroom` (
 -- ----------------------------
 BEGIN;
 INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2312, 521, 1806, '2024-04-19 10:50:05', '2024-04-19 10:50:05');
-INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2313, 505, 1806, '2024-04-19 10:50:05', '2024-04-19 10:50:05');
-INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2314, 519, 1807, '2024-04-18 13:32:26', '2024-04-18 13:32:26');
-INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2315, 505, 1807, '2024-04-18 13:32:26', '2024-04-18 13:32:26');
+INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2313, 505, 1806, '2024-04-19 10:50:05', '2024-06-30 22:45:55');
+INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2314, 519, 1807, '2024-04-18 13:32:26', '2024-07-01 00:54:07');
+INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2315, 505, 1807, '2024-04-18 13:32:26', '2024-07-01 01:42:48');
 INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2316, 522, 1808, '2024-04-19 11:38:14', '2024-04-19 11:38:14');
-INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2317, 505, 1808, '2024-04-19 11:38:14', '2024-04-19 11:38:14');
+INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2317, 505, 1808, '2024-04-19 11:38:14', '2024-07-01 01:43:14');
 INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2318, 513, 1809, '2024-04-18 17:56:25', '2024-04-18 17:56:25');
-INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2319, 505, 1809, '2024-04-18 17:56:25', '2024-04-18 17:56:25');
+INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2319, 505, 1809, '2024-04-18 17:56:25', '2024-07-01 01:42:47');
 INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2320, 515, 1810, '2024-04-18 21:03:18', '2024-04-18 21:03:18');
-INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2321, 505, 1810, '2024-04-18 21:03:18', '2024-04-18 21:03:18');
-INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2322, 505, 1811, '2024-04-18 02:18:53', '2024-04-18 02:18:53');
+INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2321, 505, 1810, '2024-04-18 21:03:18', '2024-06-30 19:02:01');
+INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2322, 505, 1811, '2024-04-18 02:18:53', '2024-06-30 18:54:37');
 INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2323, 506, 1811, '2024-04-18 02:18:53', '2024-04-18 02:18:53');
 INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2324, 517, 1812, '2024-04-19 23:59:15', '2024-04-19 23:59:15');
 INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2325, 506, 1812, '2024-04-19 23:59:15', '2024-04-19 23:59:15');
@@ -650,7 +794,7 @@ INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `lat
 INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2331, 506, 1815, '2024-04-18 14:29:58', '2024-04-18 14:29:58');
 INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2332, 510, 1816, '2024-04-17 06:30:56', '2024-04-17 06:30:56');
 INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2333, 523, 1816, '2024-04-17 06:30:56', '2024-04-17 06:30:56');
-INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2334, 507, 1816, '2024-04-17 06:30:56', '2024-04-17 06:30:56');
+INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2334, 507, 1816, '2024-04-17 06:30:56', '2024-06-26 23:28:05');
 INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2335, 513, 1817, '2024-04-18 09:58:41', '2024-04-18 09:58:41');
 INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2336, 521, 1817, '2024-04-18 09:58:41', '2024-04-18 09:58:41');
 INSERT INTO `user_chatroom` (`id`, `user_id`, `chatroom_id`, `create_time`, `latest_visit_time`) VALUES (2337, 517, 1817, '2024-04-18 09:58:41', '2024-04-18 09:58:41');
@@ -668,9 +812,7 @@ CREATE TABLE `user_friendship` (
   `from_id` int unsigned NOT NULL,
   `to_id` int unsigned NOT NULL,
   `chatroom_id` int unsigned DEFAULT NULL,
-  `status` enum('PENDING','ACCEPT','REJECT') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `update_time` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1054 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -678,34 +820,16 @@ CREATE TABLE `user_friendship` (
 -- Records of user_friendship
 -- ----------------------------
 BEGIN;
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1005, 523, 505, NULL, 'PENDING', '2024-04-16 22:34:55', NULL);
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1006, 509, 505, NULL, 'REJECT', '2024-04-17 12:22:27', '2024-04-18 20:07:43');
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1007, 521, 505, 1806, 'ACCEPT', '2024-04-17 08:52:41', '2024-04-19 10:50:05');
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1008, 519, 505, 1807, 'ACCEPT', '2024-04-17 17:39:59', '2024-04-18 13:32:26');
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1009, 514, 505, NULL, 'REJECT', '2024-04-17 04:17:55', '2024-04-19 00:36:23');
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1010, 522, 505, 1808, 'ACCEPT', '2024-04-17 17:43:48', '2024-04-19 11:38:14');
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1011, 512, 505, NULL, 'PENDING', '2024-04-17 14:22:19', NULL);
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1012, 517, 505, NULL, 'REJECT', '2024-04-16 00:06:36', '2024-04-19 08:48:13');
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1013, 524, 505, NULL, 'REJECT', '2024-04-16 02:03:41', '2024-04-19 15:18:23');
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1015, 513, 505, 1809, 'ACCEPT', '2024-04-16 14:43:45', '2024-04-18 17:56:25');
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1016, 507, 505, NULL, 'PENDING', '2024-04-17 21:30:53', NULL);
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1017, 508, 505, NULL, 'PENDING', '2024-04-16 18:24:19', NULL);
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1019, 515, 505, 1810, 'ACCEPT', '2024-04-17 02:55:47', '2024-04-18 21:03:18');
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1020, 520, 505, NULL, 'PENDING', '2024-04-16 19:57:19', NULL);
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1021, 511, 505, NULL, 'REJECT', '2024-04-16 18:24:14', '2024-04-19 08:00:03');
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1022, 510, 505, NULL, 'PENDING', '2024-04-17 13:17:15', NULL);
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1023, 516, 505, NULL, 'PENDING', '2024-04-17 14:07:41', NULL);
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1024, 518, 505, NULL, 'REJECT', '2024-04-16 09:19:41', '2024-04-19 21:19:13');
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1044, 508, 506, NULL, 'REJECT', '2024-04-16 02:26:03', '2024-04-19 00:37:42');
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1045, 505, 506, 1811, 'ACCEPT', '2024-04-17 20:10:47', '2024-04-18 02:18:53');
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1046, 517, 506, 1812, 'ACCEPT', '2024-04-16 16:16:34', '2024-04-19 23:59:15');
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1047, 522, 506, 1813, 'ACCEPT', '2024-04-16 05:59:51', '2024-04-18 01:50:10');
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1048, 512, 506, 1814, 'ACCEPT', '2024-04-16 11:21:27', '2024-04-18 00:55:39');
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1049, 507, 506, NULL, 'PENDING', '2024-04-17 16:01:47', NULL);
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1050, 514, 506, NULL, 'PENDING', '2024-04-16 15:10:03', NULL);
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1051, 509, 506, NULL, 'REJECT', '2024-04-17 21:38:48', '2024-04-18 20:58:13');
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1052, 516, 506, 1815, 'ACCEPT', '2024-04-16 01:46:18', '2024-04-18 14:29:58');
-INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `status`, `create_time`, `update_time`) VALUES (1053, 518, 506, NULL, 'REJECT', '2024-04-17 06:26:01', '2024-04-18 18:46:40');
+INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `create_time`) VALUES (1007, 521, 505, 1806, '2024-04-17 08:52:41');
+INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `create_time`) VALUES (1008, 519, 505, 1807, '2024-04-17 17:39:59');
+INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `create_time`) VALUES (1010, 522, 505, 1808, '2024-04-17 17:43:48');
+INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `create_time`) VALUES (1015, 513, 505, 1809, '2024-04-16 14:43:45');
+INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `create_time`) VALUES (1019, 515, 505, 1810, '2024-04-17 02:55:47');
+INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `create_time`) VALUES (1045, 505, 506, 1811, '2024-04-17 20:10:47');
+INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `create_time`) VALUES (1046, 517, 506, 1812, '2024-04-16 16:16:34');
+INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `create_time`) VALUES (1047, 522, 506, 1813, '2024-04-16 05:59:51');
+INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `create_time`) VALUES (1048, 512, 506, 1814, '2024-04-16 11:21:27');
+INSERT INTO `user_friendship` (`id`, `from_id`, `to_id`, `chatroom_id`, `create_time`) VALUES (1052, 516, 506, 1815, '2024-04-16 01:46:18');
 COMMIT;
 
 -- ----------------------------
@@ -753,6 +877,42 @@ BEGIN
     END LOOP;
 
     CLOSE message_cursor;
+END
+;;
+delimiter ;
+
+-- ----------------------------
+-- Procedure structure for CreateFriendRequest
+-- ----------------------------
+DROP PROCEDURE IF EXISTS `CreateFriendRequest`;
+delimiter ;;
+CREATE PROCEDURE `CreateFriendRequest`()
+BEGIN
+  #Routine body goes here...
+	-- 首先，确保 FriendRequestType 表存在并包含 ACCEPT 的枚举值
+-- INSERT INTO FriendRequestType (name) VALUES ('ACCEPT');
+
+-- 创建临时表来保存符合条件的 userfriend 记录
+CREATE TEMPORARY TABLE temp_userfriend AS
+SELECT *
+FROM user_friendship
+WHERE create_time > '2024-04-14 01:00:00';
+
+-- 插入符合条件的 friendrequest 记录
+INSERT INTO friend_request (from_id, to_id, status, create_time, update_time)
+SELECT uf.from_id, uf.to_id, 'ACCEPT', uf.create_time - INTERVAL 1 SECOND, uf.create_time
+FROM temp_userfriend uf
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM friend_request fr
+    WHERE fr.from_id = uf.from_id
+      AND fr.to_id = uf.to_id
+      AND fr.status = 'ACCEPT'
+      AND fr.create_time < uf.create_time
+);
+
+-- 删除临时表
+DROP TABLE temp_userfriend;
 END
 ;;
 delimiter ;
