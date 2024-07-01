@@ -102,21 +102,10 @@ export interface components {
       /** @description 好友的基本信息 */
       user: components["schemas"]["UserVo"];
       /**
-       * @description 好友请求状态
-       * @example PENDING
-       * @enum {string}
-       */
-      status: "PENDING" | "ACCEPT" | "REJECT";
-      /**
        * @description 好友请求创建的时间
        * @example 2024-05-20 19:12
        */
       createTime: string;
-      /**
-       * @description 好友请求状态更改的时间
-       * @example 2024-05-20 21:09
-       */
-      updateTime: string;
     };
     LoginVo: {
       /** @description 用户id */

@@ -778,32 +778,15 @@
               }
             ]
           },
-          "status": {
-            "type": "string",
-            "description": "好友请求状态",
-            "example": "PENDING",
-            "enum": [
-              "PENDING",
-              "ACCEPT",
-              "REJECT"
-            ]
-          },
           "createTime": {
             "type": "string",
             "description": "好友请求创建的时间",
             "example": "2024-05-20 19:12"
-          },
-          "updateTime": {
-            "type": "string",
-            "description": "好友请求状态更改的时间",
-            "example": "2024-05-20 21:09"
           }
         },
         "required": [
           "user",
-          "status",
-          "createTime",
-          "updateTime"
+          "createTime"
         ]
       },
       "LoginVo": {
