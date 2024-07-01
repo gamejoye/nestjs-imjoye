@@ -32,6 +32,7 @@ import {
   ApiCreatedResponseResult,
   ApiOkResponseResult,
 } from 'src/common/types/response.type';
+import { FriendRequestVo } from './vo/friendrequest.vo';
 
 @ApiTags('users')
 @Controller('users')
@@ -39,7 +40,7 @@ export class UsersController {
   constructor(
     protected readonly usersService: UsersService,
     protected readonly envConfigService: EnvConfigService,
-  ) {}
+  ) { }
 
   @Get(':id')
   @UseGuards(JwtGuard)
@@ -82,6 +83,33 @@ export class UsersController {
     }
     const friends = await this.usersService.getFriends(id);
     return friends.map((friend) => transformUser(friend));
+  }
+
+  @Get(':id/friends/requests')
+  @UseGuards(JwtGuard)
+  @ApiOperation({ summary: '根据userId获取好友请求列表' })
+  @ApiOkResponseResult({
+    model: FriendRequestVo,
+    description: '成功获取好友请求列表',
+    isArray: true,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: '未认证用户',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: '权限不足',
+  })
+  async getFriendRequestsById(
+    @GetUser() user: User,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    if (user.id !== id) {
+      throw new HttpException('权限不足', HttpStatus.FORBIDDEN);
+    }
+    const fqs = await this.usersService.getFriendRqeusts(user.id);
+    return fqs;
   }
 
   @Get(':id/friends/:friendId')
