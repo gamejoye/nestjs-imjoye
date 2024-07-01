@@ -14,6 +14,14 @@ const documentTag = 'Api/V1';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // 动态配置CORS
+  app.enableCors({
+    origin: process.env.CORS_ORIGIN || '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
+
   const options = new DocumentBuilder()
     .setTitle(swaggerTitle)
     .setDescription(documentDescription)
