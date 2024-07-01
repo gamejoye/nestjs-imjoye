@@ -29,6 +29,8 @@ const user: User = {
   userChatrooms: [],
   fromFriendships: [],
   toFriendships: [],
+  fromFriendRequests: [],
+  toFriendRequests: [],
 };
 const friend1: User = {
   id: 2,
@@ -41,6 +43,8 @@ const friend1: User = {
   userChatrooms: [],
   fromFriendships: [],
   toFriendships: [],
+  fromFriendRequests: [],
+  toFriendRequests: [],
 };
 
 const chatroom: Chatroom = {

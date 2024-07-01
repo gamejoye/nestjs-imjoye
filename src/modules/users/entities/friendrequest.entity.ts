@@ -41,11 +41,11 @@ export class FriendRequest {
   })
   status: FriendRequestType;
 
-  @ManyToOne(() => User, (user) => user.fromFriendships)
+  @ManyToOne(() => User, (user) => user.fromFriendRequests)
   @JoinColumn({ name: 'from_id' })
   from: User;
 
-  @ManyToOne(() => User, (user) => user.toFriendships)
+  @ManyToOne(() => User, (user) => user.toFriendRequests)
   @JoinColumn({ name: 'to_id' })
   to: User;
 }

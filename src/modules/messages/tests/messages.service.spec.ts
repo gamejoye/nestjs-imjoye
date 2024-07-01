@@ -64,6 +64,12 @@ describe('MessagesService', () => {
 
   it('getByPaging work correctly', async () => {
     const chatrooms = await chatroomsRepository.find();
+    const messageSorter = (msg1: Message, msg2: Message) => {
+      const t1 = new Date(msg1.createTime).getTime();
+      const t2 = new Date(msg2.createTime).getTime();
+      if (t1 == t2) return msg2.id - msg1.id;
+      return t2 - t1;
+    };
     for (const chatroom of chatrooms) {
       /**
        * 按照createTime从大到小排序
@@ -73,13 +79,17 @@ describe('MessagesService', () => {
           where: { chatroom: { id: chatroom.id } },
           relations: ['from', 'chatroom'],
         })
-      ).sort((message1, message2) => {
-        return (
-          new Date(message2.createTime).getTime() -
-          new Date(message1.createTime).getTime()
-        );
-      });
+      ).sort(messageSorter);
       const messagesToBeTested = await service.getByPaging(chatroom.id);
+      for (let i = 0; i < messagesToBeTested.length - 1; i++) {
+        const msg1 = messagesToBeTested[i];
+        const msg2 = messagesToBeTested[i + 1];
+        expect(
+          new Date(msg1.createTime).getTime() >=
+            new Date(msg2.createTime).getTime(),
+        );
+      };
+      messagesToBeTested.sort(messageSorter);
       expect(messagesToBeTested).toMatchObject(messages);
     }
   });

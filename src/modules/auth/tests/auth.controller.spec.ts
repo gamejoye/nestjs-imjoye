@@ -33,6 +33,8 @@ const user: User = {
   userChatrooms: [],
   fromFriendships: [],
   toFriendships: [],
+  fromFriendRequests: [],
+  toFriendRequests: [],
 };
 
 jest.mock('jsonwebtoken', () => ({
@@ -64,6 +66,8 @@ const mockUsersService: Partial<IUsersService> = {
           userChatrooms: [],
           fromFriendships: [],
           toFriendships: [],
+          fromFriendRequests: [],
+          toFriendRequests: [],
         };
       },
     ),

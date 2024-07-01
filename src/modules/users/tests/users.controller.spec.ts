@@ -27,6 +27,8 @@ const user1: User = {
   userChatrooms: [],
   fromFriendships: [],
   toFriendships: [],
+  fromFriendRequests: [],
+  toFriendRequests: [],
 };
 const user2: User = {
   id: 2,
@@ -39,6 +41,8 @@ const user2: User = {
   userChatrooms: [],
   fromFriendships: [],
   toFriendships: [],
+  fromFriendRequests: [],
+  toFriendRequests: [],
 };
 
 const mockUsersService: Partial<IUsersService> = {
