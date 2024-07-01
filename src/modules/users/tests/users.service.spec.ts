@@ -22,6 +22,7 @@ import { UserFriendship } from '../entities/friendship.entity';
 import * as bcrypt from 'bcrypt';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { FriendRequest } from '../entities/friendrequest.entity';
+import { FriendRequestType } from 'src/common/constants/friendrequest';
 
 describe('UserService', () => {
   let service: UsersService;
@@ -55,6 +56,26 @@ describe('UserService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  it('updateFriendRequestStatus work correctly', async () => {
+    const fqs = await friendRequestsRepository.find();
+    for (const fq of fqs) {
+      let newStatus = fq.status;
+      if (newStatus === FriendRequestType.ACCEPT) {
+        newStatus = FriendRequestType.PENDING;
+      } else if (newStatus === FriendRequestType.PENDING) {
+        newStatus = FriendRequestType.REJECT;
+      } else {
+        newStatus = FriendRequestType.ACCEPT;
+      }
+      const updated = await service.updateFriendRequestStatus(fq.id, newStatus);
+      expect(updated).toMatchObject({ ...fq, status: newStatus });
+      const actualFq = await friendRequestsRepository.findOne({
+        where: { id: fq.id },
+      });
+      expect(updated).toMatchObject(actualFq);
+    }
   });
 
   it('getFriendRequests work correctly', async () => {

@@ -10,6 +10,7 @@ import {
 import { UserFriendship } from './entities/friendship.entity';
 import { FriendInfo } from './types/friend-info.type';
 import { FriendRequest } from './entities/friendrequest.entity';
+import { FriendRequestType } from 'src/common/constants/friendrequest';
 
 @Injectable()
 export class UsersService implements IUsersService {
@@ -21,6 +22,22 @@ export class UsersService implements IUsersService {
     @Inject(FRIEND_REQUEST_REPOSITORY)
     protected friendRequestRepository: Repository<FriendRequest>,
   ) { }
+  async updateFriendRequestStatus(
+    id: number,
+    status: FriendRequestType,
+  ): Promise<FriendRequest> {
+    const existing = await this.friendRequestRepository.findOne({
+      where: { id },
+    });
+    if (existing) {
+      const completed = await this.friendRequestRepository.save({
+        ...existing,
+        status,
+      });
+      return completed;
+    }
+    return null;
+  }
   async getFriendRqeusts(userId: number): Promise<Array<FriendRequest>> {
     const fqs = await this.friendRequestRepository
       .createQueryBuilder('fq')

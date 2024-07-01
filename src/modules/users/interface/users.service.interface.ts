@@ -1,3 +1,4 @@
+import { FriendRequestType } from 'src/common/constants/friendrequest';
 import { FriendRequest } from '../entities/friendrequest.entity';
 import { User } from '../entities/user.entity';
 import { FriendInfo } from '../types/friend-info.type';
@@ -13,6 +14,10 @@ export interface IUsersService {
   ): Promise<User>;
   getFriends(userId: number): Promise<Array<User>>;
   getFriendRqeusts(userId: number): Promise<Array<FriendRequest>>;
+  updateFriendRequestStatus(
+    id: number,
+    status: FriendRequestType,
+  ): Promise<FriendRequest>;
   getFriendInfoByUserIdAndFriendId(
     userId: number,
     friendId: number,
