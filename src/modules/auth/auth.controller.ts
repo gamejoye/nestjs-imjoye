@@ -59,7 +59,7 @@ export class AuthController {
     const token = jwt.sign(
       { id },
       this.envConfigService.getJwtConfig().secret,
-      { expiresIn: 7 * 24 * 60 },
+      { expiresIn: '7d' },
     );
     return {
       id,
