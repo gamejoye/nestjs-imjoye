@@ -1,4 +1,4 @@
-export enum UserFriendshipType {
+export enum FriendRequestType {
   PENDING = 'PENDING',
   ACCEPT = 'ACCEPT',
   REJECT = 'REJECT',

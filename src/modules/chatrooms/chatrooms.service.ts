@@ -12,7 +12,6 @@ import { Logger } from 'src/common/utils';
 import { USER_CHATROOM } from 'src/common/constants/database-tables';
 import { UserChatroom } from './entities/user-chatroom.entity';
 import { UserFriendship } from '../users/entities/friendship.entity';
-import { UserFriendshipType } from 'src/common/constants/friendship';
 
 @Injectable()
 export class ChatroomsService implements IChatroomsService {
@@ -32,7 +31,6 @@ export class ChatroomsService implements IChatroomsService {
       where: {
         from: { id: userId },
         to: { id: friendId },
-        status: UserFriendshipType.ACCEPT,
       },
       relations: ['chatroom', 'from', 'to'],
     });
@@ -41,7 +39,6 @@ export class ChatroomsService implements IChatroomsService {
         where: {
           from: { id: friendId },
           to: { id: userId },
-          status: UserFriendshipType.ACCEPT,
         },
         relations: ['chatroom', 'from', 'to'],
       });

@@ -7,7 +7,6 @@ import {
   USER_REPOSITORY,
 } from 'src/common/constants/providers';
 import { UserFriendship } from './entities/friendship.entity';
-import { UserFriendshipType } from 'src/common/constants/friendship';
 import { FriendInfo } from './types/friend-info.type';
 
 @Injectable()
@@ -41,19 +40,17 @@ export class UsersService implements IUsersService {
 
     const friendInfo: FriendInfo = {
       user: friendUser,
-      status: friendship.status,
       createTime: friendship.createTime,
-      updateTime: friendship.updateTime,
     };
     return friendInfo;
   }
   async getFriends(userId: number): Promise<User[]> {
     const friendshipsAsFrom = await this.userFriendshipRepository.find({
-      where: { from: { id: userId }, status: UserFriendshipType.ACCEPT },
+      where: { from: { id: userId } },
       relations: ['to'],
     });
     const friendshipsAsTo = await this.userFriendshipRepository.find({
-      where: { to: { id: userId }, status: UserFriendshipType.ACCEPT },
+      where: { to: { id: userId } },
       relations: ['from'],
     });
 

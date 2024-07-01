@@ -21,7 +21,6 @@ import { UserFriendship } from '../entities/friendship.entity';
 import { transformUser } from '../vo/utils/user-transform';
 import { UserVo } from '../vo/user.vo';
 import { FriendInfoVo } from '../vo/friend-info.vo';
-import { UserFriendshipType } from 'src/common/constants/friendship';
 
 const userSorter = (user1: User, user2: User) => user1.id - user2.id;
 
@@ -134,13 +133,13 @@ describe('UsersController (e2e)', () => {
       const authorization = getAuthorization(userId);
       const friendsUserSend = (
         await userFriendshipsRepository.find({
-          where: { from: { id: userId }, status: UserFriendshipType.ACCEPT },
+          where: { from: { id: userId } },
           relations: ['to'],
         })
       ).map(({ to }) => to);
       const friendsUserReceive = (
         await userFriendshipsRepository.find({
-          where: { to: { id: userId }, status: UserFriendshipType.ACCEPT },
+          where: { to: { id: userId } },
           relations: ['from'],
         })
       ).map(({ from }) => from);
@@ -194,13 +193,13 @@ describe('UsersController (e2e)', () => {
       const authorization = getAuthorization(userId);
       const friendsUserSend = (
         await userFriendshipsRepository.find({
-          where: { from: { id: userId }, status: UserFriendshipType.ACCEPT },
+          where: { from: { id: userId } },
           relations: ['to'],
         })
       ).map(({ to }) => to);
       const friendsUserReceive = (
         await userFriendshipsRepository.find({
-          where: { to: { id: userId }, status: UserFriendshipType.ACCEPT },
+          where: { to: { id: userId } },
           relations: ['from'],
         })
       ).map(({ from }) => from);
@@ -225,8 +224,6 @@ describe('UsersController (e2e)', () => {
             where: { from: { id: friend.id }, to: { id: user.id } },
           }));
         expect(friendInfoVo.createTime).toBe(userFriendship.createTime);
-        expect(friendInfoVo.updateTime).toBe(userFriendship.updateTime);
-        expect(friendInfoVo.status).toBe(UserFriendshipType.ACCEPT);
       }
 
       if (friends.length === 0) continue;

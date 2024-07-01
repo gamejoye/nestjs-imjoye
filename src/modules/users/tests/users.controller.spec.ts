@@ -9,7 +9,6 @@ import { User } from '../entities/user.entity';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { transformFriendInfo, transformUser } from '../vo/utils/user-transform';
 import { FriendInfo } from '../types/friend-info.type';
-import { UserFriendshipType } from 'src/common/constants/friendship';
 import { Response } from 'express';
 import { EnvConfigService } from 'src/modules/env-config/env-config.service';
 import { getCurrentDatetime } from 'src/common/utils';
@@ -118,9 +117,7 @@ describe('UserController', () => {
   it('getFriendInfoByUserIdAndFriendId work correctly', async () => {
     const friendInfo: FriendInfo = {
       user: user2,
-      status: UserFriendshipType.ACCEPT,
       createTime: getCurrentDatetime(),
-      updateTime: getCurrentDatetime(),
     };
     (
       mockUsersService.getFriendInfoByUserIdAndFriendId as jest.Mock

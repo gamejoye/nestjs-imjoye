@@ -18,7 +18,6 @@ import {
 } from 'src/common/utils';
 import { UserFriendship } from '../entities/friendship.entity';
 import * as bcrypt from 'bcrypt';
-import { UserFriendshipType } from 'src/common/constants/friendship';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 describe('UserService', () => {
@@ -114,11 +113,11 @@ describe('UserService', () => {
     const users = await usersRepository.find();
     for (const user of users) {
       const friendshipsUserSend = await userFriendshipsRepository.find({
-        where: { from: { id: user.id }, status: UserFriendshipType.ACCEPT },
+        where: { from: { id: user.id } },
         relations: ['to'],
       });
       const friendshipsUserReceive = await userFriendshipsRepository.find({
-        where: { to: { id: user.id }, status: UserFriendshipType.ACCEPT },
+        where: { to: { id: user.id } },
         relations: ['from'],
       });
       const friends = [
@@ -148,8 +147,6 @@ describe('UserService', () => {
         to.id,
       );
       expect(friendInfoByFrom.user).toMatchObject(to);
-      expect(friendInfoByFrom.status).toBe(friendship.status);
-      expect(friendInfoByFrom.updateTime).toBe(friendship.updateTime);
       expect(friendInfoByFrom.createTime).toBe(friendship.createTime);
 
       const friendInfoByTo = await service.getFriendInfoByUserIdAndFriendId(
@@ -157,8 +154,6 @@ describe('UserService', () => {
         from.id,
       );
       expect(friendInfoByTo.user).toMatchObject(from);
-      expect(friendInfoByTo.status).toBe(friendship.status);
-      expect(friendInfoByTo.updateTime).toBe(friendship.updateTime);
       expect(friendInfoByTo.createTime).toBe(friendship.createTime);
     }
 
