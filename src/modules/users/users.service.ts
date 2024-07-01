@@ -1,13 +1,15 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { IUsersService } from './interface/users.service.interface';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { Or, Repository } from 'typeorm';
 import {
+  FRIEND_REQUEST_REPOSITORY,
   USER_FRIENDSHIP_REPOSITORY,
   USER_REPOSITORY,
 } from 'src/common/constants/providers';
 import { UserFriendship } from './entities/friendship.entity';
 import { FriendInfo } from './types/friend-info.type';
+import { FriendRequest } from './entities/friendrequest.entity';
 
 @Injectable()
 export class UsersService implements IUsersService {
@@ -16,7 +18,20 @@ export class UsersService implements IUsersService {
     protected usersRepository: Repository<User>,
     @Inject(USER_FRIENDSHIP_REPOSITORY)
     protected userFriendshipRepository: Repository<UserFriendship>,
-  ) {}
+    @Inject(FRIEND_REQUEST_REPOSITORY)
+    protected friendRequestRepository: Repository<FriendRequest>,
+  ) { }
+  async getFriendRqeusts(userId: number): Promise<Array<FriendRequest>> {
+    const fqs = await this.friendRequestRepository
+      .createQueryBuilder('fq')
+      .leftJoinAndSelect('fq.from', 'fu')
+      .leftJoinAndSelect('fq.to', 'tu')
+      .where('fu.id = :userId', { userId })
+      .orWhere('tu.id = :userId', { userId })
+      .orderBy('fq.createTime', 'DESC')
+      .getMany();
+    return fqs;
+  }
   async getFriendInfoByUserIdAndFriendId(
     userId: number,
     friendId: number,

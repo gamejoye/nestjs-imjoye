@@ -1,3 +1,4 @@
+import { FriendRequest } from '../entities/friendrequest.entity';
 import { User } from '../entities/user.entity';
 import { FriendInfo } from '../types/friend-info.type';
 
@@ -11,6 +12,7 @@ export interface IUsersService {
     avatarUrl: string,
   ): Promise<User>;
   getFriends(userId: number): Promise<Array<User>>;
+  getFriendRqeusts(userId: number): Promise<Array<FriendRequest>>;
   getFriendInfoByUserIdAndFriendId(
     userId: number,
     friendId: number,

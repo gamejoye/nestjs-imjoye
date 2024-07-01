@@ -8,6 +8,7 @@ import { EnvConfigService } from 'src/modules/env-config/env-config.service';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import {
+  FRIEND_REQUEST_REPOSITORY,
   USER_FRIENDSHIP_REPOSITORY,
   USER_REPOSITORY,
 } from 'src/common/constants/providers';
@@ -15,16 +16,19 @@ import {
   getUserNonExistingEmail,
   getUserNonExistingId,
   initDatabase,
+  Logger,
 } from 'src/common/utils';
 import { UserFriendship } from '../entities/friendship.entity';
 import * as bcrypt from 'bcrypt';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { FriendRequest } from '../entities/friendrequest.entity';
 
 describe('UserService', () => {
   let service: UsersService;
   let envService: EnvConfigService;
   let usersRepository: Repository<User>;
   let userFriendshipsRepository: Repository<UserFriendship>;
+  let friendRequestsRepository: Repository<FriendRequest>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -40,6 +44,9 @@ describe('UserService', () => {
     userFriendshipsRepository = module.get<Repository<UserFriendship>>(
       USER_FRIENDSHIP_REPOSITORY,
     );
+    friendRequestsRepository = module.get<Repository<FriendRequest>>(
+      FRIEND_REQUEST_REPOSITORY,
+    );
   });
 
   beforeEach(async () => {
@@ -48,6 +55,34 @@ describe('UserService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  it('getFriendRequests work correctly', async () => {
+    const requestSorter = (fq1: FriendRequest, fq2: FriendRequest) => {
+      const t1 = new Date(fq1.createTime).getTime();
+      const t2 = new Date(fq2.createTime).getTime();
+      if (t1 === t2) return fq1.id - fq2.id;
+      return t1 - t2;
+    };
+    const users = await usersRepository.find();
+    for (const user of users) {
+      const allRequests = await friendRequestsRepository.find({
+        relations: ['from', 'to'],
+      });
+      const actualRequests = allRequests
+        .filter(({ from, to }) => from.id === user.id || to.id === user.id)
+        .sort(requestSorter);
+      const requests = await service.getFriendRqeusts(user.id);
+      for (let i = 0; i < requests.length - 1; i++) {
+        const rq1 = requests[i];
+        const rq2 = requests[i + 1];
+        const t1 = new Date(rq1.createTime).getTime();
+        const t2 = new Date(rq2.createTime).getTime();
+        expect(t1).toBeGreaterThanOrEqual(t2);
+      }
+      requests.sort(requestSorter);
+      expect(requests).toMatchObject(actualRequests);
+    }
   });
 
   it('getByEmail work correctly', async () => {
