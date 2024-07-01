@@ -32,6 +32,13 @@ import { MessageVo } from '../vo/message.vo';
 import { IAddMessageDto } from '../dto/add-message.dto';
 import { transformMessage } from '../vo/utils';
 
+const messageSorter = (msg1: Message, msg2: Message) => {
+  const t1 = new Date(msg1.createTime).getTime();
+  const t2 = new Date(msg2.createTime).getTime();
+  if (t1 == t2) return msg2.id - msg1.id;
+  return t2 - t1;
+};
+
 describe('ChatroomController (e2e)', () => {
   let app: INestApplication;
   let envConfigService: EnvConfigService;
@@ -122,16 +129,20 @@ describe('ChatroomController (e2e)', () => {
         .set('Authorization', authorization);
       expect(response.status).toBe(HttpStatus.OK);
       const messageVos: Array<MessageVo> = response.body.data;
+      for (let i = 0; i < messageVos.length - 1; i++) {
+        const vo1 = messageVos[i];
+        const vo2 = messageVos[i + 1];
+        const t1 = new Date(vo1.createTime).getTime();
+        const t2 = new Date(vo2.createTime).getTime();
+        expect(t1).toBeGreaterThanOrEqual(t2);
+      }
       const messages = (
         await messagesRepository.find({
           where: { chatroom: { id: chatroom.id } },
           relations: ['from', 'chatroom'],
         })
-      ).sort(
-        (message1, message2) =>
-          new Date(message2.createTime).getTime() -
-          new Date(message1.createTime).getTime(),
-      );
+      ).sort(messageSorter);
+      messageVos.sort(messageSorter);
       expect(
         messages.map((message) => transformMessage(message)),
       ).toMatchObject(messageVos);
