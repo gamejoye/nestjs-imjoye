@@ -1,6 +1,8 @@
+import { FriendRequest } from '../../entities/friendrequest.entity';
 import { User } from '../../entities/user.entity';
 import { FriendInfo } from '../../types/friend-info.type';
 import { FriendInfoVo } from '../friend-info.vo';
+import { FriendRequestVo } from '../friendrequest.vo';
 import { UserVo } from '../user.vo';
 
 export function transformUser(user: User): UserVo {
@@ -16,7 +18,15 @@ export function transformUser(user: User): UserVo {
 
 export function transformFriendInfo(friendInfo: FriendInfo): FriendInfoVo {
   return {
-    user: transformUser(friendInfo.user),
     ...friendInfo,
+    user: transformUser(friendInfo.user),
+  };
+}
+
+export function transformFriendRequest(fq: FriendRequest): FriendRequestVo {
+  return {
+    ...fq,
+    from: transformUser(fq.from),
+    to: transformUser(fq.to),
   };
 }
