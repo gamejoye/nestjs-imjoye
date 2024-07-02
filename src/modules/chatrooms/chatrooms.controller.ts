@@ -212,7 +212,6 @@ export class ChatroomsController {
     );
     const latestMessage =
       await this.messagesService.getLatestMessageByChatroomId(chatroomId);
-    Logger.test('latestMessage: ', latestMessage);
     const summary: ChatroomSummaryVo = {
       chatroom: transformChatroom(chatroom),
       latestVisitTime: userChatroom.latestVisitTime,

@@ -93,7 +93,6 @@ describe('WsGatewayService', () => {
           client.on('open', () => {
             count++;
             if (count === userClients.length) {
-              Logger.test('done!!!');
               resolve();
             }
           });
