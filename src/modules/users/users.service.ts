@@ -28,6 +28,7 @@ export class UsersService implements IUsersService {
         from: { id: from },
         to: { id: to },
       },
+      relations: ['from', 'to'],
       order: { createTime: 'DESC' },
     });
     const existingAdverse = await this.friendRequestRepository.findOne({
@@ -35,6 +36,7 @@ export class UsersService implements IUsersService {
         from: { id: to },
         to: { id: from },
       },
+      relations: ['from', 'to'],
       order: { createTime: 'DESC' },
     });
     const partial: DeepPartial<FriendRequest> = {
@@ -43,47 +45,53 @@ export class UsersService implements IUsersService {
       status: FriendRequestType.PENDING,
     };
     if (!existing && !existingAdverse) {
-      return this.friendRequestRepository.save(partial);
+      // 两者之间从来没有发送过好友请求
+      const saved = await this.friendRequestRepository.save(partial);
+      return this.friendRequestRepository.findOne({
+        where: { id: saved.id },
+        relations: ['from', 'to'],
+      });
     }
-    if (existing && existingAdverse) {
-      if (
-        existing.status === FriendRequestType.PENDING ||
-        existing.status == FriendRequestType.ACCEPT ||
-        existingAdverse.status === FriendRequestType.ACCEPT
-      ) {
-        // 无法发送 要么已经发送过一次 要么已经是好友了
-        return null;
-      }
 
-      if (existingAdverse.status === FriendRequestType.PENDING) {
-        const accept: FriendRequest = {
-          ...existingAdverse,
-          status: FriendRequestType.ACCEPT,
-        };
-        return this.friendRequestRepository.save(accept);
+    // 只考虑最后一次的请求
+    let lastestFriendRequest: FriendRequest;
+    if (!existing) lastestFriendRequest = existingAdverse;
+    else if (!existingAdverse) lastestFriendRequest = existing;
+    else {
+      const t1 = new Date(existing.createTime).getTime();
+      const t2 = new Date(existingAdverse.createTime).getTime();
+      if ((t1 === t2 && existing.id > existingAdverse.id) || t1 >= t2) {
+        lastestFriendRequest = existing;
+      } else {
+        lastestFriendRequest = existingAdverse;
       }
-    } else if (existing) {
-      if (
-        existing.status === FriendRequestType.PENDING ||
-        existing.status === FriendRequestType.ACCEPT
-      ) {
-        return null;
-      }
-      return this.friendRequestRepository.save(partial);
-    } else {
-      if (existingAdverse.status === FriendRequestType.ACCEPT) {
-        return null;
-      }
-      if (existingAdverse.status === FriendRequestType.PENDING) {
-        const accept: FriendRequest = {
-          ...existingAdverse,
-          status: FriendRequestType.ACCEPT,
-        };
-        return this.friendRequestRepository.save(accept);
-      }
-      return this.friendRequestRepository.save(partial);
     }
+
+    if (lastestFriendRequest.status === FriendRequestType.ACCEPT) return null;
+
+    if (lastestFriendRequest.status === FriendRequestType.PENDING) {
+      // 重复发送
+      if (lastestFriendRequest.from.id === from) return null;
+
+      // 对方之前发送过 直接同意
+      const accept: FriendRequest = {
+        ...lastestFriendRequest,
+        status: FriendRequestType.ACCEPT,
+      };
+      const saved = await this.friendRequestRepository.save(accept);
+      return this.friendRequestRepository.findOne({
+        where: { id: saved.id },
+        relations: ['from', 'to'],
+      });
+    }
+
+    const saved = await this.friendRequestRepository.save(partial);
+    return this.friendRequestRepository.findOne({
+      where: { id: saved.id },
+      relations: ['from', 'to'],
+    });
   }
+
   async updateFriendRequestStatus(
     id: number,
     status: FriendRequestType,
