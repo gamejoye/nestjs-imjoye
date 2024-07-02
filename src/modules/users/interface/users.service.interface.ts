@@ -14,6 +14,7 @@ export interface IUsersService {
   ): Promise<User>;
   getFriends(userId: number): Promise<Array<User>>;
   getFriendRqeusts(userId: number): Promise<Array<FriendRequest>>;
+  getFriendRequestById(id: number): Promise<FriendRequest>;
   updateFriendRequestStatus(
     id: number,
     status: FriendRequestType,

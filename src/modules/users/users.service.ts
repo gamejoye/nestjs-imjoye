@@ -21,7 +21,13 @@ export class UsersService implements IUsersService {
     protected userFriendshipRepository: Repository<UserFriendship>,
     @Inject(FRIEND_REQUEST_REPOSITORY)
     protected friendRequestRepository: Repository<FriendRequest>,
-  ) {}
+  ) { }
+  getFriendRequestById(id: number): Promise<FriendRequest> {
+    return this.friendRequestRepository.findOne({
+      where: { id },
+      relations: ['from', 'to'],
+    });
+  }
   async createFriendRequest(from: number, to: number): Promise<FriendRequest> {
     const existing = await this.friendRequestRepository.findOne({
       where: {
