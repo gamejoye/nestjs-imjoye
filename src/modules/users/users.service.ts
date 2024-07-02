@@ -52,7 +52,7 @@ export class UsersService implements IUsersService {
         existingAdverse.status === FriendRequestType.ACCEPT
       ) {
         // 无法发送 要么已经发送过一次 要么已经是好友了
-        return existing;
+        return null;
       }
 
       if (existingAdverse.status === FriendRequestType.PENDING) {
@@ -67,12 +67,12 @@ export class UsersService implements IUsersService {
         existing.status === FriendRequestType.PENDING ||
         existing.status === FriendRequestType.ACCEPT
       ) {
-        return existing;
+        return null;
       }
       return this.friendRequestRepository.save(partial);
     } else {
       if (existingAdverse.status === FriendRequestType.ACCEPT) {
-        return existing;
+        return null;
       }
       if (existingAdverse.status === FriendRequestType.PENDING) {
         const accept: FriendRequest = {
