@@ -109,6 +109,36 @@ describe('WsGatewayService', () => {
     return userClients;
   };
 
+  it('notifyNewFriend work correctly', async () => {
+    const sorter = (o1: [number, User], o2: [number, User]) => {
+      if (o1[0] === o2[0]) return o1[1].id - o2[1].id;
+      return o1[0] - o2[0];
+    };
+    const users = await usersRepository.find();
+    const clients = await connectToServer(users);
+    const all: Array<[number, User]> = [];
+    const expected: Array<[number, User]> = [];
+    clients.forEach((client, index) => {
+      client.on('message', (rawData) => {
+        const message: IWebSocketMessage<User> = JSON.parse(
+          rawData.toString('utf-8'),
+        );
+        all.push([users[index].id, message.payload]);
+      });
+    });
+    const N = users.length;
+    for (let i = 0; i < N; i++) {
+      for (let j = i + 1; j < N; j++) {
+        wsGatewayService.notifyNewFriend(users[i].id, users[j]);
+        expected.push([users[i].id, users[j]]);
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    all.sort(sorter);
+    expected.sort(sorter);
+    expect(all).toMatchObject(expected);
+  });
+
   it('notifyNewFriendRequest work correctly', async () => {
     const users = await usersRepository.find();
     const clients = await connectToServer(users);
