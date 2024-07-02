@@ -1,8 +1,9 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { IUsersService } from './interface/users.service.interface';
 import { User } from './entities/user.entity';
-import { DeepPartial, Repository } from 'typeorm';
+import { DataSource, DeepPartial, Repository } from 'typeorm';
 import {
+  DATA_SOURCE,
   FRIEND_REQUEST_REPOSITORY,
   USER_FRIENDSHIP_REPOSITORY,
   USER_REPOSITORY,
@@ -11,6 +12,10 @@ import { UserFriendship } from './entities/friendship.entity';
 import { FriendInfo } from './types/friend-info.type';
 import { FriendRequest } from './entities/friendrequest.entity';
 import { FriendRequestType } from 'src/common/constants/friendrequest';
+import { Chatroom } from '../chatrooms/entities/chatroom.entity';
+import { ChatroomType } from 'src/common/constants/chatroom';
+import { getCurrentDatetime, Logger } from 'src/common/utils';
+import { UserChatroom } from '../chatrooms/entities/user-chatroom.entity';
 
 @Injectable()
 export class UsersService implements IUsersService {
@@ -21,6 +26,7 @@ export class UsersService implements IUsersService {
     protected userFriendshipRepository: Repository<UserFriendship>,
     @Inject(FRIEND_REQUEST_REPOSITORY)
     protected friendRequestRepository: Repository<FriendRequest>,
+    @Inject(DATA_SOURCE) protected dataSouce: DataSource,
   ) { }
   getFriendRequestById(id: number): Promise<FriendRequest> {
     return this.friendRequestRepository.findOne({
@@ -29,6 +35,19 @@ export class UsersService implements IUsersService {
     });
   }
   async createFriendRequest(from: number, to: number): Promise<FriendRequest> {
+    let userFS = await this.userFriendshipRepository.findOne({
+      where: { from: { id: from }, to: { id: to } },
+    });
+    if (!userFS) {
+      userFS = await this.userFriendshipRepository.findOne({
+        where: { to: { id: from }, from: { id: to } },
+      });
+    }
+    if (userFS) {
+      // 已经是好友了
+      return null;
+    }
+
     const existing = await this.friendRequestRepository.findOne({
       where: {
         from: { id: from },
@@ -73,21 +92,61 @@ export class UsersService implements IUsersService {
       }
     }
 
-    if (lastestFriendRequest.status === FriendRequestType.ACCEPT) return null;
-
     if (lastestFriendRequest.status === FriendRequestType.PENDING) {
       // 重复发送
       if (lastestFriendRequest.from.id === from) return null;
 
       // 对方之前发送过 直接同意
-      const accept: FriendRequest = {
-        ...lastestFriendRequest,
-        status: FriendRequestType.ACCEPT,
-      };
-      const saved = await this.friendRequestRepository.save(accept);
-      return this.friendRequestRepository.findOne({
-        where: { id: saved.id },
-        relations: ['from', 'to'],
+      return this.dataSouce.transaction(async (manager) => {
+        const createTime = getCurrentDatetime();
+        const accept: FriendRequest = {
+          ...lastestFriendRequest,
+          status: FriendRequestType.ACCEPT,
+          updateTime: createTime,
+        };
+        // 更新好友请求
+        const savedFriendRequest = await manager.save(FriendRequest, accept);
+        const partialSingleChatroom: DeepPartial<Chatroom> = {
+          type: ChatroomType.SINGLE,
+          createTime,
+        };
+        // 插入单聊
+        const savedChatroom = await manager.save(
+          Chatroom,
+          partialSingleChatroom,
+        );
+        const partialUserChatroom1: DeepPartial<UserChatroom> = {
+          user: { id: accept.to.id },
+          chatroom: { id: savedChatroom.id },
+          createTime,
+          latestVisitTime: createTime,
+        };
+        const partialUserChatroom2: DeepPartial<UserChatroom> = {
+          user: { id: accept.from.id },
+          chatroom: { id: savedChatroom.id },
+          createTime,
+          latestVisitTime: createTime,
+        };
+        // 插入用户和单聊的关系
+        await manager.save(UserChatroom, partialUserChatroom1);
+        await manager.save(UserChatroom, partialUserChatroom2);
+        const partialUserFs: DeepPartial<UserFriendship> = {
+          from: { id: accept.from.id },
+          to: { id: accept.to.id },
+          chatroom: { id: savedChatroom.id },
+          createTime,
+        };
+        // 插入好友关系
+        await manager.save(UserFriendship, partialUserFs);
+        const [from, to] = await Promise.all([
+          this.usersRepository.findOne({ where: { id: accept.from.id } }),
+          this.usersRepository.findOne({ where: { id: accept.to.id } }),
+        ]);
+        return {
+          ...savedFriendRequest,
+          from,
+          to,
+        };
       });
     }
 
