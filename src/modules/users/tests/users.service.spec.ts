@@ -59,6 +59,16 @@ describe('UserService', () => {
     expect(service).toBeDefined();
   });
 
+  it('getFriendRequestById work correctly', async () => {
+    const actualFqs = await friendRequestsRepository.find({
+      relations: ['from', 'to'],
+    });
+    for (const actual of actualFqs) {
+      const fq = await service.getFriendRequestById(actual.id);
+      expect(actual).toMatchObject(fq);
+    }
+  });
+
   it('createFriendRequest work correctly', async () => {
     const ids: [number, number] = await getNonExsitingFriendRequest(
       usersRepository,
