@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   HttpException,
@@ -6,6 +7,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Res,
   UploadedFile,
   UseGuards,
@@ -33,12 +35,16 @@ import {
   ApiOkResponseResult,
 } from 'src/common/types/response.type';
 import { FriendRequestVo } from './vo/friendrequest.vo';
+import { PostFriendRequestDto } from './dto/post-friend-request.dto';
+import { FriendRequestType } from 'src/common/constants/friendrequest';
+import { WsGatewayService } from '../ws-gateway/ws-gateway.service';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(
     protected readonly usersService: UsersService,
+    protected readonly wsService: WsGatewayService,
     protected readonly envConfigService: EnvConfigService,
   ) {}
 
@@ -110,6 +116,53 @@ export class UsersController {
     }
     const fqs = await this.usersService.getFriendRqeusts(user.id);
     return fqs;
+  }
+
+  @Post(':id/friends/requests')
+  @UseGuards(JwtGuard)
+  @ApiOperation({
+    summary:
+      '发送一个好友请求，如果互相发送则后面发送的请求等价于直接同意之前的请求',
+  })
+  @ApiCreatedResponseResult({
+    model: FriendRequestVo,
+    description: '成功发送好友请求或者默认同意之前的好友请求',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: '未认证用户',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: '权限不足',
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: '重复发送好友请求',
+  })
+  async postFriendRequest(
+    @GetUser() user: User,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: PostFriendRequestDto,
+  ) {
+    if (user.id !== id || dto.from !== id) {
+      throw new HttpException('权限不足', HttpStatus.FORBIDDEN);
+    }
+    const fq = await this.usersService.createFriendRequest(dto.from, dto.to);
+    if (!fq) {
+      throw new HttpException('重复发送好友请求', HttpStatus.CONFLICT);
+    }
+    if (fq.status === FriendRequestType.PENDING) {
+      // 通知接收者有新的好友请求
+      await this.wsService.notifyNewFriendRequest(fq.to.id, fq);
+    } else if (fq.status === FriendRequestType.ACCEPT) {
+      // 通知发送者和发送者有新的好友
+      await Promise.all([
+        this.wsService.notifyNewFriend(fq.from.id, fq.to),
+        this.wsService.notifyNewFriend(fq.to.id, fq.from),
+      ]);
+    }
+    return fq;
   }
 
   @Get(':id/friends/:friendId')
