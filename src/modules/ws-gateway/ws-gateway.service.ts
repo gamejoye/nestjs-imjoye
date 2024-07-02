@@ -98,8 +98,10 @@ export class WsGatewayService
 
   onModuleDestroy() {
     if (this.wss) this.wss.close(() => {});
-    for (const entry of this.onlineClients.entries()) {
-      entry[1].close();
+    if (this.onlineClients) {
+      for (const entry of this.onlineClients.entries()) {
+        entry[1].close();
+      }
     }
   }
 
