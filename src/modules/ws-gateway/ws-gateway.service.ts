@@ -16,6 +16,7 @@ import * as jwt from 'jsonwebtoken';
 import { EnvConfigService } from '../env-config/env-config.service';
 import { Logger } from 'src/common/utils';
 import { IWsGatewayService } from './interface/ws-gateway.interface.service';
+import { FriendRequest } from '../users/entities/friendrequest.entity';
 
 @Injectable()
 export class WsGatewayService
@@ -107,6 +108,17 @@ export class WsGatewayService
   //   Logger.log(message, pong);
   //   client.send(JSON.stringify(pong));
   // }
+
+  async notifyNewFriendRequest(to: number, fq: FriendRequest) {
+    const onlineClient = this.onlineClients.get(to);
+    if (onlineClient) {
+      const socketMessage: IWebSocketMessage<FriendRequest> = {
+        event: WebSocketEventType.NEW_FRIEND_REQUEST,
+        payload: fq,
+      };
+      onlineClient.send(JSON.stringify(socketMessage));
+    }
+  }
 
   async notifynChat(from: number, message: Message) {
     const users = await this.userRepository
