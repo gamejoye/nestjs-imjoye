@@ -23,6 +23,7 @@ import * as bcrypt from 'bcrypt';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { FriendRequest } from '../entities/friendrequest.entity';
 import { FriendRequestType } from 'src/common/constants/friendrequest';
+import { WsGatewayService } from 'src/modules/ws-gateway/ws-gateway.service';
 
 describe('UserService', () => {
   let service: UsersService;
@@ -35,7 +36,7 @@ describe('UserService', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [DatabaseModule, EnvConfigModule],
       controllers: [UsersController],
-      providers: [...usersProviders, UsersService],
+      providers: [...usersProviders, UsersService, WsGatewayService],
       exports: [UsersService],
     }).compile();
 

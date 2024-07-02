@@ -14,6 +14,7 @@ import { EnvConfigService } from 'src/modules/env-config/env-config.service';
 import { getCurrentDatetime } from 'src/common/utils';
 import { FriendRequest } from '../entities/friendrequest.entity';
 import { FriendRequestType } from 'src/common/constants/friendrequest';
+import { WsGatewayService } from 'src/modules/ws-gateway/ws-gateway.service';
 
 /**
  * 数据
@@ -62,7 +63,7 @@ describe('UserController', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [DatabaseModule, EnvConfigModule],
       controllers: [UsersController],
-      providers: [...usersProviders, UsersService],
+      providers: [...usersProviders, UsersService, WsGatewayService],
       exports: [UsersService],
     })
       .overrideProvider(UsersService)
