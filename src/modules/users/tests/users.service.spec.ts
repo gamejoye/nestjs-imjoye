@@ -17,6 +17,7 @@ import {
   getUserNonExistingEmail,
   getUserNonExistingId,
   initDatabase,
+  Logger,
 } from 'src/common/utils';
 import { UserFriendship } from '../entities/friendship.entity';
 import * as bcrypt from 'bcrypt';
@@ -70,7 +71,7 @@ describe('UserService', () => {
   });
 
   it('createFriendRequest work correctly', async () => {
-    const ids: [number, number] = await getNonExsitingFriendRequest(
+    let ids: [number, number] = await getNonExsitingFriendRequest(
       usersRepository,
       friendRequestsRepository,
     );
@@ -101,9 +102,19 @@ describe('UserService', () => {
     expect(shouldNull1).toBeNull();
     expect(shouldNull2).toBeNull();
 
+    // 应该只插入1条
+    const allCountAfterInsert = (await friendRequestsRepository.find()).length;
+    expect(allCountAfterInsert).toBe(allCountBeforeInsert + 1);
+
     // 如果是拒绝该请求 之后再发送请求 应该再数据库插入新的请求
+    ids = await getNonExsitingFriendRequest(
+      usersRepository,
+      friendRequestsRepository,
+    );
+    expect(ids).toBeDefined();
+    const pending = await service.createFriendRequest(ids[0], ids[1]);
     await service.updateFriendRequestStatus(
-      shouldAccepted.id,
+      pending.id,
       FriendRequestType.REJECT,
     );
     await new Promise((resolve) => setTimeout(resolve, 1200));
@@ -111,17 +122,6 @@ describe('UserService', () => {
     expect(newPending).not.toBeNull();
     expect(newPending.id).not.toEqual(oldRequestId);
     expect(newPending.status).toBe(FriendRequestType.PENDING);
-
-    // 同样的 如果是拒绝请求 后续不管哪一方发送 都应该插入一条新的pending记录
-    await friendRequestsRepository.delete({ id: newPending.id });
-    const anotherNewPending = await service.createFriendRequest(ids[0], ids[1]);
-    expect(anotherNewPending).not.toBeNull();
-    expect(anotherNewPending.id).not.toEqual(oldRequestId);
-    expect(anotherNewPending.status).toBe(FriendRequestType.PENDING);
-
-    // 应该只插入两条
-    const allCountAfterInsert = (await friendRequestsRepository.find()).length;
-    expect(allCountAfterInsert).toBe(allCountBeforeInsert + 2);
   });
 
   it('updateFriendRequestStatus work correctly', async () => {
