@@ -6,6 +6,7 @@ import { User } from 'src/modules/users/entities/user.entity';
 import { UserChatroom } from 'src/modules/chatrooms/entities/user-chatroom.entity';
 import { LoginUserRequestDto } from 'src/modules/auth/dto/login.dto';
 import { exec } from 'child_process';
+import { FriendRequest } from 'src/modules/users/entities/friendrequest.entity';
 
 export const dataForValidIsNumber = ['not a number', NaN, undefined, null];
 export const usersLoginDto: Array<LoginUserRequestDto> = [
@@ -121,6 +122,35 @@ export async function getNonExistingUserChatroom(
     }
   }
   return nonExistingUserChatrooms;
+}
+
+export async function getNonExsitingFriendRequest(
+  usersRepo: Repository<User>,
+  friendRequestRepo: Repository<FriendRequest>,
+) {
+  const users = await usersRepo.find();
+  let ids: [number, number];
+  for (let i = 0; i < users.length; i++) {
+    for (let j = i + 1; j < users.length; j++) {
+      const existing1 = await friendRequestRepo.findOne({
+        where: {
+          from: { id: users[i].id },
+          to: { id: users[j].id },
+        },
+      });
+      const existing2 = await friendRequestRepo.findOne({
+        where: {
+          to: { id: users[i].id },
+          from: { id: users[j].id },
+        },
+      });
+      if (!existing1 && !existing2) {
+        ids = [users[i].id, users[j].id];
+        break;
+      }
+    }
+  }
+  return ids;
 }
 
 export async function sleep(ms: number): Promise<void> {

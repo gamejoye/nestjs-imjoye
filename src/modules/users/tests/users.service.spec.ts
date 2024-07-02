@@ -13,6 +13,7 @@ import {
   USER_REPOSITORY,
 } from 'src/common/constants/providers';
 import {
+  getNonExsitingFriendRequest,
   getUserNonExistingEmail,
   getUserNonExistingId,
   initDatabase,
@@ -58,28 +59,10 @@ describe('UserService', () => {
   });
 
   it('createFriendRequest work correctly', async () => {
-    const users = await usersRepository.find();
-    let ids: [number, number];
-    for (let i = 0; i < users.length; i++) {
-      for (let j = i + 1; j < users.length; j++) {
-        const existing1 = await friendRequestsRepository.findOne({
-          where: {
-            from: { id: users[i].id },
-            to: { id: users[j].id },
-          },
-        });
-        const existing2 = await friendRequestsRepository.findOne({
-          where: {
-            to: { id: users[i].id },
-            from: { id: users[j].id },
-          },
-        });
-        if (!existing1 && !existing2) {
-          ids = [users[i].id, users[j].id];
-          break;
-        }
-      }
-    }
+    const ids: [number, number] = await getNonExsitingFriendRequest(
+      usersRepository,
+      friendRequestsRepository,
+    );
     expect(ids).toBeDefined();
     const allCountBeforeInsert = (await friendRequestsRepository.find()).length;
 
