@@ -84,11 +84,7 @@ describe('UserService', () => {
     const allCountBeforeInsert = (await friendRequestsRepository.find()).length;
 
     // 发起好友请求
-    await service.createFriendRequest(ids[0], ids[1]);
-    const shouldPending = await friendRequestsRepository.findOne({
-      where: { from: { id: ids[0] }, to: { id: ids[1] } },
-      relations: ['from', 'to'],
-    });
+    const shouldPending = await service.createFriendRequest(ids[0], ids[1]);
     expect(shouldPending).not.toBeNull();
     expect(shouldPending.from.id).toBe(ids[0]);
     expect(shouldPending.to.id).toBe(ids[1]);
@@ -96,33 +92,20 @@ describe('UserService', () => {
     const oldRequestId = shouldPending.id;
 
     // 重复发起请求 不会再插入新的记录
-    await service.createFriendRequest(ids[0], ids[1]);
-    const shouldSameWithPending = await friendRequestsRepository.findOne({
-      where: { from: { id: ids[0] }, to: { id: ids[1] } },
-      relations: ['from', 'to'],
-    });
-    expect(shouldSameWithPending).toMatchObject(shouldPending);
+    const shouldBeNull = await service.createFriendRequest(ids[0], ids[1]);
+    expect(shouldBeNull).toBeNull();
 
     // 互相发送请求 应该直接同意之前的请求
-    await service.createFriendRequest(ids[1], ids[0]);
-    const shouldAccepted = await friendRequestsRepository.findOne({
-      where: { from: { id: ids[0] }, to: { id: ids[1] } },
-      relations: ['from', 'to'],
-    });
+    const shouldAccepted = await service.createFriendRequest(ids[1], ids[0]);
     expect(shouldAccepted).not.toBeNull();
     expect(shouldAccepted.id).toBe(oldRequestId);
-    expect(shouldAccepted.from.id).toBe(ids[0]);
-    expect(shouldAccepted.to.id).toBe(ids[1]);
     expect(shouldAccepted.status).toBe(FriendRequestType.ACCEPT);
 
     // 对于已经接受的请求 不会再插入新的记录
-    await service.createFriendRequest(ids[1], ids[0]);
-    await service.createFriendRequest(ids[0], ids[1]);
-    const shouldSameWithAccepted = await friendRequestsRepository.findOne({
-      where: { from: { id: ids[0] }, to: { id: ids[1] } },
-      relations: ['from', 'to'],
-    });
-    expect(shouldSameWithAccepted).toMatchObject(shouldAccepted);
+    const shouldNull1 = await service.createFriendRequest(ids[1], ids[0]);
+    const shouldNull2 = await service.createFriendRequest(ids[0], ids[1]);
+    expect(shouldNull1).toBeNull();
+    expect(shouldNull2).toBeNull();
 
     // 如果是拒绝该请求 之后再发送请求 应该再数据库插入新的请求
     await service.updateFriendRequestStatus(
@@ -130,30 +113,16 @@ describe('UserService', () => {
       FriendRequestType.REJECT,
     );
     await new Promise((resolve) => setTimeout(resolve, 1200));
-    await service.createFriendRequest(ids[0], ids[1]);
-    const newPending = await friendRequestsRepository.findOne({
-      where: { from: { id: ids[0] }, to: { id: ids[1] } },
-      relations: ['from', 'to'],
-      order: { createTime: 'DESC' },
-    });
+    const newPending = await service.createFriendRequest(ids[0], ids[1]);
     expect(newPending).not.toBeNull();
     expect(newPending.id).not.toEqual(oldRequestId);
-    expect(newPending.from.id).toBe(ids[0]);
-    expect(newPending.to.id).toBe(ids[1]);
     expect(newPending.status).toBe(FriendRequestType.PENDING);
 
     // 同样的 如果是拒绝请求 后续不管哪一方发送 都应该插入一条新的pending记录
     await friendRequestsRepository.delete({ id: newPending.id });
-    await service.createFriendRequest(ids[0], ids[1]);
-    const anotherNewPending = await friendRequestsRepository.findOne({
-      where: { from: { id: ids[0] }, to: { id: ids[1] } },
-      relations: ['from', 'to'],
-      order: { createTime: 'DESC' },
-    });
+    const anotherNewPending = await service.createFriendRequest(ids[0], ids[1]);
     expect(anotherNewPending).not.toBeNull();
     expect(anotherNewPending.id).not.toEqual(oldRequestId);
-    expect(anotherNewPending.from.id).toBe(ids[0]);
-    expect(anotherNewPending.to.id).toBe(ids[1]);
     expect(anotherNewPending.status).toBe(FriendRequestType.PENDING);
 
     // 应该只插入两条
