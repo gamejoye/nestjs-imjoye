@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { IUsersService } from './interface/users.service.interface';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import {
   FRIEND_REQUEST_REPOSITORY,
   USER_FRIENDSHIP_REPOSITORY,
@@ -22,6 +22,68 @@ export class UsersService implements IUsersService {
     @Inject(FRIEND_REQUEST_REPOSITORY)
     protected friendRequestRepository: Repository<FriendRequest>,
   ) {}
+  async createFriendRequest(from: number, to: number): Promise<FriendRequest> {
+    const existing = await this.friendRequestRepository.findOne({
+      where: {
+        from: { id: from },
+        to: { id: to },
+      },
+      order: { createTime: 'DESC' },
+    });
+    const existingAdverse = await this.friendRequestRepository.findOne({
+      where: {
+        from: { id: to },
+        to: { id: from },
+      },
+      order: { createTime: 'DESC' },
+    });
+    const partial: DeepPartial<FriendRequest> = {
+      from: { id: from },
+      to: { id: to },
+      status: FriendRequestType.PENDING,
+    };
+    if (!existing && !existingAdverse) {
+      return this.friendRequestRepository.save(partial);
+    }
+    if (existing && existingAdverse) {
+      if (
+        existing.status === FriendRequestType.PENDING ||
+        existing.status == FriendRequestType.ACCEPT ||
+        existingAdverse.status === FriendRequestType.ACCEPT
+      ) {
+        // 无法发送 要么已经发送过一次 要么已经是好友了
+        return existing;
+      }
+
+      if (existingAdverse.status === FriendRequestType.PENDING) {
+        const accept: FriendRequest = {
+          ...existingAdverse,
+          status: FriendRequestType.ACCEPT,
+        };
+        return this.friendRequestRepository.save(accept);
+      }
+    } else if (existing) {
+      if (
+        existing.status === FriendRequestType.PENDING ||
+        existing.status === FriendRequestType.ACCEPT
+      ) {
+        return existing;
+      }
+      return this.friendRequestRepository.save(partial);
+    } else {
+      if (existingAdverse.status === FriendRequestType.ACCEPT) {
+        return existing;
+      }
+      if (existingAdverse.status === FriendRequestType.PENDING) {
+        const accept: FriendRequest = {
+          ...existingAdverse,
+          status: FriendRequestType.ACCEPT,
+        };
+        return this.friendRequestRepository.save(accept);
+      }
+      return this.friendRequestRepository.save(partial);
+    }
+  }
   async updateFriendRequestStatus(
     id: number,
     status: FriendRequestType,

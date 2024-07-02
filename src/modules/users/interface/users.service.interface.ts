@@ -18,6 +18,7 @@ export interface IUsersService {
     id: number,
     status: FriendRequestType,
   ): Promise<FriendRequest>;
+  createFriendRequest(from: number, to: number): Promise<FriendRequest>;
   getFriendInfoByUserIdAndFriendId(
     userId: number,
     friendId: number,
