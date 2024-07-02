@@ -27,6 +27,8 @@ import { UserVo } from '../vo/user.vo';
 import { FriendInfoVo } from '../vo/friend-info.vo';
 import { FriendRequest } from '../entities/friendrequest.entity';
 import { FriendRequestVo } from '../vo/friendrequest.vo';
+import { FriendRequestType } from 'src/common/constants/friendrequest';
+import { PostFriendRequestDto } from '../dto/post-friend-request.dto';
 
 const userSorter = (user1: User, user2: User) => user1.id - user2.id;
 const descRequestSorter = (fq1: FriendRequest, fq2: FriendRequest) => {
@@ -102,6 +104,75 @@ describe('UsersController (e2e)', () => {
   afterAll(async () => {
     await initDatabase(envConfigService.getDatabaseConfig());
     await app.close();
+  });
+
+  it('POST /users/:id/friends/requests', async () => {
+    const users = await usersRepository.find();
+    const acceptFqs = await friendRequestsRepository.find({
+      where: { status: FriendRequestType.ACCEPT },
+      relations: ['from', 'to'],
+    });
+    for (const accept of acceptFqs) {
+      const { from, to } = accept;
+      const authorization = getAuthorization(from.id);
+      const dto: PostFriendRequestDto = {
+        from: from.id,
+        to: to.id,
+      };
+      const conflictResponse = await request(app.getHttpServer())
+        .post(`/users/${from.id}/friends/requests`)
+        .set('Authorization', authorization)
+        .send(dto);
+      expect(conflictResponse.status).toBe(HttpStatus.CONFLICT);
+
+      const unauthorizedResponse = await request(app.getHttpServer())
+        .post(`/users/${from.id}/friends/requests`)
+        .send(dto);
+      expect(unauthorizedResponse.status).toBe(HttpStatus.UNAUTHORIZED);
+
+      const forbiddenResponse = await request(app.getHttpServer())
+        .post(`/users/${to.id}/friends/requests`)
+        .set('Authorization', authorization)
+        .send(dto);
+      expect(forbiddenResponse.status).toBe(HttpStatus.FORBIDDEN);
+    }
+    for (const user of users) {
+      const authorization = getAuthorization(user.id);
+      let toId = -1;
+      for (const toUser of users) {
+        if (user.id === toUser.id) continue;
+        let existing = await friendRequestsRepository.findOne({
+          where: {
+            from: { id: user.id },
+            to: { id: toUser.id },
+          },
+        });
+        if (!existing) {
+          existing = await friendRequestsRepository.findOne({
+            where: {
+              to: { id: user.id },
+              from: { id: toUser.id },
+            },
+          });
+        }
+        if (!existing) {
+          toId = toUser.id;
+          break;
+        }
+      }
+      if (toId === -1) continue;
+      const dto: PostFriendRequestDto = {
+        from: user.id,
+        to: toId,
+      };
+      const response = await request(app.getHttpServer())
+        .post(`/users/${user.id}/friends/requests`)
+        .set('Authorization', authorization)
+        .send(dto);
+      expect(response.status).toBe(HttpStatus.CREATED);
+      const fq = response.body.data as FriendRequestVo;
+      expect(fq.status).toBe(FriendRequestType.PENDING);
+    }
   });
 
   it('GET /users/:id/friends/requests', async () => {

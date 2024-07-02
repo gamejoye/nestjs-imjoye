@@ -11,10 +11,11 @@ import { transformFriendInfo, transformUser } from '../vo/utils/user-transform';
 import { FriendInfo } from '../types/friend-info.type';
 import { Response } from 'express';
 import { EnvConfigService } from 'src/modules/env-config/env-config.service';
-import { getCurrentDatetime } from 'src/common/utils';
+import { getCurrentDatetime, Logger } from 'src/common/utils';
 import { FriendRequest } from '../entities/friendrequest.entity';
 import { FriendRequestType } from 'src/common/constants/friendrequest';
 import { WsGatewayService } from 'src/modules/ws-gateway/ws-gateway.service';
+import { IWsGatewayService } from 'src/modules/ws-gateway/interface/ws-gateway.interface.service';
 
 /**
  * 数据
@@ -47,12 +48,32 @@ const user2: User = {
   fromFriendRequests: [],
   toFriendRequests: [],
 };
+const user3: User = {
+  id: 2,
+  username: 'user3333',
+  email: 'user3333@gmail.com',
+  passwordHash: '',
+  avatarUrl: '',
+  description: '',
+  createTime: getCurrentDatetime(),
+  userChatrooms: [],
+  fromFriendships: [],
+  toFriendships: [],
+  fromFriendRequests: [],
+  toFriendRequests: [],
+};
 
 const mockUsersService: Partial<IUsersService> = {
   getById: jest.fn(),
   getFriends: jest.fn(),
   getFriendInfoByUserIdAndFriendId: jest.fn(),
   getFriendRqeusts: jest.fn(),
+  createFriendRequest: jest.fn(),
+};
+
+const mockWsGateWayService: Partial<IWsGatewayService> = {
+  notifyNewFriend: jest.fn(),
+  notifyNewFriendRequest: jest.fn(),
 };
 
 describe('UserController', () => {
@@ -68,6 +89,8 @@ describe('UserController', () => {
     })
       .overrideProvider(UsersService)
       .useValue(mockUsersService)
+      .overrideProvider(WsGatewayService)
+      .useValue(mockWsGateWayService)
       .compile();
 
     controller = module.get<UsersController>(UsersController);
@@ -80,6 +103,103 @@ describe('UserController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  it('postFriendRequest', async () => {
+    const pendingRq: FriendRequest = {
+      id: 1,
+      from: user1,
+      to: user2,
+      status: FriendRequestType.PENDING,
+      createTime: getCurrentDatetime(),
+      updateTime: null,
+    };
+    const acceptRq: FriendRequest = {
+      id: 1,
+      from: user2,
+      to: user3,
+      status: FriendRequestType.ACCEPT,
+      createTime: getCurrentDatetime(),
+      updateTime: getCurrentDatetime(),
+    };
+    let callCount1 = 0;
+    let callCount2 = 0;
+    (mockUsersService.createFriendRequest as jest.Mock).mockImplementation(
+      (from: number, to: number) => {
+        if (!callCount1 && from === user1.id) {
+          callCount1++;
+          return pendingRq;
+        }
+        if (!callCount2 && from === user2.id) {
+          callCount2++;
+          return acceptRq;
+        }
+        return null;
+      },
+    );
+    await controller.postFriendRequest(user1, user1.id, {
+      from: user1.id,
+      to: user2.id,
+    });
+    expect(mockUsersService.createFriendRequest).toHaveBeenCalledTimes(1);
+    expect(mockUsersService.createFriendRequest).toHaveBeenCalledWith(
+      user1.id,
+      user2.id,
+    );
+    expect(mockWsGateWayService.notifyNewFriendRequest).toHaveBeenCalledTimes(
+      1,
+    );
+    expect(mockWsGateWayService.notifyNewFriendRequest).toHaveBeenCalledWith(
+      user2.id,
+      pendingRq,
+    );
+
+    await controller.postFriendRequest(user2, user2.id, {
+      from: user2.id,
+      to: user3.id,
+    });
+    expect(mockUsersService.createFriendRequest).toHaveBeenCalledTimes(2);
+    expect(mockUsersService.createFriendRequest).toHaveBeenCalledWith(
+      user2.id,
+      user3.id,
+    );
+    expect(mockWsGateWayService.notifyNewFriend).toHaveBeenCalledTimes(2);
+    expect(mockWsGateWayService.notifyNewFriend).toHaveBeenCalledWith(
+      user3.id,
+      user2,
+    );
+    expect(mockWsGateWayService.notifyNewFriend).toHaveBeenCalledWith(
+      user2.id,
+      user3,
+    );
+
+    // 重复发起
+    await controller
+      .postFriendRequest(user2, user2.id, {
+        from: user2.id,
+        to: user3.id,
+      })
+      .then(() => {
+        expect(true).toBe(false);
+      })
+      .catch((e) => {
+        expect(e).toBeInstanceOf(HttpException);
+        expect((e as HttpException).getStatus()).toBe(HttpStatus.CONFLICT);
+      });
+
+    // 异常
+    await controller
+      .postFriendRequest(user2, user1.id, {
+        from: user3.id,
+        to: user1.id,
+      })
+      .then(() => {
+        expect(true).toBe(false);
+      })
+      .catch((e) => {
+        expect(e).toBeInstanceOf(HttpException);
+        expect((e as HttpException).getStatus()).toBe(HttpStatus.FORBIDDEN);
+      });
   });
 
   it('getFriendRequestsById', async () => {
