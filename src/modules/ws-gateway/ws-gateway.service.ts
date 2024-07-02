@@ -20,7 +20,8 @@ import { FriendRequest } from '../users/entities/friendrequest.entity';
 
 @Injectable()
 export class WsGatewayService
-  implements OnModuleInit, OnModuleDestroy, IWsGatewayService {
+  implements OnModuleInit, OnModuleDestroy, IWsGatewayService
+{
   private wss: Server;
   private onlineClients: Map<number, WebSocket>;
   constructor(
@@ -96,7 +97,10 @@ export class WsGatewayService
   }
 
   onModuleDestroy() {
-    if (this.wss) this.wss.close(() => { });
+    if (this.wss) this.wss.close(() => {});
+    for (const entry of this.onlineClients.entries()) {
+      entry[1].close();
+    }
   }
 
   async notifyNewFriend(to: number, friend: User): Promise<void> {
