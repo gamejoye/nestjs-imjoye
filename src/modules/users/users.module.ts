@@ -6,6 +6,7 @@ import { usersProviders } from './users.providers';
 import { MulterModule } from '@nestjs/platform-express';
 import * as multer from 'multer';
 import { EnvConfigService } from '../env-config/env-config.service';
+import { WsGatewayModule } from '../ws-gateway/ws-gateway.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { EnvConfigService } from '../env-config/env-config.service';
       }),
       inject: [EnvConfigService],
     }),
+    WsGatewayModule,
   ],
   controllers: [UsersController],
   providers: [...usersProviders, UsersService],
