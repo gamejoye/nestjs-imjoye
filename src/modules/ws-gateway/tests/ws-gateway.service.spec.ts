@@ -24,7 +24,6 @@ import { AUTHORIZATION } from 'src/common/constants/websocketHeaders';
 import { IWebSocketMessage } from 'src/common/types/base.type';
 import { Message } from '../../messages/entities/message.entity';
 import { WebSocketEventType } from 'src/common/constants/websocketEvents';
-import { Logger } from 'src/common/utils';
 import { FriendRequest } from 'src/modules/users/entities/friendrequest.entity';
 import { FriendRequestType } from 'src/common/constants/friendrequest';
 
@@ -34,7 +33,6 @@ describe('WsGatewayService', () => {
   let chatroomsRepository: Repository<Chatroom>;
   let friendRequestsRepository: Repository<FriendRequest>;
   let envConfigService: EnvConfigService;
-  let connectToServer: (users: User[]) => Promise<WebSocket[]>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -66,7 +64,7 @@ describe('WsGatewayService', () => {
     expect(envConfigService).toBeDefined();
   });
 
-  connectToServer = async (users: User[]) => {
+  const connectToServer = async (users: User[]) => {
     // 1. Mock jwt
     // 2. user 连接 webSocketServer
     const userClients = users.map((user) => {

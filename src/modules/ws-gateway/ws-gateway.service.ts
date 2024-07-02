@@ -28,7 +28,7 @@ export class WsGatewayService
     @Inject(USER_REPOSITORY)
     protected readonly userRepository: Repository<User>,
     protected readonly envConfigService: EnvConfigService,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.onlineClients = new Map();

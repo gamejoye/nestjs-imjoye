@@ -11,7 +11,7 @@ import { transformFriendInfo, transformUser } from '../vo/utils/user-transform';
 import { FriendInfo } from '../types/friend-info.type';
 import { Response } from 'express';
 import { EnvConfigService } from 'src/modules/env-config/env-config.service';
-import { getCurrentDatetime, Logger } from 'src/common/utils';
+import { getCurrentDatetime } from 'src/common/utils';
 import { FriendRequest } from '../entities/friendrequest.entity';
 import { FriendRequestType } from 'src/common/constants/friendrequest';
 import { WsGatewayService } from 'src/modules/ws-gateway/ws-gateway.service';
@@ -125,7 +125,7 @@ describe('UserController', () => {
     let callCount1 = 0;
     let callCount2 = 0;
     (mockUsersService.createFriendRequest as jest.Mock).mockImplementation(
-      (from: number, to: number) => {
+      (from: number) => {
         if (!callCount1 && from === user1.id) {
           callCount1++;
           return pendingRq;
