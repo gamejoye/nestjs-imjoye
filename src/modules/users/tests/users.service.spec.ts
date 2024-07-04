@@ -17,7 +17,6 @@ import {
   getUserNonExistingEmail,
   getUserNonExistingId,
   initDatabase,
-  Logger,
 } from 'src/common/utils';
 import { UserFriendship } from '../entities/friendship.entity';
 import * as bcrypt from 'bcrypt';
@@ -125,7 +124,9 @@ describe('UserService', () => {
   });
 
   it('updateFriendRequestStatus work correctly', async () => {
-    const fqs = await friendRequestsRepository.find();
+    const fqs = await friendRequestsRepository.find({
+      relations: ['from', 'to'],
+    });
     for (const fq of fqs) {
       let newStatus = fq.status;
       if (newStatus === FriendRequestType.ACCEPT) {
@@ -136,10 +137,17 @@ describe('UserService', () => {
         newStatus = FriendRequestType.ACCEPT;
       }
       const updated = await service.updateFriendRequestStatus(fq.id, newStatus);
-      expect(updated).toMatchObject({ ...fq, status: newStatus });
+      expect(updated.id).toBe(fq.id);
+      expect(updated.status).toBe(newStatus);
+      expect(updated.createTime).toBe(fq.createTime);
+      // updated的updateTime已经更新了
+      expect(updated.updateTime).not.toBe(fq.updateTime);
+      expect(updated.from).toMatchObject(fq.from);
+      expect(updated.to).toMatchObject(fq.to);
       const actualFq = await friendRequestsRepository.findOne({
         where: { id: fq.id },
       });
+      // 正确插入
       expect(updated).toMatchObject(actualFq);
     }
   });
