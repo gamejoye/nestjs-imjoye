@@ -200,6 +200,10 @@ export class UsersController {
       request.id,
       FriendRequestType.ACCEPT,
     );
+    await Promise.all([
+      this.wsService.notifyNewFriend(fq.from.id, fq.to),
+      this.wsService.notifyNewFriend(fq.to.id, fq.from),
+    ]);
     return transformFriendRequest(fq);
   }
 
