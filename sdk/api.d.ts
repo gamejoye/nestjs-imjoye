@@ -16,6 +16,16 @@ export interface paths {
   "/users/{id}/friends/requests": {
     /** 根据userId获取好友请求列表 */
     get: operations["UsersController_getFriendRequestsById"];
+    /** 发送一个好友请求，如果互相发送则后面发送的请求等价于直接同意之前的请求 */
+    post: operations["UsersController_postFriendRequest"];
+  };
+  "/users/{id}/friends/requests/{requestId}/accept": {
+    /** 同意好友请求 */
+    put: operations["UsersController_acceptFriendRequest"];
+  };
+  "/users/{id}/friends/requests/{requestId}/reject": {
+    /** 拒绝好友请求 */
+    put: operations["UsersController_rejectFriendRequest"];
   };
   "/users/{id}/friends/{friendId}": {
     /** 获取好友信息 */
@@ -128,6 +138,18 @@ export interface components {
       from: components["schemas"]["UserVo"];
       /** @description 好友请求接收者 */
       to: components["schemas"]["UserVo"];
+    };
+    PostFriendRequestDto: {
+      /**
+       * @description 发起请求的用户id
+       * @example 1
+       */
+      from: number;
+      /**
+       * @description 接收者的用户id
+       * @example 1
+       */
+      to: number;
     };
     FriendInfoVo: {
       /** @description 好友的基本信息 */
@@ -356,6 +378,95 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["ApiBaseResult"] & {
             data: components["schemas"]["FriendRequestVo"][];
+          };
+        };
+      };
+      /** @description 未认证用户 */
+      401: {
+        content: never;
+      };
+      /** @description 权限不足 */
+      403: {
+        content: never;
+      };
+    };
+  };
+  /** 发送一个好友请求，如果互相发送则后面发送的请求等价于直接同意之前的请求 */
+  UsersController_postFriendRequest: {
+    parameters: {
+      path: {
+        id: number;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PostFriendRequestDto"];
+      };
+    };
+    responses: {
+      /** @description 成功发送好友请求或者默认同意之前的好友请求 */
+      201: {
+        content: {
+          "application/json": components["schemas"]["ApiBaseResult"] & {
+            data: components["schemas"]["FriendRequestVo"];
+          };
+        };
+      };
+      /** @description 未认证用户 */
+      401: {
+        content: never;
+      };
+      /** @description 权限不足 */
+      403: {
+        content: never;
+      };
+      /** @description 重复发送好友请求 */
+      409: {
+        content: never;
+      };
+    };
+  };
+  /** 同意好友请求 */
+  UsersController_acceptFriendRequest: {
+    parameters: {
+      path: {
+        id: number;
+        requestId: number;
+      };
+    };
+    responses: {
+      /** @description 成功通过好友请求 */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ApiBaseResult"] & {
+            data: components["schemas"]["FriendRequestVo"];
+          };
+        };
+      };
+      /** @description 未认证用户 */
+      401: {
+        content: never;
+      };
+      /** @description 权限不足 */
+      403: {
+        content: never;
+      };
+    };
+  };
+  /** 拒绝好友请求 */
+  UsersController_rejectFriendRequest: {
+    parameters: {
+      path: {
+        id: number;
+        requestId: number;
+      };
+    };
+    responses: {
+      /** @description 成功拒绝好友请求 */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ApiBaseResult"] & {
+            data: components["schemas"]["FriendRequestVo"];
           };
         };
       };

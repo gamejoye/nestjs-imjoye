@@ -155,6 +155,186 @@
         "tags": [
           "users"
         ]
+      },
+      "post": {
+        "operationId": "UsersController_postFriendRequest",
+        "summary": "发送一个好友请求，如果互相发送则后面发送的请求等价于直接同意之前的请求",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostFriendRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "成功发送好友请求或者默认同意之前的好友请求",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiBaseResult"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FriendRequestVo"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未认证用户"
+          },
+          "403": {
+            "description": "权限不足"
+          },
+          "409": {
+            "description": "重复发送好友请求"
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/{id}/friends/requests/{requestId}/accept": {
+      "put": {
+        "operationId": "UsersController_acceptFriendRequest",
+        "summary": "同意好友请求",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "requestId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功通过好友请求",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiBaseResult"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FriendRequestVo"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未认证用户"
+          },
+          "403": {
+            "description": "权限不足"
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/{id}/friends/requests/{requestId}/reject": {
+      "put": {
+        "operationId": "UsersController_rejectFriendRequest",
+        "summary": "拒绝好友请求",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "requestId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功拒绝好友请求",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiBaseResult"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FriendRequestVo"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未认证用户"
+          },
+          "403": {
+            "description": "权限不足"
+          }
+        },
+        "tags": [
+          "users"
+        ]
       }
     },
     "/users/{id}/friends/{friendId}": {
@@ -871,6 +1051,25 @@
           "createTime",
           "updateTime",
           "status",
+          "from",
+          "to"
+        ]
+      },
+      "PostFriendRequestDto": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "number",
+            "example": 1,
+            "description": "发起请求的用户id"
+          },
+          "to": {
+            "type": "number",
+            "example": 1,
+            "description": "接收者的用户id"
+          }
+        },
+        "required": [
           "from",
           "to"
         ]
