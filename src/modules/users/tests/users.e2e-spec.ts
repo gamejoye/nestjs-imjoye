@@ -15,7 +15,11 @@ import {
   USER_REPOSITORY,
 } from 'src/common/constants/providers';
 import { LoginUserRequestDto } from 'src/modules/auth/dto/login.dto';
-import { dataForValidIsNumber, initDatabase } from 'src/common/utils';
+import {
+  dataForValidIsNumber,
+  getNonExsitingFriendRequest,
+  initDatabase,
+} from 'src/common/utils';
 import { EnvConfigModule } from 'src/modules/env-config/env-config.module';
 import { usersProviders } from '../users.providers';
 import { UserFriendship } from '../entities/friendship.entity';
@@ -104,6 +108,98 @@ describe('UsersController (e2e)', () => {
   afterAll(async () => {
     await initDatabase(envConfigService.getDatabaseConfig());
     await app.close();
+  });
+
+  it('PUT /users/:id/friends/requests/:requestId/accept', async () => {
+    const ids = await getNonExsitingFriendRequest(
+      usersRepository,
+      friendRequestsRepository,
+    );
+    const fromAuthorization = getAuthorization(ids[0]);
+    const postDto: PostFriendRequestDto = { from: ids[0], to: ids[1] };
+    const postResponse = await request(app.getHttpServer())
+      .post(`/users/${ids[0]}/friends/requests`)
+      .set('Authorization', fromAuthorization)
+      .send(postDto);
+    expect(postResponse.status).toBe(HttpStatus.CREATED);
+    const fq = postResponse.body.data as FriendRequestVo;
+
+    // Forbbiden流程
+    // 1. 只有接受者能同意请求
+    const forbbidenResponse = await request(app.getHttpServer())
+      .put(`/users/${ids[0]}/friends/requests/${fq.id}/accept`)
+      .set('Authorization', fromAuthorization);
+    expect(forbbidenResponse.status).toBe(HttpStatus.FORBIDDEN);
+    expect(forbbidenResponse.body.message).toBe('只有接收者能处理好友请求');
+
+    const toAuthorization = getAuthorization(ids[1]);
+    // 2. 用户认证信息不正确
+    const forbbidenTokenResponse = await request(app.getHttpServer())
+      .put(`/users/${ids[0]}/friends/requests/${fq.id}/accept`)
+      .set('Authorization', toAuthorization);
+    expect(forbbidenTokenResponse.status).toBe(HttpStatus.FORBIDDEN);
+    expect(forbbidenTokenResponse.body.message).toBe('权限不足');
+
+    // Unauthorized
+    const unauthorizedResponse = await request(app.getHttpServer()).put(
+      `/users/${ids[1]}/friends/requests/${fq.id}/accept`,
+    );
+    expect(unauthorizedResponse.status).toBe(HttpStatus.UNAUTHORIZED);
+
+    // 正常流程
+    const putResponse = await request(app.getHttpServer())
+      .put(`/users/${ids[1]}/friends/requests/${fq.id}/accept`)
+      .set('Authorization', toAuthorization);
+    expect(putResponse.status).toBe(HttpStatus.OK);
+    expect((putResponse.body.data as FriendRequestVo).status).toBe(
+      FriendRequestType.ACCEPT,
+    );
+  });
+
+  it('PUT /users/:id/friends/requests/:requestId/reject', async () => {
+    const ids = await getNonExsitingFriendRequest(
+      usersRepository,
+      friendRequestsRepository,
+    );
+    const fromAuthorization = getAuthorization(ids[0]);
+    const postDto: PostFriendRequestDto = { from: ids[0], to: ids[1] };
+    const postResponse = await request(app.getHttpServer())
+      .post(`/users/${ids[0]}/friends/requests`)
+      .set('Authorization', fromAuthorization)
+      .send(postDto);
+    expect(postResponse.status).toBe(HttpStatus.CREATED);
+    const fq = postResponse.body.data as FriendRequestVo;
+
+    // Forbbiden流程
+    // 1. 只有接受者能拒绝请求
+    const forbbidenResponse = await request(app.getHttpServer())
+      .put(`/users/${ids[0]}/friends/requests/${fq.id}/reject`)
+      .set('Authorization', fromAuthorization);
+    expect(forbbidenResponse.status).toBe(HttpStatus.FORBIDDEN);
+    expect(forbbidenResponse.body.message).toBe('只有接收者能处理好友请求');
+
+    const toAuthorization = getAuthorization(ids[1]);
+    // 2. 用户认证信息不正确
+    const forbbidenTokenResponse = await request(app.getHttpServer())
+      .put(`/users/${ids[0]}/friends/requests/${fq.id}/reject`)
+      .set('Authorization', toAuthorization);
+    expect(forbbidenTokenResponse.status).toBe(HttpStatus.FORBIDDEN);
+    expect(forbbidenTokenResponse.body.message).toBe('权限不足');
+
+    // Unauthorized
+    const unauthorizedResponse = await request(app.getHttpServer()).put(
+      `/users/${ids[1]}/friends/requests/${fq.id}/reject`,
+    );
+    expect(unauthorizedResponse.status).toBe(HttpStatus.UNAUTHORIZED);
+
+    // 正常流程
+    const putResponse = await request(app.getHttpServer())
+      .put(`/users/${ids[1]}/friends/requests/${fq.id}/reject`)
+      .set('Authorization', toAuthorization);
+    expect(putResponse.status).toBe(HttpStatus.OK);
+    expect((putResponse.body.data as FriendRequestVo).status).toBe(
+      FriendRequestType.REJECT,
+    );
   });
 
   it('POST /users/:id/friends/requests', async () => {
