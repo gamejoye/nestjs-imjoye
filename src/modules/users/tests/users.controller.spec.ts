@@ -68,7 +68,9 @@ const mockUsersService: Partial<IUsersService> = {
   getFriends: jest.fn(),
   getFriendInfoByUserIdAndFriendId: jest.fn(),
   getFriendRqeusts: jest.fn(),
+  getFriendRequestById: jest.fn(),
   createFriendRequest: jest.fn(),
+  updateFriendRequestStatus: jest.fn(),
 };
 
 const mockWsGateWayService: Partial<IWsGatewayService> = {
@@ -103,6 +105,100 @@ describe('UserController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  it('acceptFriendRequest', async () => {
+    const existingFq: FriendRequest = {
+      id: 1,
+      from: user1,
+      to: user2,
+      status: FriendRequestType.PENDING,
+      createTime: getCurrentDatetime(),
+      updateTime: getCurrentDatetime(),
+    };
+    (mockUsersService.getFriendRequestById as jest.Mock).mockImplementation(
+      (id: number) => {
+        if (id === existingFq.id) return existingFq;
+        return null;
+      },
+    );
+    (
+      mockUsersService.updateFriendRequestStatus as jest.Mock
+    ).mockImplementation((id: number, status: FriendRequestType) => {
+      if (id === existingFq.id) {
+        return {
+          ...existingFq,
+          status,
+        };
+      }
+      return null;
+    });
+    await controller.acceptFriendRequest(
+      existingFq.to,
+      existingFq.to.id,
+      existingFq.id,
+    );
+    expect(mockUsersService.getFriendRequestById).toHaveBeenCalledTimes(1);
+    expect(mockUsersService.getFriendRequestById).toHaveBeenCalledWith(
+      existingFq.id,
+    );
+    expect(mockUsersService.updateFriendRequestStatus).toHaveBeenCalledTimes(1);
+    expect(mockUsersService.updateFriendRequestStatus).toHaveBeenCalledWith(
+      existingFq.id,
+      FriendRequestType.ACCEPT,
+    );
+    expect(mockWsGateWayService.notifyNewFriend).toHaveBeenCalledTimes(2);
+    expect(mockWsGateWayService.notifyNewFriend).toHaveBeenCalledWith(
+      existingFq.from.id,
+      existingFq.to,
+    );
+    expect(mockWsGateWayService.notifyNewFriend).toHaveBeenCalledWith(
+      existingFq.to.id,
+      existingFq.from,
+    );
+  });
+
+  it('rejectFriendRequest', async () => {
+    const existingFq: FriendRequest = {
+      id: 1,
+      from: user1,
+      to: user2,
+      status: FriendRequestType.PENDING,
+      createTime: getCurrentDatetime(),
+      updateTime: getCurrentDatetime(),
+    };
+    (mockUsersService.getFriendRequestById as jest.Mock).mockImplementation(
+      (id: number) => {
+        if (id === existingFq.id) return existingFq;
+        return null;
+      },
+    );
+    (
+      mockUsersService.updateFriendRequestStatus as jest.Mock
+    ).mockImplementation((id: number, status: FriendRequestType) => {
+      if (id === existingFq.id) {
+        return {
+          ...existingFq,
+          status,
+        };
+      }
+      return null;
+    });
+
+    await controller.rejectFriendRequest(
+      existingFq.to,
+      existingFq.to.id,
+      existingFq.id,
+    );
+    expect(mockUsersService.getFriendRequestById).toHaveBeenCalledTimes(1);
+    expect(mockUsersService.getFriendRequestById).toHaveBeenCalledWith(
+      existingFq.id,
+    );
+    expect(mockUsersService.updateFriendRequestStatus).toHaveBeenCalledTimes(1);
+    expect(mockUsersService.updateFriendRequestStatus).toHaveBeenCalledWith(
+      existingFq.id,
+      FriendRequestType.REJECT,
+    );
   });
 
   it('postFriendRequest', async () => {
