@@ -7,6 +7,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Res,
   UploadedFile,
   UseGuards,
@@ -27,7 +28,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { EnvConfigService } from '../env-config/env-config.service';
 import { Response } from 'express';
 import { UserVo } from './vo/user.vo';
-import { transformFriendInfo, transformUser } from './vo/utils/user-transform';
+import {
+  transformFriendInfo,
+  transformFriendRequest,
+  transformUser,
+} from './vo/utils/user-transform';
 import { FriendInfoVo } from './vo/friend-info.vo';
 import {
   ApiCreatedResponseResult,
@@ -161,7 +166,75 @@ export class UsersController {
         this.wsService.notifyNewFriend(fq.to.id, fq.from),
       ]);
     }
-    return fq;
+    return transformFriendRequest(fq);
+  }
+
+  @Put(':id/friends/requests/:requestId/accept')
+  @UseGuards(JwtGuard)
+  @ApiOperation({ summary: '同意好友请求' })
+  @ApiOkResponseResult({
+    model: FriendRequestVo,
+    description: '成功通过好友请求',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: '未认证用户',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: '权限不足',
+  })
+  async acceptFriendRequest(
+    @GetUser() user: User,
+    @Param('id', ParseIntPipe) id: number,
+    @Param('requestId', ParseIntPipe) requestId: number,
+  ) {
+    if (user.id !== id) {
+      throw new HttpException('权限不足', HttpStatus.FORBIDDEN);
+    }
+    const request = await this.usersService.getFriendRequestById(requestId);
+    if (request.to.id !== user.id) {
+      throw new HttpException('只有接收者能处理好友请求', HttpStatus.FORBIDDEN);
+    }
+    const fq = await this.usersService.updateFriendRequestStatus(
+      request.id,
+      FriendRequestType.ACCEPT,
+    );
+    return transformFriendRequest(fq);
+  }
+
+  @Put(':id/friends/requests/:requestId/reject')
+  @UseGuards(JwtGuard)
+  @ApiOperation({ summary: '拒绝好友请求' })
+  @ApiOkResponseResult({
+    model: FriendRequestVo,
+    description: '成功拒绝好友请求',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: '未认证用户',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: '权限不足',
+  })
+  async rejectFriendRequest(
+    @GetUser() user: User,
+    @Param('id', ParseIntPipe) id: number,
+    @Param('requestId', ParseIntPipe) requestId: number,
+  ) {
+    if (user.id !== id) {
+      throw new HttpException('权限不足', HttpStatus.FORBIDDEN);
+    }
+    const request = await this.usersService.getFriendRequestById(requestId);
+    if (request.to.id !== user.id) {
+      throw new HttpException('只有接收者能处理好友请求', HttpStatus.FORBIDDEN);
+    }
+    const fq = await this.usersService.updateFriendRequestStatus(
+      request.id,
+      FriendRequestType.REJECT,
+    );
+    return transformFriendRequest(fq);
   }
 
   @Get(':id/friends/:friendId')
