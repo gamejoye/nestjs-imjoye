@@ -65,6 +65,7 @@ const user3: User = {
 
 const mockUsersService: Partial<IUsersService> = {
   getById: jest.fn(),
+  getByEmail: jest.fn(),
   getFriends: jest.fn(),
   getFriendInfoByUserIdAndFriendId: jest.fn(),
   getFriendRqeusts: jest.fn(),
@@ -105,6 +106,19 @@ describe('UserController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  it('getUserByEmail', async () => {
+    (mockUsersService.getByEmail as jest.Mock).mockImplementation(
+      (email: string) => {
+        if (email === user1.email) return user1;
+        return null;
+      },
+    );
+    const userVo = await controller.getUserByEmail({ email: user1.email });
+    expect(userVo.id).toBe(user1.id);
+    expect(mockUsersService.getByEmail).toHaveBeenCalledTimes(1);
+    expect(mockUsersService.getByEmail).toHaveBeenCalledWith(user1.email);
   });
 
   it('acceptFriendRequest', async () => {
