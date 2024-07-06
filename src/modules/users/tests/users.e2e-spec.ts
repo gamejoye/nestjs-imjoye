@@ -18,6 +18,7 @@ import { LoginUserRequestDto } from 'src/modules/auth/dto/login.dto';
 import {
   dataForValidIsNumber,
   getNonExsitingFriendRequest,
+  getUserNonExistingEmail,
   initDatabase,
 } from 'src/common/utils';
 import { EnvConfigModule } from 'src/modules/env-config/env-config.module';
@@ -108,6 +109,26 @@ describe('UsersController (e2e)', () => {
   afterAll(async () => {
     await initDatabase(envConfigService.getDatabaseConfig());
     await app.close();
+  });
+
+  it('GET /users?email=', async () => {
+    const users = await usersRepository.find();
+    for (const user of users) {
+      const response = await request(app.getHttpServer()).get(
+        `/users?email=${user.email}`,
+      );
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body.data).toMatchObject(transformUser(user));
+    }
+    const badRequestResponse = await request(app.getHttpServer()).get(
+      `/users?email=123`,
+    );
+    expect(badRequestResponse.status).toBe(HttpStatus.BAD_REQUEST);
+    const nonExistingEmail = await getUserNonExistingEmail(usersRepository);
+    const notFoundResponse = await request(app.getHttpServer()).get(
+      `/users?email=${nonExistingEmail}`,
+    );
+    expect(notFoundResponse.status).toBe(HttpStatus.NOT_FOUND);
   });
 
   it('PUT /users/:id/friends/requests/:requestId/accept', async () => {
