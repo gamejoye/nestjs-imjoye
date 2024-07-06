@@ -55,18 +55,20 @@ export class UsersController {
   ) {}
 
   @Get(':id')
-  @UseGuards(JwtGuard)
   @ApiOperation({ summary: '根据userId获取用户' })
   @ApiOkResponseResult({
     model: UserVo,
     description: '成功获取用户',
   })
   @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: '未认证用户',
+    status: HttpStatus.NOT_FOUND,
+    description: '未找到用户',
   })
   async getUserById(@Param('id', ParseIntPipe) id: number): Promise<UserVo> {
     const target = await this.usersService.getById(id);
+    if (!target) {
+      throw new HttpException('不存在的用户', HttpStatus.NOT_FOUND);
+    }
     return transformUser(target);
   }
 
