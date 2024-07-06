@@ -40,8 +40,58 @@
               }
             }
           },
-          "401": {
-            "description": "未认证用户"
+          "404": {
+            "description": "未找到用户"
+          }
+        },
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "UsersController_getUserByEmail",
+        "summary": "根据email获取用户",
+        "parameters": [
+          {
+            "name": "email",
+            "required": true,
+            "in": "query",
+            "example": "gamejoye@gmail.com",
+            "description": "待查询的用户邮箱",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功根据email获取用户",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiBaseResult"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UserVo"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "不存在的邮箱"
           }
         },
         "tags": [
