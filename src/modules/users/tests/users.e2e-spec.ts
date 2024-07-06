@@ -19,6 +19,7 @@ import {
   dataForValidIsNumber,
   getNonExsitingFriendRequest,
   getUserNonExistingEmail,
+  getUserNonExistingId,
   initDatabase,
 } from 'src/common/utils';
 import { EnvConfigModule } from 'src/modules/env-config/env-config.module';
@@ -326,31 +327,29 @@ describe('UsersController (e2e)', () => {
      */
     const users = await usersRepository.find();
     for (const user of users) {
-      const authorization = getAuthorization(user.id);
-      const response = await request(app.getHttpServer())
-        .get(`/users/${user.id}`)
-        .set('Authorization', authorization);
+      const response = await request(app.getHttpServer()).get(
+        `/users/${user.id}`,
+      );
       expect(response.status).toBe(HttpStatus.OK);
       expect(response.body.data).toMatchObject(transformUser(user));
     }
 
     /**
-     * Unauthorized逻辑
+     * NotFound逻辑
      */
-    const unauthorizedResponse = await request(app.getHttpServer()).get(
-      `/users/${users[0].id}`,
+    const unknowId = await getUserNonExistingId(usersRepository);
+    const notFoundResponse = await request(app.getHttpServer()).get(
+      `/users/${unknowId}`,
     );
-    expect(unauthorizedResponse.status).toBe(HttpStatus.UNAUTHORIZED);
+    expect(notFoundResponse.status).toBe(HttpStatus.NOT_FOUND);
 
     /**
      * BadReqeust逻辑
      */
-    const user = (await usersRepository.find()).at(0);
-    const authorization = getAuthorization(user.id);
     for (const invalidNumber of dataForValidIsNumber) {
-      const badRequestrRes = await request(app.getHttpServer())
-        .get(`/users/${invalidNumber}`)
-        .set('Authorization', authorization);
+      const badRequestrRes = await request(app.getHttpServer()).get(
+        `/users/${invalidNumber}`,
+      );
       expect(badRequestrRes.status).toBe(HttpStatus.BAD_REQUEST);
     }
   });
