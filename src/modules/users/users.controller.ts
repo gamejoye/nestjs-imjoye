@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
   Res,
   UploadedFile,
   UseGuards,
@@ -42,6 +43,7 @@ import { FriendRequestVo } from './vo/friendrequest.vo';
 import { PostFriendRequestDto } from './dto/post-friend-request.dto';
 import { FriendRequestType } from 'src/common/constants/friendrequest';
 import { WsGatewayService } from '../ws-gateway/ws-gateway.service';
+import { GetUserByEmailDto } from './dto/get-user-by-email.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -65,6 +67,25 @@ export class UsersController {
   })
   async getUserById(@Param('id', ParseIntPipe) id: number): Promise<UserVo> {
     const target = await this.usersService.getById(id);
+    return transformUser(target);
+  }
+
+  @Get()
+  @ApiOperation({ summary: '根据email获取用户' })
+  @ApiOkResponseResult({
+    model: UserVo,
+    description: '成功根据email获取用户',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: '不存在的邮箱',
+  })
+  async getUserByEmail(@Query() query: GetUserByEmailDto): Promise<UserVo> {
+    const { email } = query;
+    const target = await this.usersService.getByEmail(email);
+    if (!target) {
+      throw new HttpException('不存在的邮箱', HttpStatus.NOT_FOUND);
+    }
     return transformUser(target);
   }
 
