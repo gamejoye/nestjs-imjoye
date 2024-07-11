@@ -16,6 +16,11 @@ import { FriendRequest } from '../entities/friendrequest.entity';
 import { FriendRequestType } from 'src/common/constants/friendrequest';
 import { WsGatewayService } from 'src/modules/ws-gateway/ws-gateway.service';
 import { IWsGatewayService } from 'src/modules/ws-gateway/interface/ws-gateway.interface.service';
+import { WsGatewayModule } from 'src/modules/ws-gateway/ws-gateway.module';
+import { ChatroomsModule } from 'src/modules/chatrooms/chatrooms.module';
+import { IChatroomsService } from 'src/modules/chatrooms/interface/chatrooms.service.interface';
+import { ChatroomsService } from 'src/modules/chatrooms/chatrooms.service';
+import { Chatroom } from 'src/modules/chatrooms/entities/chatroom.entity';
 
 /**
  * 数据
@@ -77,6 +82,11 @@ const mockUsersService: Partial<IUsersService> = {
 const mockWsGateWayService: Partial<IWsGatewayService> = {
   notifyNewFriend: jest.fn(),
   notifyNewFriendRequest: jest.fn(),
+  notifyNewChatroom: jest.fn(),
+};
+
+const mockChatroomsService: Partial<IChatroomsService> = {
+  getByUserIdAndFriendId: jest.fn(),
 };
 
 describe('UserController', () => {
@@ -85,15 +95,22 @@ describe('UserController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DatabaseModule, EnvConfigModule],
+      imports: [
+        DatabaseModule,
+        EnvConfigModule,
+        WsGatewayModule,
+        ChatroomsModule,
+      ],
       controllers: [UsersController],
-      providers: [...usersProviders, UsersService, WsGatewayService],
+      providers: [...usersProviders, UsersService],
       exports: [UsersService],
     })
       .overrideProvider(UsersService)
       .useValue(mockUsersService)
       .overrideProvider(WsGatewayService)
       .useValue(mockWsGateWayService)
+      .overrideProvider(ChatroomsService)
+      .useValue(mockChatroomsService)
       .compile();
 
     controller = module.get<UsersController>(UsersController);
@@ -147,6 +164,18 @@ describe('UserController', () => {
       }
       return null;
     });
+    const existingChatroom = new Chatroom();
+    (
+      mockChatroomsService.getByUserIdAndFriendId as jest.Mock
+    ).mockImplementation((userId: number, friendId: number) => {
+      if (
+        (userId === existingFq.from.id && friendId === existingFq.to.id) ||
+        (userId === existingFq.to.id && friendId === existingFq.from.id)
+      ) {
+        return existingChatroom;
+      }
+      return null;
+    });
     await controller.acceptFriendRequest(
       existingFq.to,
       existingFq.to.id,
@@ -169,6 +198,15 @@ describe('UserController', () => {
     expect(mockWsGateWayService.notifyNewFriend).toHaveBeenCalledWith(
       existingFq.to.id,
       existingFq.from,
+    );
+    expect(mockWsGateWayService.notifyNewChatroom).toHaveBeenCalledTimes(2);
+    expect(mockWsGateWayService.notifyNewChatroom).toHaveBeenCalledWith(
+      existingFq.from.id,
+      existingChatroom,
+    );
+    expect(mockWsGateWayService.notifyNewChatroom).toHaveBeenCalledWith(
+      existingFq.to.id,
+      existingChatroom,
     );
   });
 
@@ -213,6 +251,17 @@ describe('UserController', () => {
       existingFq.id,
       FriendRequestType.REJECT,
     );
+    expect(mockWsGateWayService.notifyNewFriendRequest).toHaveBeenCalledTimes(
+      2,
+    );
+    expect(mockWsGateWayService.notifyNewFriendRequest).toHaveBeenCalledWith(
+      existingFq.from.id,
+      { ...existingFq, status: FriendRequestType.REJECT },
+    );
+    expect(mockWsGateWayService.notifyNewFriendRequest).toHaveBeenCalledWith(
+      existingFq.to.id,
+      { ...existingFq, status: FriendRequestType.REJECT },
+    );
   });
 
   it('postFriendRequest', async () => {
@@ -247,6 +296,18 @@ describe('UserController', () => {
         return null;
       },
     );
+    const existingChatroom = new Chatroom();
+    (
+      mockChatroomsService.getByUserIdAndFriendId as jest.Mock
+    ).mockImplementation((userId: number, friendId: number) => {
+      if (
+        (userId === user2.id && friendId === user3.id) ||
+        (userId === user3.id && friendId === user2.id)
+      ) {
+        return existingChatroom;
+      }
+      return null;
+    });
     await controller.postFriendRequest(user1, user1.id, {
       from: user1.id,
       to: user2.id,
@@ -281,6 +342,15 @@ describe('UserController', () => {
     expect(mockWsGateWayService.notifyNewFriend).toHaveBeenCalledWith(
       user2.id,
       user3,
+    );
+    expect(mockWsGateWayService.notifyNewChatroom).toHaveBeenCalledTimes(2);
+    expect(mockWsGateWayService.notifyNewChatroom).toHaveBeenCalledWith(
+      user2.id,
+      existingChatroom,
+    );
+    expect(mockWsGateWayService.notifyNewChatroom).toHaveBeenCalledWith(
+      user3.id,
+      existingChatroom,
     );
 
     // 重复发起
