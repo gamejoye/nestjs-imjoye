@@ -35,6 +35,7 @@ import { FriendRequest } from '../entities/friendrequest.entity';
 import { FriendRequestVo } from '../vo/friendrequest.vo';
 import { FriendRequestType } from 'src/common/constants/friendrequest';
 import { PostFriendRequestDto } from '../dto/post-friend-request.dto';
+import { ChatroomsModule } from 'src/modules/chatrooms/chatrooms.module';
 
 const userSorter = (user1: User, user2: User) => user1.id - user2.id;
 const descRequestSorter = (fq1: FriendRequest, fq2: FriendRequest) => {
@@ -55,7 +56,13 @@ describe('UsersController (e2e)', () => {
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [UsersModule, DatabaseModule, EnvConfigModule, AuthModule],
+      imports: [
+        UsersModule,
+        DatabaseModule,
+        EnvConfigModule,
+        AuthModule,
+        ChatroomsModule,
+      ],
       providers: [...usersProviders],
     }).compile();
 

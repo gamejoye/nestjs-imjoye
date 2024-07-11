@@ -24,6 +24,8 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { FriendRequest } from '../entities/friendrequest.entity';
 import { FriendRequestType } from 'src/common/constants/friendrequest';
 import { WsGatewayService } from 'src/modules/ws-gateway/ws-gateway.service';
+import { WsGatewayModule } from 'src/modules/ws-gateway/ws-gateway.module';
+import { ChatroomsModule } from 'src/modules/chatrooms/chatrooms.module';
 
 describe('UserService', () => {
   let service: UsersService;
@@ -34,9 +36,14 @@ describe('UserService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DatabaseModule, EnvConfigModule],
+      imports: [
+        DatabaseModule,
+        EnvConfigModule,
+        WsGatewayModule,
+        ChatroomsModule,
+      ],
       controllers: [UsersController],
-      providers: [...usersProviders, UsersService, WsGatewayService],
+      providers: [...usersProviders, UsersService],
       exports: [UsersService],
     }).compile();
 
