@@ -23,7 +23,6 @@ import * as bcrypt from 'bcrypt';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { FriendRequest } from '../entities/friendrequest.entity';
 import { FriendRequestType } from 'src/common/constants/friendrequest';
-import { WsGatewayService } from 'src/modules/ws-gateway/ws-gateway.service';
 import { WsGatewayModule } from 'src/modules/ws-gateway/ws-gateway.module';
 import { ChatroomsModule } from 'src/modules/chatrooms/chatrooms.module';
 
