@@ -17,6 +17,7 @@ import { EnvConfigService } from '../env-config/env-config.service';
 import { Logger } from 'src/common/utils';
 import { IWsGatewayService } from './interface/ws-gateway.interface.service';
 import { FriendRequest } from '../users/entities/friendrequest.entity';
+import { Chatroom } from '../chatrooms/entities/chatroom.entity';
 
 @Injectable()
 export class WsGatewayService
@@ -102,6 +103,17 @@ export class WsGatewayService
       for (const entry of this.onlineClients.entries()) {
         entry[1].close();
       }
+    }
+  }
+
+  async notifyNewChatroom(to: number, chatroom: Chatroom): Promise<void> {
+    const onlineClient = this.onlineClients.get(to);
+    if (onlineClient) {
+      const socketMessage: IWebSocketMessage<Chatroom> = {
+        event: WebSocketEventType.NEW_CHATROOM,
+        payload: chatroom,
+      };
+      onlineClient.send(JSON.stringify(socketMessage));
     }
   }
 

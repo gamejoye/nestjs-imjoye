@@ -1,3 +1,4 @@
+import { Chatroom } from 'src/modules/chatrooms/entities/chatroom.entity';
 import { Message } from 'src/modules/messages/entities/message.entity';
 import { FriendRequest } from 'src/modules/users/entities/friendrequest.entity';
 import { User } from 'src/modules/users/entities/user.entity';
@@ -8,4 +9,5 @@ export interface IWsGatewayService {
   notifynChat(from: number, message: Message): Promise<void>;
   notifyNewFriendRequest(to: number, fq: FriendRequest): Promise<void>;
   notifyNewFriend(to: number, friend: User): Promise<void>;
+  notifyNewChatroom(to: number, chatroom: Chatroom): Promise<void>;
 }
