@@ -15,5 +15,6 @@ import { MessagesService } from '../messages/messages.service';
     UserChatroomService,
     MessagesService,
   ],
+  exports: [ChatroomsService],
 })
 export class ChatroomsModule {}
