@@ -44,12 +44,14 @@ import { PostFriendRequestDto } from './dto/post-friend-request.dto';
 import { FriendRequestType } from 'src/common/constants/friendrequest';
 import { WsGatewayService } from '../ws-gateway/ws-gateway.service';
 import { GetUserByEmailDto } from './dto/get-user-by-email.dto';
+import { ChatroomsService } from '../chatrooms/chatrooms.service';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(
     protected readonly usersService: UsersService,
+    protected readonly chatroomsService: ChatroomsService,
     protected readonly wsService: WsGatewayService,
     protected readonly envConfigService: EnvConfigService,
   ) {}
@@ -183,7 +185,16 @@ export class UsersController {
       // 通知接收者有新的好友请求
       await this.wsService.notifyNewFriendRequest(fq.to.id, fq);
     } else if (fq.status === FriendRequestType.ACCEPT) {
-      // 通知发送者和发送者有新的好友
+      const chatroom = await this.chatroomsService.getByUserIdAndFriendId(
+        fq.from.id,
+        fq.to.id,
+      );
+      // 通知发送者和接收者有新的聊天室
+      await Promise.all([
+        this.wsService.notifyNewChatroom(fq.from.id, chatroom),
+        this.wsService.notifyNewChatroom(fq.to.id, chatroom),
+      ]);
+      // 通知发送者和接收者有新的好友
       await Promise.all([
         this.wsService.notifyNewFriend(fq.from.id, fq.to),
         this.wsService.notifyNewFriend(fq.to.id, fq.from),
@@ -223,6 +234,14 @@ export class UsersController {
       request.id,
       FriendRequestType.ACCEPT,
     );
+    const chatroom = await this.chatroomsService.getByUserIdAndFriendId(
+      fq.from.id,
+      fq.to.id,
+    );
+    await Promise.all([
+      this.wsService.notifyNewChatroom(fq.from.id, chatroom),
+      this.wsService.notifyNewChatroom(fq.to.id, chatroom),
+    ]);
     await Promise.all([
       this.wsService.notifyNewFriend(fq.from.id, fq.to),
       this.wsService.notifyNewFriend(fq.to.id, fq.from),
@@ -261,6 +280,11 @@ export class UsersController {
       request.id,
       FriendRequestType.REJECT,
     );
+    // 通知请求的发送者请求被拒绝了
+    await Promise.all([
+      this.wsService.notifyNewFriendRequest(fq.from.id, fq),
+      this.wsService.notifyNewFriendRequest(fq.to.id, fq),
+    ]);
     return transformFriendRequest(fq);
   }
 
