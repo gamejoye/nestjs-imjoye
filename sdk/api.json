@@ -504,107 +504,6 @@
         ]
       }
     },
-    "/auth/login": {
-      "post": {
-        "operationId": "AuthController_login",
-        "summary": "用户登录",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginUserRequestDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "登录成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiBaseResult"
-                    },
-                    {
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/LoginVo"
-                        }
-                      },
-                      "required": [
-                        "data"
-                      ]
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "登录失败"
-          }
-        },
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/auth/register": {
-      "post": {
-        "operationId": "AuthController_register",
-        "summary": "用户注册",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterUserRequestDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "注册成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "allOf": [
-                    {
-                      "$ref": "#/components/schemas/ApiBaseResult"
-                    },
-                    {
-                      "properties": {
-                        "data": {
-                          "$ref": "#/components/schemas/UserVo"
-                        }
-                      },
-                      "required": [
-                        "data"
-                      ]
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "注册失败"
-          },
-          "409": {
-            "description": "用户邮箱已经存在"
-          }
-        },
-        "tags": [
-          "auth"
-        ]
-      }
-    },
     "/chatrooms/{chatroomId}/visit": {
       "put": {
         "operationId": "ChatroomsController_visitChatroom",
@@ -853,6 +752,107 @@
         },
         "tags": [
           "chatrooms"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "summary": "用户登录",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginUserRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "登录成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiBaseResult"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/LoginVo"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "登录失败"
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "summary": "用户注册",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterUserRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "注册成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiBaseResult"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UserVo"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "注册失败"
+          },
+          "409": {
+            "description": "用户邮箱已经存在"
+          }
+        },
+        "tags": [
+          "auth"
         ]
       }
     },
@@ -1146,80 +1146,6 @@
           "createTime"
         ]
       },
-      "LoginVo": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number",
-            "description": "用户id",
-            "examples": [
-              1,
-              2,
-              7,
-              99,
-              12412
-            ]
-          },
-          "token": {
-            "type": "string",
-            "description": "用户登录成功后的认证信息"
-          }
-        },
-        "required": [
-          "id",
-          "token"
-        ]
-      },
-      "LoginUserRequestDto": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "example": "gamejoye@gmail.com",
-            "description": "用户邮箱"
-          },
-          "password": {
-            "type": "string",
-            "example": "147jkl...",
-            "description": "用户密码"
-          }
-        },
-        "required": [
-          "email",
-          "password"
-        ]
-      },
-      "RegisterUserRequestDto": {
-        "type": "object",
-        "properties": {
-          "username": {
-            "type": "string",
-            "example": "gamejoye",
-            "description": "用户名"
-          },
-          "email": {
-            "type": "string",
-            "example": "gamejoye@gmail.com",
-            "description": "用户邮箱"
-          },
-          "password": {
-            "type": "string",
-            "example": "147jkl...",
-            "description": "用户密码"
-          },
-          "avatarUrl": {
-            "type": "string",
-            "example": "https://gamejoye.top/static/media/bg.6885a3ed90df348b4f7a.jpeg",
-            "description": "用户头像"
-          }
-        },
-        "required": [
-          "username",
-          "email",
-          "password",
-          "avatarUrl"
-        ]
-      },
       "ChatroomVo": {
         "type": "object",
         "properties": {
@@ -1373,6 +1299,80 @@
           "onlineUserIds",
           "chatroom",
           "latestMessage"
+        ]
+      },
+      "LoginVo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "用户id",
+            "examples": [
+              1,
+              2,
+              7,
+              99,
+              12412
+            ]
+          },
+          "token": {
+            "type": "string",
+            "description": "用户登录成功后的认证信息"
+          }
+        },
+        "required": [
+          "id",
+          "token"
+        ]
+      },
+      "LoginUserRequestDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "gamejoye@gmail.com",
+            "description": "用户邮箱"
+          },
+          "password": {
+            "type": "string",
+            "example": "147jkl...",
+            "description": "用户密码"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "RegisterUserRequestDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "gamejoye",
+            "description": "用户名"
+          },
+          "email": {
+            "type": "string",
+            "example": "gamejoye@gmail.com",
+            "description": "用户邮箱"
+          },
+          "password": {
+            "type": "string",
+            "example": "147jkl...",
+            "description": "用户密码"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "example": "https://gamejoye.top/static/media/bg.6885a3ed90df348b4f7a.jpeg",
+            "description": "用户头像"
+          }
+        },
+        "required": [
+          "username",
+          "email",
+          "password",
+          "avatarUrl"
         ]
       },
       "IAddMessageChatroomDto": {
