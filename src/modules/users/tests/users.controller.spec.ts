@@ -11,7 +11,7 @@ import { transformFriendInfo, transformUser } from '../vo/utils/user-transform';
 import { FriendInfo } from '../types/friend-info.type';
 import { Response } from 'express';
 import { EnvConfigService } from 'src/modules/env-config/env-config.service';
-import { getCurrentDatetime } from 'src/common/utils';
+import { getCurrentDatetime, Logger } from 'src/common/utils';
 import { FriendRequest } from '../entities/friendrequest.entity';
 import { FriendRequestType } from 'src/common/constants/friendrequest';
 import { WsGatewayService } from 'src/modules/ws-gateway/ws-gateway.service';
@@ -54,7 +54,7 @@ const user2: User = {
   toFriendRequests: [],
 };
 const user3: User = {
-  id: 2,
+  id: 3,
   username: 'user3333',
   email: 'user3333@gmail.com',
   passwordHash: '',
@@ -136,6 +136,16 @@ describe('UserController', () => {
     expect(userVo.id).toBe(user1.id);
     expect(mockUsersService.getByEmail).toHaveBeenCalledTimes(1);
     expect(mockUsersService.getByEmail).toHaveBeenCalledWith(user1.email);
+
+    await controller
+      .getUserByEmail({ email: user2.email })
+      .then(() => {
+        expect(true).toBe(false);
+      })
+      .catch((e) => {
+        expect(e).toBeInstanceOf(HttpException);
+        expect((e as HttpException).getStatus()).toBe(HttpStatus.NOT_FOUND);
+      });
   });
 
   it('acceptFriendRequest', async () => {
@@ -208,6 +218,17 @@ describe('UserController', () => {
       existingFq.to.id,
       existingChatroom,
     );
+
+    // FORBBIDEN
+    await controller
+      .acceptFriendRequest(existingFq.from, existingFq.to.id, existingFq.id)
+      .then(() => {
+        expect(true).toBe(false);
+      })
+      .catch((e) => {
+        expect(e).toBeInstanceOf(HttpException);
+        expect((e as HttpException).getStatus()).toBe(HttpStatus.FORBIDDEN);
+      });
   });
 
   it('rejectFriendRequest', async () => {
@@ -262,6 +283,16 @@ describe('UserController', () => {
       existingFq.to.id,
       { ...existingFq, status: FriendRequestType.REJECT },
     );
+
+    await controller
+      .rejectFriendRequest(existingFq.from, existingFq.to.id, existingFq.id)
+      .then(() => {
+        expect(true).toBe(false);
+      })
+      .catch((e) => {
+        expect(e).toBeInstanceOf(HttpException);
+        expect((e as HttpException).getStatus()).toBe(HttpStatus.FORBIDDEN);
+      });
   });
 
   it('postFriendRequest', async () => {
@@ -281,19 +312,20 @@ describe('UserController', () => {
       createTime: getCurrentDatetime(),
       updateTime: getCurrentDatetime(),
     };
-    let callCount1 = 0;
-    let callCount2 = 0;
+    const called = new Set<string>();
     (mockUsersService.createFriendRequest as jest.Mock).mockImplementation(
-      (from: number) => {
-        if (!callCount1 && from === user1.id) {
-          callCount1++;
-          return pendingRq;
+      (from: number, to: number) => {
+        let fq: FriendRequest;
+        if (!called.has(to + ',' + from)) {
+          fq = pendingRq;
+        } else {
+          if (called.has(from + ',' + to)) {
+            return null;
+          }
+          fq = acceptRq;
         }
-        if (!callCount2 && from === user2.id) {
-          callCount2++;
-          return acceptRq;
-        }
-        return null;
+        called.add(from + ',' + to);
+        return fq;
       },
     );
     const existingChatroom = new Chatroom();
@@ -318,16 +350,21 @@ describe('UserController', () => {
       user2.id,
     );
     expect(mockWsGateWayService.notifyNewFriendRequest).toHaveBeenCalledTimes(
-      1,
+      2,
     );
     expect(mockWsGateWayService.notifyNewFriendRequest).toHaveBeenCalledWith(
       user2.id,
       pendingRq,
     );
 
+    jest.clearAllMocks();
     await controller.postFriendRequest(user2, user2.id, {
       from: user2.id,
       to: user3.id,
+    });
+    await controller.postFriendRequest(user3, user3.id, {
+      from: user3.id,
+      to: user2.id,
     });
     expect(mockUsersService.createFriendRequest).toHaveBeenCalledTimes(2);
     expect(mockUsersService.createFriendRequest).toHaveBeenCalledWith(
@@ -344,6 +381,17 @@ describe('UserController', () => {
       user3,
     );
     expect(mockWsGateWayService.notifyNewChatroom).toHaveBeenCalledTimes(2);
+    expect(mockWsGateWayService.notifyNewFriendRequest).toHaveBeenCalledTimes(
+      4,
+    );
+    expect(mockWsGateWayService.notifyNewFriendRequest).toHaveBeenCalledWith(
+      user2.id,
+      acceptRq,
+    );
+    expect(mockWsGateWayService.notifyNewFriendRequest).toHaveBeenCalledWith(
+      user3.id,
+      acceptRq,
+    );
     expect(mockWsGateWayService.notifyNewChatroom).toHaveBeenCalledWith(
       user2.id,
       existingChatroom,
@@ -419,10 +467,25 @@ describe('UserController', () => {
   });
 
   it('getUserByid work correctly', async () => {
-    (mockUsersService.getById as jest.Mock).mockResolvedValue(user2);
+    (mockUsersService.getById as jest.Mock).mockImplementation((userId) => {
+      if (userId === user2.id) {
+        return user2;
+      }
+      return null;
+    });
     await controller.getUserById(user2.id);
     expect(mockUsersService.getById).toHaveBeenCalledTimes(1);
     expect(mockUsersService.getById).toHaveBeenCalledWith(user2.id);
+
+    await controller
+      .getUserById(user1.id)
+      .then(() => {
+        expect(true).toBe(false);
+      })
+      .catch((e) => {
+        expect(e).toBeInstanceOf(HttpException);
+        expect((e as HttpException).getStatus()).toBe(HttpStatus.NOT_FOUND);
+      });
   });
 
   it('getFriendsById work correctly', async () => {

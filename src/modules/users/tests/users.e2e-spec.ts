@@ -159,7 +159,7 @@ describe('UsersController (e2e)', () => {
       .put(`/users/${ids[0]}/friends/requests/${fq.id}/accept`)
       .set('Authorization', fromAuthorization);
     expect(forbbidenResponse.status).toBe(HttpStatus.FORBIDDEN);
-    expect(forbbidenResponse.body.message).toBe('只有接收者能处理好友请求');
+    expect(forbbidenResponse.body.message).toBe('权限不足');
 
     const toAuthorization = getAuthorization(ids[1]);
     // 2. 用户认证信息不正确
@@ -205,7 +205,7 @@ describe('UsersController (e2e)', () => {
       .put(`/users/${ids[0]}/friends/requests/${fq.id}/reject`)
       .set('Authorization', fromAuthorization);
     expect(forbbidenResponse.status).toBe(HttpStatus.FORBIDDEN);
-    expect(forbbidenResponse.body.message).toBe('只有接收者能处理好友请求');
+    expect(forbbidenResponse.body.message).toBe('权限不足');
 
     const toAuthorization = getAuthorization(ids[1]);
     // 2. 用户认证信息不正确
