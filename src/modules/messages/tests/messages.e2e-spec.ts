@@ -2,7 +2,6 @@ import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Chatroom } from 'src/modules/chatrooms/entities/chatroom.entity';
 import { UserChatroom } from 'src/modules/chatrooms/entities/user-chatroom.entity';
-import { EnvConfigService } from 'src/modules/env-config/env-config.service';
 import { User } from 'src/modules/users/entities/user.entity';
 import * as request from 'supertest';
 import { Repository } from 'typeorm';
@@ -25,12 +24,13 @@ import {
   getUserNonExistingId,
   initDatabase,
 } from 'src/common/utils';
-import { EnvConfigModule } from 'src/modules/env-config/env-config.module';
 import { Message } from '../entities/message.entity';
 import { GetMessagesByChatroomIdDto } from '../dto/get-messages-by-chatroom-id.dto';
 import { MessageVo } from '../vo/message.vo';
 import { IAddMessageDto } from '../dto/add-message.dto';
 import { transformMessage } from '../vo/utils';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import configuration, { Config } from 'src/config/configuration';
 
 const messageSorter = (msg1: Message, msg2: Message) => {
   const t1 = new Date(msg1.createTime).getTime();
@@ -41,7 +41,7 @@ const messageSorter = (msg1: Message, msg2: Message) => {
 
 describe('ChatroomController (e2e)', () => {
   let app: INestApplication;
-  let envConfigService: EnvConfigService;
+  let configService: ConfigService;
   let messagesRepository: Repository<Message>;
   let usersRepository: Repository<User>;
   let chatroomsRepository: Repository<Chatroom>;
@@ -50,7 +50,16 @@ describe('ChatroomController (e2e)', () => {
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [MessagesModule, DatabaseModule, EnvConfigModule, AuthModule],
+      imports: [
+        MessagesModule,
+        DatabaseModule,
+        ConfigModule.forRoot({
+          envFilePath: `.env.${process.env.NODE_ENV}`,
+          load: [configuration],
+          isGlobal: true,
+        }),
+        AuthModule,
+      ],
       providers: [...messagesProviders],
     }).compile();
 
@@ -73,7 +82,7 @@ describe('ChatroomController (e2e)', () => {
       USER_CHATROOM_REPOSITORY,
     );
     usersRepository = moduleFixture.get<Repository<User>>(USER_REPOSITORY);
-    envConfigService = moduleFixture.get<EnvConfigService>(EnvConfigService);
+    configService = moduleFixture.get<ConfigService>(ConfigService);
 
     /**
      * 登录获取token
@@ -100,11 +109,11 @@ describe('ChatroomController (e2e)', () => {
   }
 
   beforeEach(async () => {
-    await initDatabase(envConfigService.getDatabaseConfig());
+    await initDatabase(configService.get<Config['database']>('database'));
   });
 
   afterAll(async () => {
-    await initDatabase(envConfigService.getDatabaseConfig());
+    await initDatabase(configService.get<Config['database']>('database'));
     await app.close();
   });
 

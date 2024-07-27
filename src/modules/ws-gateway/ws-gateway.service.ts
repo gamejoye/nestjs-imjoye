@@ -13,11 +13,12 @@ import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { AUTHORIZATION } from 'src/common/constants/websocketHeaders';
 import * as jwt from 'jsonwebtoken';
-import { EnvConfigService } from '../env-config/env-config.service';
 import { Logger } from 'src/common/utils';
 import { IWsGatewayService } from './interface/ws-gateway.interface.service';
 import { FriendRequest } from '../users/entities/friendrequest.entity';
 import { Chatroom } from '../chatrooms/entities/chatroom.entity';
+import { ConfigService } from '@nestjs/config';
+import { Config } from 'src/config/configuration';
 
 @Injectable()
 export class WsGatewayService
@@ -28,7 +29,7 @@ export class WsGatewayService
   constructor(
     @Inject(USER_REPOSITORY)
     protected readonly userRepository: Repository<User>,
-    protected readonly envConfigService: EnvConfigService,
+    protected readonly configService: ConfigService,
   ) {}
 
   onModuleInit() {
@@ -51,7 +52,7 @@ export class WsGatewayService
       try {
         payload = jwt.verify(
           token,
-          this.envConfigService.getJwtConfig().secret,
+          this.configService.get<Config['jwt']>('jwt').secret,
         ) as jwt.JwtPayload;
         if (
           !payload ||

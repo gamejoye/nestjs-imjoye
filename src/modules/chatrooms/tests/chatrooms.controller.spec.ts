@@ -3,7 +3,6 @@ import { ChatroomsController } from '../chatrooms.controller';
 import { DatabaseModule } from '../../database/database.module';
 import { chatroomsProviders } from '../chatrooms.providers';
 import { ChatroomsService } from '../chatrooms.service';
-import { EnvConfigModule } from '../../env-config/env-config.module';
 import { UserChatroomService } from '../user-chatroom.service';
 import { IUserChatroomService } from '../interface/user-chatrooms.service.interface';
 import { User } from 'src/modules/users/entities/user.entity';
@@ -16,6 +15,8 @@ import { IChatroomsService } from '../interface/chatrooms.service.interface';
 import { IMessagesService } from 'src/modules/messages/interface/messages.service.interface';
 import { MessagesService } from 'src/modules/messages/messages.service';
 import { Message } from 'src/modules/messages/entities/message.entity';
+import { ConfigModule } from '@nestjs/config';
+import configuration from 'src/config/configuration';
 
 /**
  * 测试所需常量
@@ -141,7 +142,14 @@ describe('ChatroomsController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DatabaseModule, EnvConfigModule],
+      imports: [
+        DatabaseModule,
+        ConfigModule.forRoot({
+          envFilePath: `.env.${process.env.NODE_ENV}`,
+          load: [configuration],
+          isGlobal: true,
+        }),
+      ],
       controllers: [ChatroomsController],
       providers: [
         ...chatroomsProviders,

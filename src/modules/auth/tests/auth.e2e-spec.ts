@@ -4,29 +4,33 @@ import * as request from 'supertest';
 import { AuthModule } from '../auth.module';
 import { UsersModule } from '../../users/users.module';
 import { PassportModule } from '@nestjs/passport';
-import { EnvConfigModule } from '../../env-config/env-config.module';
 import { initDatabase } from 'src/common/utils';
-import { EnvConfigService } from '../../env-config/env-config.service';
 import { RegisterUserRequestDto } from '../dto/register.dto';
 import { UserVo } from '../../users/vo/user.vo';
 import { LoginUserRequestDto } from '../dto/login.dto';
 import { LoginVo } from '../vo/login.vo';
 import { HttpExceptionFilter } from 'src/common/filters/http-exception.filter';
 import { ResTransformInterceptor } from 'src/common/interceptors/res-transform.interceptors';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import configuration, { Config } from 'src/config/configuration';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
-  let envConfigService: EnvConfigService;
+  let configService: ConfigService;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
+        ConfigModule.forRoot({
+          envFilePath: `.env.${process.env.NODE_ENV}`,
+          load: [configuration],
+          isGlobal: true,
+        }),
         AuthModule,
         PassportModule.register({
           defaultStrategy: ['jwt', 'local'],
         }),
         UsersModule,
-        EnvConfigModule,
       ],
     }).compile();
 
@@ -40,15 +44,15 @@ describe('AuthController (e2e)', () => {
     app.useGlobalFilters(new HttpExceptionFilter());
     app.useGlobalInterceptors(new ResTransformInterceptor());
     await app.init();
-    envConfigService = moduleFixture.get<EnvConfigService>(EnvConfigService);
+    configService = app.get<ConfigService>(ConfigService);
   });
 
   beforeEach(async () => {
-    await initDatabase(envConfigService.getDatabaseConfig());
+    await initDatabase(configService.get<Config['database']>('database'));
   });
 
   afterAll(async () => {
-    await initDatabase(envConfigService.getDatabaseConfig());
+    await initDatabase(configService.get<Config['database']>('database'));
     await app.close();
   });
 

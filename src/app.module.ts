@@ -1,15 +1,20 @@
 import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
-import { EnvConfigModule } from './modules/env-config/env-config.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ChatroomsModule } from './modules/chatrooms/chatrooms.module';
 import { MessagesModule } from './modules/messages/messages.module';
 import { WsGatewayModule } from './modules/ws-gateway/ws-gateway.module';
 import { LoggerMiddleWare } from './common/middlewares/logger.middleware';
+import { ConfigModule } from '@nestjs/config';
+import configuration from './config/configuration';
 
 @Module({
   imports: [
-    EnvConfigModule,
+    ConfigModule.forRoot({
+      envFilePath: `.env.${process.env.NODE_ENV}`,
+      load: [configuration],
+      isGlobal: true,
+    }),
     UsersModule,
     AuthModule,
     ChatroomsModule,

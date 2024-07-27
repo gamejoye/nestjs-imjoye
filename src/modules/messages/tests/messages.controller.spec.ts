@@ -4,7 +4,6 @@ import { DatabaseModule } from '../../database/database.module';
 import { WsGatewayModule } from '../../ws-gateway/ws-gateway.module';
 import { messagesProviders } from '../messages.providers';
 import { MessagesService } from '../messages.service';
-import { EnvConfigModule } from '../../env-config/env-config.module';
 import { IMessagesService } from '../interface/messages.service.interface';
 import { WsGatewayService } from 'src/modules/ws-gateway/ws-gateway.service';
 import { User } from 'src/modules/users/entities/user.entity';
@@ -14,6 +13,8 @@ import { ChatroomType } from 'src/common/constants/chatroom';
 import { Message } from '../entities/message.entity';
 import { IAddMessageDto } from '../dto/add-message.dto';
 import { ChatroomsService } from 'src/modules/chatrooms/chatrooms.service';
+import { ConfigModule } from '@nestjs/config';
+import configuration from 'src/config/configuration';
 
 /**
  * 测试所需常量
@@ -92,7 +93,15 @@ describe('MessagesController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DatabaseModule, WsGatewayModule, EnvConfigModule],
+      imports: [
+        DatabaseModule,
+        WsGatewayModule,
+        ConfigModule.forRoot({
+          envFilePath: `.env.${process.env.NODE_ENV}`,
+          load: [configuration],
+          isGlobal: true,
+        }),
+      ],
       controllers: [MessagesController],
       providers: [...messagesProviders, MessagesService, ChatroomsService],
       exports: [MessagesService],

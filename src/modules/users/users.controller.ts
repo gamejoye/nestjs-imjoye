@@ -26,7 +26,6 @@ import { UsersService } from './users.service';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { User } from './entities/user.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { EnvConfigService } from '../env-config/env-config.service';
 import { Response } from 'express';
 import { UserVo } from './vo/user.vo';
 import {
@@ -45,6 +44,8 @@ import { FriendRequestType } from 'src/common/constants/friendrequest';
 import { WsGatewayService } from '../ws-gateway/ws-gateway.service';
 import { GetUserByEmailDto } from './dto/get-user-by-email.dto';
 import { ChatroomsService } from '../chatrooms/chatrooms.service';
+import { ConfigService } from '@nestjs/config';
+import { Config } from 'src/config/configuration';
 
 @ApiTags('users')
 @Controller('users')
@@ -53,7 +54,7 @@ export class UsersController {
     protected readonly usersService: UsersService,
     protected readonly chatroomsService: ChatroomsService,
     protected readonly wsService: WsGatewayService,
-    protected readonly envConfigService: EnvConfigService,
+    protected readonly configService: ConfigService,
   ) {}
 
   @Get(':id')
@@ -343,7 +344,7 @@ export class UsersController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const filename = file.filename;
-    const avatarUrl = this.envConfigService.getAvatarConfig().avatarUrl;
+    const avatarUrl = this.configService.get<Config['avatar']>('avatar').url;
     const userAvatarUrl = avatarUrl + '/' + filename;
     return userAvatarUrl;
   }

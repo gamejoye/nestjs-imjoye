@@ -1,9 +1,7 @@
 import * as request from 'supertest';
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { EnvConfigService } from 'src/modules/env-config/env-config.service';
 import { ChatroomsModule } from '../chatrooms.module';
-import { EnvConfigModule } from 'src/modules/env-config/env-config.module';
 import { HttpExceptionFilter } from 'src/common/filters/http-exception.filter';
 import { ResTransformInterceptor } from 'src/common/interceptors/res-transform.interceptors';
 import {
@@ -32,10 +30,12 @@ import { User } from 'src/modules/users/entities/user.entity';
 import { ChatroomSummaryVo } from '../vo/chatroom-summary.vo';
 import { AuthModule } from 'src/modules/auth/auth.module';
 import { transformChatroom } from '../vo/utils';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import configuration, { Config } from 'src/config/configuration';
 
 describe('ChatroomController (e2e)', () => {
   let app: INestApplication;
-  let envConfigService: EnvConfigService;
+  let configService: ConfigService;
   let usersRepository: Repository<User>;
   let chatroomsRepository: Repository<Chatroom>;
   let userChatroomRepository: Repository<UserChatroom>;
@@ -43,7 +43,16 @@ describe('ChatroomController (e2e)', () => {
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [ChatroomsModule, DatabaseModule, EnvConfigModule, AuthModule],
+      imports: [
+        ChatroomsModule,
+        DatabaseModule,
+        ConfigModule.forRoot({
+          envFilePath: `.env.${process.env.NODE_ENV}`,
+          load: [configuration],
+          isGlobal: true,
+        }),
+        AuthModule,
+      ],
       providers: [...chatroomsProviders],
     }).compile();
 
@@ -64,7 +73,7 @@ describe('ChatroomController (e2e)', () => {
       USER_CHATROOM_REPOSITORY,
     );
     usersRepository = moduleFixture.get<Repository<User>>(USER_REPOSITORY);
-    envConfigService = moduleFixture.get<EnvConfigService>(EnvConfigService);
+    configService = moduleFixture.get<ConfigService>(ConfigService);
 
     authorizations = new Map();
     const users = await usersRepository.find();
@@ -88,11 +97,11 @@ describe('ChatroomController (e2e)', () => {
   }
 
   beforeEach(async () => {
-    await initDatabase(envConfigService.getDatabaseConfig());
+    await initDatabase(configService.get<Config['database']>('database'));
   });
 
   afterAll(async () => {
-    await initDatabase(envConfigService.getDatabaseConfig());
+    await initDatabase(configService.get<Config['database']>('database'));
     await app.close();
   });
 

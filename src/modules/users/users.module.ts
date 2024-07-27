@@ -5,17 +5,18 @@ import { DatabaseModule } from '../database/database.module';
 import { usersProviders } from './users.providers';
 import { MulterModule } from '@nestjs/platform-express';
 import * as multer from 'multer';
-import { EnvConfigService } from '../env-config/env-config.service';
 import { WsGatewayModule } from '../ws-gateway/ws-gateway.module';
 import { ChatroomsModule } from '../chatrooms/chatrooms.module';
+import { ConfigService } from '@nestjs/config';
+import { Config } from 'src/config/configuration';
 
 @Module({
   imports: [
     DatabaseModule,
     MulterModule.registerAsync({
-      useFactory: async (envConfigService: EnvConfigService) => ({
+      useFactory: async (configService: ConfigService) => ({
         storage: multer.diskStorage({
-          destination: envConfigService.getAvatarConfig().avatarDir,
+          destination: configService.get<Config['avatar']>('avatar').dir,
           filename: (req, file, callback) => {
             const spilitedOriginalname = file.originalname.split('.');
             const fileExtName =
@@ -31,7 +32,7 @@ import { ChatroomsModule } from '../chatrooms/chatrooms.module';
           fileSize: 1024 * 1024 * 2, // 2MB
         },
       }),
-      inject: [EnvConfigService],
+      inject: [ConfigService],
     }),
     WsGatewayModule,
     ChatroomsModule,

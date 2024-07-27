@@ -16,7 +16,6 @@ import {
 } from '@nestjs/swagger';
 import { LocalGuard } from './local.guard';
 import { GetUser } from './decorators/get-user.decorator';
-import { EnvConfigService } from '../env-config/env-config.service';
 import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcrypt';
 import { User } from '../users/entities/user.entity';
@@ -30,13 +29,15 @@ import {
   ApiCreatedResponseResult,
 } from 'src/common/types/response.type';
 import { Logger } from 'src/common/utils';
+import { ConfigService } from '@nestjs/config';
+import { Config } from 'src/config/configuration';
 
 @ApiExtraModels(ApiBaseResult)
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
-    private envConfigService: EnvConfigService,
+    private configService: ConfigService,
     private usersService: UsersService,
   ) {}
 
@@ -58,7 +59,7 @@ export class AuthController {
     const id = user.id;
     const token = jwt.sign(
       { id },
-      this.envConfigService.getJwtConfig().secret,
+      this.configService.get<Config['jwt']>('jwt').secret,
       { expiresIn: '7d' },
     );
     return {

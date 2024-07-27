@@ -4,16 +4,16 @@ import { PassportModule } from '@nestjs/passport';
 import { UsersModule } from '../../users/users.module';
 import { LocalStrategy } from '../local.strategy';
 import { JwtStrategy } from '../jwt.strategy';
-import { EnvConfigModule } from '../../env-config/env-config.module';
 import { LoginUserRequestDto } from '../dto/login.dto';
 import { User } from 'src/modules/users/entities/user.entity';
 import { getCurrentDatetime } from 'src/common/utils';
 import * as jwt from 'jsonwebtoken';
-import { EnvConfigService } from 'src/modules/env-config/env-config.service';
 import { IUsersService } from 'src/modules/users/interface/users.service.interface';
 import { UsersService } from 'src/modules/users/users.service';
 import { RegisterUserRequestDto } from '../dto/register.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import configuration, { Config } from 'src/config/configuration';
 
 /**
  * 测试所需常量
@@ -75,15 +75,20 @@ const mockUsersService: Partial<IUsersService> = {
 
 describe('AuthController', () => {
   let controller: AuthController;
-  let envConfigService: EnvConfigService;
+  let configService: ConfigService;
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
+        ConfigModule.forRoot({
+          envFilePath: `.env.${process.env.NODE_ENV}`,
+          load: [configuration],
+          isGlobal: true,
+        }),
         PassportModule.register({
           defaultStrategy: ['jwt', 'local'],
         }),
         UsersModule,
-        EnvConfigModule,
+        ConfigModule,
       ],
       controllers: [AuthController],
       providers: [LocalStrategy, JwtStrategy],
@@ -93,7 +98,7 @@ describe('AuthController', () => {
       .compile();
 
     controller = module.get<AuthController>(AuthController);
-    envConfigService = module.get<EnvConfigService>(EnvConfigService);
+    configService = module.get<ConfigService>(ConfigService);
   });
 
   it('login逻辑验证', async () => {
@@ -108,7 +113,7 @@ describe('AuthController', () => {
     // login验证调用sign进行token签名
     expect(jwt.sign).toHaveBeenCalledWith(
       { id: user.id },
-      envConfigService.getJwtConfig().secret,
+      configService.get<Config['jwt']>('jwt').secret,
       expect.any(Object),
     );
   });

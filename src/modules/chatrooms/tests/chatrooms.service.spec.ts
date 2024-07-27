@@ -1,10 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ChatroomsService } from '../chatrooms.service';
 import { DatabaseModule } from '../../database/database.module';
-import { EnvConfigModule } from '../../env-config/env-config.module';
 import { chatroomsProviders } from '../chatrooms.providers';
 import { initDatabase, getUserNonExistingId } from 'src/common/utils';
-import { EnvConfigService } from '../../env-config/env-config.service';
 import { Repository } from 'typeorm';
 import { UserChatroom } from '../entities/user-chatroom.entity';
 import {
@@ -16,34 +14,43 @@ import { ChatroomType } from 'src/common/constants/chatroom';
 import { Chatroom } from '../entities/chatroom.entity';
 import { User } from '../../users/entities/user.entity';
 import { UserChatroomService } from '../user-chatroom.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import configuration, { Config } from 'src/config/configuration';
 
 describe('ChatroomsService', () => {
   let service: ChatroomsService;
-  let envService: EnvConfigService;
+  let configService: ConfigService;
   let usersRepository: Repository<User>;
   let chatroomsRepository: Repository<Chatroom>;
   let userChatroomsRepository: Repository<UserChatroom>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DatabaseModule, EnvConfigModule],
+      imports: [
+        DatabaseModule,
+        ConfigModule.forRoot({
+          envFilePath: `.env.${process.env.NODE_ENV}`,
+          load: [configuration],
+          isGlobal: true,
+        }),
+      ],
       providers: [ChatroomsService, UserChatroomService, ...chatroomsProviders],
     }).compile();
 
     service = module.get<ChatroomsService>(ChatroomsService);
-    envService = module.get<EnvConfigService>(EnvConfigService);
+    configService = module.get<ConfigService>(ConfigService);
     userChatroomsRepository = module.get<Repository<UserChatroom>>(
       USER_CHATROOM_REPOSITORY,
     );
     chatroomsRepository = module.get<Repository<Chatroom>>(CHATROOM_REPOSITORY);
     usersRepository = module.get<Repository<User>>(USER_REPOSITORY);
 
-    await initDatabase(envService.getDatabaseConfig());
+    await initDatabase(configService.get<Config['database']>('database'));
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
-    expect(envService).toBeDefined();
+    expect(configService).toBeDefined();
   });
 
   it('countAll work correctly', async () => {

@@ -1,12 +1,15 @@
 import { DataSource } from 'typeorm';
 import { DATA_SOURCE } from 'src/common/constants/providers';
-import { EnvConfigService } from '../env-config/env-config.service';
+import { ConfigService } from '@nestjs/config';
+import { Config } from 'src/config/configuration';
+import { Logger } from 'src/common/utils';
 
 export const databaseProviders = [
   {
     provide: DATA_SOURCE,
-    useFactory: async (envConfigService: EnvConfigService) => {
-      const config = envConfigService.getDatabaseConfig();
+    useFactory: async (configService: ConfigService) => {
+      const config = configService.get<Config['database']>('database');
+      Logger.log(config);
       const dataSource = new DataSource({
         type: config.type,
         host: config.host,
@@ -21,6 +24,6 @@ export const databaseProviders = [
       });
       return dataSource.initialize();
     },
-    inject: [EnvConfigService],
+    inject: [ConfigService],
   },
 ];

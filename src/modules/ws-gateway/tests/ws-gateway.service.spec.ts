@@ -2,8 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { WsGatewayService } from '../ws-gateway.service';
 import { wsGatewayProviders } from '../ws-gateway.providers';
 import { DatabaseModule } from '../../database/database.module';
-import { EnvConfigModule } from '../../env-config/env-config.module';
-import { EnvConfigService } from '../../env-config/env-config.service';
 import { Repository } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Chatroom } from '../../chatrooms/entities/chatroom.entity';
@@ -26,23 +24,32 @@ import { Message } from '../../messages/entities/message.entity';
 import { WebSocketEventType } from 'src/common/constants/websocketEvents';
 import { FriendRequest } from 'src/modules/users/entities/friendrequest.entity';
 import { FriendRequestType } from 'src/common/constants/friendrequest';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import configuration, { Config } from 'src/config/configuration';
 
 describe('WsGatewayService', () => {
   let wsGatewayService: WsGatewayService;
   let usersRepository: Repository<User>;
   let chatroomsRepository: Repository<Chatroom>;
   let friendRequestsRepository: Repository<FriendRequest>;
-  let envConfigService: EnvConfigService;
+  let configService: ConfigService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DatabaseModule, EnvConfigModule],
+      imports: [
+        DatabaseModule,
+        ConfigModule.forRoot({
+          envFilePath: `.env.${process.env.NODE_ENV}`,
+          load: [configuration],
+          isGlobal: true,
+        }),
+      ],
       providers: [...wsGatewayProviders, WsGatewayService],
       exports: [WsGatewayService],
     }).compile();
 
     wsGatewayService = module.get<WsGatewayService>(WsGatewayService);
-    envConfigService = module.get<EnvConfigService>(EnvConfigService);
+    configService = module.get<ConfigService>(ConfigService);
     usersRepository = module.get<Repository<User>>(USER_REPOSITORY);
     chatroomsRepository = module.get<Repository<Chatroom>>(CHATROOM_REPOSITORY);
     friendRequestsRepository = module.get<Repository<FriendRequest>>(
@@ -50,7 +57,7 @@ describe('WsGatewayService', () => {
     );
 
     wsGatewayService.onModuleInit();
-    await initDatabase(envConfigService.getDatabaseConfig());
+    await initDatabase(configService.get<Config['database']>('database'));
   });
 
   afterEach(async () => {
@@ -61,14 +68,14 @@ describe('WsGatewayService', () => {
     expect(wsGatewayService).toBeDefined();
     expect(usersRepository).toBeDefined();
     expect(chatroomsRepository).toBeDefined();
-    expect(envConfigService).toBeDefined();
+    expect(configService).toBeDefined();
   });
 
   const connectToServer = async (users: User[]) => {
     // 1. Mock jwt
     // 2. user 连接 webSocketServer
     const userClients = users.map((user) => {
-      const jwtConfig = envConfigService.getJwtConfig();
+      const jwtConfig = configService.get<Config['jwt']>('jwt');
       const authorization = mockJwt(user.id, jwtConfig.secret);
 
       return new WebSocket('ws://localhost:5173', {

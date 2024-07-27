@@ -2,12 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MessagesService } from '../messages.service';
 import { DatabaseModule } from '../../database/database.module';
 import { WsGatewayModule } from '../../ws-gateway/ws-gateway.module';
-import { EnvConfigModule } from '../../env-config/env-config.module';
 import { MessagesController } from '../messages.controller';
 import { messagesProviders } from '../messages.providers';
 import { Repository } from 'typeorm';
 import { Message } from '../entities/message.entity';
-import { EnvConfigService } from 'src/modules/env-config/env-config.service';
 import { User } from 'src/modules/users/entities/user.entity';
 import {
   CHATROOM_REPOSITORY,
@@ -28,10 +26,12 @@ import { IAddMessageDto } from '../dto/add-message.dto';
 import { UserChatroom } from 'src/modules/chatrooms/entities/user-chatroom.entity';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ChatroomsService } from 'src/modules/chatrooms/chatrooms.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import configuration, { Config } from 'src/config/configuration';
 
 describe('MessagesService', () => {
   let service: MessagesService;
-  let envService: EnvConfigService;
+  let configService: ConfigService;
   let usersRepository: Repository<User>;
   let userChatroomRepository: Repository<UserChatroom>;
   let messagesRepository: Repository<Message>;
@@ -39,13 +39,21 @@ describe('MessagesService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DatabaseModule, WsGatewayModule, EnvConfigModule],
+      imports: [
+        DatabaseModule,
+        WsGatewayModule,
+        ConfigModule.forRoot({
+          envFilePath: `.env.${process.env.NODE_ENV}`,
+          load: [configuration],
+          isGlobal: true,
+        }),
+      ],
       controllers: [MessagesController],
       providers: [...messagesProviders, MessagesService, ChatroomsService],
     }).compile();
 
     service = module.get<MessagesService>(MessagesService);
-    envService = module.get<EnvConfigService>(EnvConfigService);
+    configService = module.get<ConfigService>(ConfigService);
     usersRepository = module.get<Repository<User>>(USER_REPOSITORY);
     userChatroomRepository = module.get<Repository<UserChatroom>>(
       USER_CHATROOM_REPOSITORY,
@@ -55,7 +63,7 @@ describe('MessagesService', () => {
   });
 
   beforeEach(async () => {
-    await initDatabase(envService.getDatabaseConfig());
+    await initDatabase(configService.get<Config['database']>('database'));
   });
 
   it('should be defined', () => {
@@ -86,7 +94,7 @@ describe('MessagesService', () => {
         const msg2 = messagesToBeTested[i + 1];
         expect(
           new Date(msg1.createTime).getTime() >=
-            new Date(msg2.createTime).getTime(),
+          new Date(msg2.createTime).getTime(),
         );
       }
       messagesToBeTested.sort(messageSorter);

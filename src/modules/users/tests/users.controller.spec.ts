@@ -3,14 +3,12 @@ import { UsersController } from '../users.controller';
 import { DatabaseModule } from '../../database/database.module';
 import { usersProviders } from '../users.providers';
 import { UsersService } from '../users.service';
-import { EnvConfigModule } from '../../env-config/env-config.module';
 import { IUsersService } from '../interface/users.service.interface';
 import { User } from '../entities/user.entity';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { transformFriendInfo, transformUser } from '../vo/utils/user-transform';
 import { FriendInfo } from '../types/friend-info.type';
 import { Response } from 'express';
-import { EnvConfigService } from 'src/modules/env-config/env-config.service';
 import { getCurrentDatetime } from 'src/common/utils';
 import { FriendRequest } from '../entities/friendrequest.entity';
 import { FriendRequestType } from 'src/common/constants/friendrequest';
@@ -21,6 +19,8 @@ import { ChatroomsModule } from 'src/modules/chatrooms/chatrooms.module';
 import { IChatroomsService } from 'src/modules/chatrooms/interface/chatrooms.service.interface';
 import { ChatroomsService } from 'src/modules/chatrooms/chatrooms.service';
 import { Chatroom } from 'src/modules/chatrooms/entities/chatroom.entity';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import configuration, { Config } from 'src/config/configuration';
 
 /**
  * 数据
@@ -91,13 +91,17 @@ const mockChatroomsService: Partial<IChatroomsService> = {
 
 describe('UserController', () => {
   let controller: UsersController;
-  let envService: EnvConfigService;
+  let configService: ConfigService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         DatabaseModule,
-        EnvConfigModule,
+        ConfigModule.forRoot({
+          envFilePath: `.env.${process.env.NODE_ENV}`,
+          load: [configuration],
+          isGlobal: true,
+        }),
         WsGatewayModule,
         ChatroomsModule,
       ],
@@ -114,7 +118,7 @@ describe('UserController', () => {
       .compile();
 
     controller = module.get<UsersController>(UsersController);
-    envService = module.get<EnvConfigService>(EnvConfigService);
+    configService = module.get<ConfigService>(ConfigService);
   });
 
   beforeEach(async () => {
@@ -571,7 +575,7 @@ describe('UserController', () => {
     } as Express.Multer.File;
     const res = {} as Response;
     const url = controller.uploadAvatar(file, res);
-    const avatarBaseUrl = envService.getAvatarConfig().avatarUrl;
+    const avatarBaseUrl = configService.get<Config['avatar']>('avatar').url;
     expect(url).toBe(avatarBaseUrl + '/' + filename);
   });
 });

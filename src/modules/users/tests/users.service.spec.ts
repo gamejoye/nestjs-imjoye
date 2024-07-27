@@ -3,8 +3,7 @@ import { UsersService } from '../users.service';
 import { DatabaseModule } from '../../database/database.module';
 import { UsersController } from '../users.controller';
 import { usersProviders } from '../users.providers';
-import { EnvConfigModule } from '../../env-config/env-config.module';
-import { EnvConfigService } from 'src/modules/env-config/env-config.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import {
@@ -25,10 +24,11 @@ import { FriendRequest } from '../entities/friendrequest.entity';
 import { FriendRequestType } from 'src/common/constants/friendrequest';
 import { WsGatewayModule } from 'src/modules/ws-gateway/ws-gateway.module';
 import { ChatroomsModule } from 'src/modules/chatrooms/chatrooms.module';
+import configuration, { Config } from 'src/config/configuration';
 
 describe('UserService', () => {
   let service: UsersService;
-  let envService: EnvConfigService;
+  let configService: ConfigService;
   let usersRepository: Repository<User>;
   let userFriendshipsRepository: Repository<UserFriendship>;
   let friendRequestsRepository: Repository<FriendRequest>;
@@ -37,7 +37,11 @@ describe('UserService', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         DatabaseModule,
-        EnvConfigModule,
+        ConfigModule.forRoot({
+          envFilePath: `.env.${process.env.NODE_ENV}`,
+          load: [configuration],
+          isGlobal: true,
+        }),
         WsGatewayModule,
         ChatroomsModule,
       ],
@@ -47,7 +51,7 @@ describe('UserService', () => {
     }).compile();
 
     service = module.get<UsersService>(UsersService);
-    envService = module.get<EnvConfigService>(EnvConfigService);
+    configService = module.get<ConfigService>(ConfigService);
     usersRepository = module.get<Repository<User>>(USER_REPOSITORY);
     userFriendshipsRepository = module.get<Repository<UserFriendship>>(
       USER_FRIENDSHIP_REPOSITORY,
@@ -58,7 +62,7 @@ describe('UserService', () => {
   });
 
   beforeEach(async () => {
-    await initDatabase(envService.getDatabaseConfig());
+    await initDatabase(configService.get<Config['database']>('database'));
   });
 
   it('should be defined', () => {

@@ -1,6 +1,5 @@
 import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { EnvConfigService } from 'src/modules/env-config/env-config.service';
 import { User } from 'src/modules/users/entities/user.entity';
 import * as request from 'supertest';
 import { Repository } from 'typeorm';
@@ -22,7 +21,6 @@ import {
   getUserNonExistingId,
   initDatabase,
 } from 'src/common/utils';
-import { EnvConfigModule } from 'src/modules/env-config/env-config.module';
 import { usersProviders } from '../users.providers';
 import { UserFriendship } from '../entities/friendship.entity';
 import {
@@ -36,6 +34,8 @@ import { FriendRequestVo } from '../vo/friendrequest.vo';
 import { FriendRequestType } from 'src/common/constants/friendrequest';
 import { PostFriendRequestDto } from '../dto/post-friend-request.dto';
 import { ChatroomsModule } from 'src/modules/chatrooms/chatrooms.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import configuration, { Config } from 'src/config/configuration';
 
 const userSorter = (user1: User, user2: User) => user1.id - user2.id;
 const descRequestSorter = (fq1: FriendRequest, fq2: FriendRequest) => {
@@ -47,7 +47,7 @@ const descRequestSorter = (fq1: FriendRequest, fq2: FriendRequest) => {
 
 describe('UsersController (e2e)', () => {
   let app: INestApplication;
-  let envConfigService: EnvConfigService;
+  let configService: ConfigService;
   let usersRepository: Repository<User>;
   let userFriendshipsRepository: Repository<UserFriendship>;
   let friendRequestsRepository: Repository<FriendRequest>;
@@ -59,7 +59,11 @@ describe('UsersController (e2e)', () => {
       imports: [
         UsersModule,
         DatabaseModule,
-        EnvConfigModule,
+        ConfigModule.forRoot({
+          envFilePath: `.env.${process.env.NODE_ENV}`,
+          load: [configuration],
+          isGlobal: true,
+        }),
         AuthModule,
         ChatroomsModule,
       ],
@@ -84,7 +88,7 @@ describe('UsersController (e2e)', () => {
     friendRequestsRepository = moduleFixture.get<Repository<FriendRequest>>(
       FRIEND_REQUEST_REPOSITORY,
     );
-    envConfigService = moduleFixture.get<EnvConfigService>(EnvConfigService);
+    configService = moduleFixture.get<ConfigService>(ConfigService);
 
     /**
      * 登录获取token
@@ -111,11 +115,11 @@ describe('UsersController (e2e)', () => {
   }
 
   beforeEach(async () => {
-    await initDatabase(envConfigService.getDatabaseConfig());
+    await initDatabase(configService.get<Config['database']>('database'));
   });
 
   afterAll(async () => {
-    await initDatabase(envConfigService.getDatabaseConfig());
+    await initDatabase(configService.get<Config['database']>('database'));
     await app.close();
   });
 
