@@ -18,6 +18,9 @@ export const databaseProviders = [
         password: config.password,
         database: config.database,
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+        migrations: [__dirname + '/../../migrations/**/*.ts'],
+        migrationsRun: false, //禁止自动执行迁移
+        synchronize: false, // 禁用自动同步
         extra: {
           dateStrings: true,
         },
