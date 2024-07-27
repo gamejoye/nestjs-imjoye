@@ -94,7 +94,7 @@ describe('MessagesService', () => {
         const msg2 = messagesToBeTested[i + 1];
         expect(
           new Date(msg1.createTime).getTime() >=
-          new Date(msg2.createTime).getTime(),
+            new Date(msg2.createTime).getTime(),
         );
       }
       messagesToBeTested.sort(messageSorter);
