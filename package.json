@@ -21,7 +21,8 @@
     "test:e2e:watch": "cross-env NODE_ENV=test jest --watch --config ./test/jest-e2e.json --runInBand --forceExit",
     "generate:openapi": "cross-env GENERATE_SWAGGER=true NODE_ENV=test node dist/main && rm -rf sdk && mkdir sdk && mv api.json sdk/api.json && npx openapi-typescript sdk/api.json -o sdk/api.d.ts",
     "create-migration": "sh create-migration.sh",
-    "run-migration": "cross-env NODE_ENV=production npx ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d ./src/modules/database/datasource.config.ts migration:run"
+    "run-migration": "cross-env NODE_ENV=production npx ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d ./src/modules/database/datasource.config.ts migration:run",
+    "revert-migration": "cross-env NODE_ENV=production npx ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d ./src/modules/database/datasource.config.ts migration:revert"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
