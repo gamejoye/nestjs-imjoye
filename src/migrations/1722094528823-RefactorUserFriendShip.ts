@@ -4,7 +4,7 @@ import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 export class RefactorUserFriendShip1722094528823 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     // 删除 `updateTime` 列
-    await queryRunner.dropColumn(USER_FRIENDSHIP, 'updateTime');
+    await queryRunner.dropColumn(USER_FRIENDSHIP, 'update_time');
 
     // 删除 `status` 列
     await queryRunner.dropColumn(USER_FRIENDSHIP, 'status');
