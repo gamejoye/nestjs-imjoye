@@ -44,7 +44,8 @@ jobs:
             ls -al
           SCRIPT_AFTER: |
             cd /usr/local/chat/nestjs-chat
+            cnpm run run-migration
             cnpm install
             cnpm run build
             ls -al
-            pm2 start pm2.json --name nestjs-chat
+            pm2 restart pm2.json --name nestjs-chat
