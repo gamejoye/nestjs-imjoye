@@ -181,10 +181,7 @@ export class UsersController {
     if (!fq) {
       throw new HttpException('重复发送好友请求', HttpStatus.CONFLICT);
     }
-    if (fq.status === FriendRequestType.PENDING) {
-      // 通知接收者有新的好友请求
-      await this.wsService.notifyNewFriendRequest(fq.to.id, fq);
-    } else if (fq.status === FriendRequestType.ACCEPT) {
+    if (fq.status === FriendRequestType.ACCEPT) {
       const chatroom = await this.chatroomsService.getByUserIdAndFriendId(
         fq.from.id,
         fq.to.id,
@@ -200,6 +197,10 @@ export class UsersController {
         this.wsService.notifyNewFriend(fq.to.id, fq.from),
       ]);
     }
+    await Promise.all([
+      this.wsService.notifyNewFriendRequest(fq.to.id, fq),
+      this.wsService.notifyNewFriendRequest(fq.from.id, fq),
+    ]);
     return transformFriendRequest(fq);
   }
 
@@ -223,12 +224,9 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Param('requestId', ParseIntPipe) requestId: number,
   ) {
-    if (user.id !== id) {
-      throw new HttpException('权限不足', HttpStatus.FORBIDDEN);
-    }
     const request = await this.usersService.getFriendRequestById(requestId);
-    if (request.to.id !== user.id) {
-      throw new HttpException('只有接收者能处理好友请求', HttpStatus.FORBIDDEN);
+    if (user.id !== id || request.to.id !== user.id) {
+      throw new HttpException('权限不足', HttpStatus.FORBIDDEN);
     }
     const fq = await this.usersService.updateFriendRequestStatus(
       request.id,
@@ -269,12 +267,9 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Param('requestId', ParseIntPipe) requestId: number,
   ) {
-    if (user.id !== id) {
-      throw new HttpException('权限不足', HttpStatus.FORBIDDEN);
-    }
     const request = await this.usersService.getFriendRequestById(requestId);
-    if (request.to.id !== user.id) {
-      throw new HttpException('只有接收者能处理好友请求', HttpStatus.FORBIDDEN);
+    if (user.id !== id || request.to.id !== user.id) {
+      throw new HttpException('权限不足', HttpStatus.FORBIDDEN);
     }
     const fq = await this.usersService.updateFriendRequestStatus(
       request.id,
