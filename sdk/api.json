@@ -804,6 +804,52 @@
         ]
       }
     },
+    "/auth/email/code": {
+      "post": {
+        "operationId": "AuthController_postEmail",
+        "summary": "发送邮箱验证码",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostEmailCodeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "验证码成功发送",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiBaseResult"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PostEmailCodeVo"
+                        }
+                      },
+                      "required": [
+                        "data"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/auth/register": {
       "post": {
         "operationId": "AuthController_register",
@@ -1344,6 +1390,32 @@
           "password"
         ]
       },
+      "PostEmailCodeVo": {
+        "type": "object",
+        "properties": {
+          "validTime": {
+            "type": "number",
+            "description": "验证码有效时间",
+            "example": 60
+          }
+        },
+        "required": [
+          "validTime"
+        ]
+      },
+      "PostEmailCodeDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "gamejoye@gmail.com",
+            "description": "用户邮箱"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
       "RegisterUserRequestDto": {
         "type": "object",
         "properties": {
@@ -1356,6 +1428,11 @@
             "type": "string",
             "example": "gamejoye@gmail.com",
             "description": "用户邮箱"
+          },
+          "code": {
+            "type": "string",
+            "example": "189452",
+            "description": "验证码"
           },
           "password": {
             "type": "string",
@@ -1371,6 +1448,7 @@
         "required": [
           "username",
           "email",
+          "code",
           "password",
           "avatarUrl"
         ]

@@ -62,6 +62,10 @@ export interface paths {
     /** 用户登录 */
     post: operations["AuthController_login"];
   };
+  "/auth/email/code": {
+    /** 发送邮箱验证码 */
+    post: operations["AuthController_postEmail"];
+  };
   "/auth/register": {
     /** 用户注册 */
     post: operations["AuthController_register"];
@@ -267,6 +271,20 @@ export interface components {
        */
       password: string;
     };
+    PostEmailCodeVo: {
+      /**
+       * @description 验证码有效时间
+       * @example 60
+       */
+      validTime: number;
+    };
+    PostEmailCodeDto: {
+      /**
+       * @description 用户邮箱
+       * @example gamejoye@gmail.com
+       */
+      email: string;
+    };
     RegisterUserRequestDto: {
       /**
        * @description 用户名
@@ -278,6 +296,11 @@ export interface components {
        * @example gamejoye@gmail.com
        */
       email: string;
+      /**
+       * @description 验证码
+       * @example 189452
+       */
+      code: string;
       /**
        * @description 用户密码
        * @example 147jkl...
@@ -704,6 +727,24 @@ export interface operations {
       /** @description 登录失败 */
       401: {
         content: never;
+      };
+    };
+  };
+  /** 发送邮箱验证码 */
+  AuthController_postEmail: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PostEmailCodeDto"];
+      };
+    };
+    responses: {
+      /** @description 验证码成功发送 */
+      201: {
+        content: {
+          "application/json": components["schemas"]["ApiBaseResult"] & {
+            data: components["schemas"]["PostEmailCodeVo"];
+          };
+        };
       };
     };
   };
