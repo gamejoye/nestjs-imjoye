@@ -6,6 +6,11 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ResTransformInterceptor } from './common/interceptors/res-transform.interceptors';
 import * as fs from 'fs';
 import { Logger } from './common/utils';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { EmailTools } from './common/utils/email';
+import { Cache } from 'cache-manager';
+import { ConfigService } from '@nestjs/config';
+import { Config } from './config/configuration';
 
 const swaggerTitle = 'IMJoye Api';
 const documentDescription = '[如有天樱花再开] 测试IMJoye Api';
@@ -14,6 +19,11 @@ const documentTag = 'Api/V1';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const configService = app.get<ConfigService>(ConfigService);
+  const cacheManager = app.get<Cache>(CACHE_MANAGER);
+  EmailTools.setCacheManager(cacheManager);
+  EmailTools.setEmailConfig(configService.get<Config['email']>('email'));
 
   const options = new DocumentBuilder()
     .setTitle(swaggerTitle)
