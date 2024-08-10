@@ -16,6 +16,13 @@ export type Config = {
     password: string;
     database: string;
   };
+  email: {
+    host: string;
+    port: number;
+    secure: boolean;
+    user: string;
+    pass: string;
+  };
 };
 
 const configuration = (): Config => {
@@ -36,6 +43,13 @@ const configuration = (): Config => {
       username: process.env.DATABASE_USERNAME,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_DATABASE,
+    },
+    email: {
+      host: 'smtp.qq.com',
+      port: 465,
+      secure: true,
+      user: '3032535923@qq.com',
+      pass: process.env.PASS,
     },
   };
 };
