@@ -30,6 +30,8 @@ jobs:
         echo "" >> .env.production
         echo "AVATAR_DIR=/usr/local/chat/avatars" >> .env.production
         echo "AVATAR_URL=http://imjoye.chat/avatars" >> .env.production
+        echo "" >> .env.production
+        echo "PASS=${{secrets.PASS}} >> .env.production"
     - name: Deploy to Server
       uses: easingthemes/ssh-deploy@main
       with:
