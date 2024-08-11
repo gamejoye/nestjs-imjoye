@@ -23,6 +23,11 @@ export type Config = {
     user: string;
     pass: string;
   };
+  redis: {
+    host: string;
+    port: number;
+    db: number;
+  };
 };
 
 const configuration = (): Config => {
@@ -50,6 +55,11 @@ const configuration = (): Config => {
       secure: true,
       user: '3032535923@qq.com',
       pass: process.env.PASS,
+    },
+    redis: {
+      host: process.env.REDIS_HOST,
+      port: +(process.env.REDIS_PORT || '6379'),
+      db: +(process.env.REDIS_DB || '0'),
     },
   };
 };
