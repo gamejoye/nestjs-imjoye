@@ -7,9 +7,8 @@ import { WsGatewayModule } from './modules/ws-gateway/ws-gateway.module';
 import { LoggerMiddleWare } from './common/middlewares/logger.middleware';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration, { Config } from './config/configuration';
-import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
+import { CacheModule } from '@nestjs/cache-manager';
 import * as redisStore from 'cache-manager-redis-store';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -37,12 +36,6 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     ChatroomsModule,
     MessagesModule,
     WsGatewayModule,
-  ],
-  providers: [
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: CacheInterceptor,
-    },
   ],
   exports: [CacheModule],
 })
