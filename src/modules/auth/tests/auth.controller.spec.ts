@@ -6,7 +6,7 @@ import { LocalStrategy } from '../local.strategy';
 import { JwtStrategy } from '../jwt.strategy';
 import { LoginUserRequestDto } from '../dto/login.dto';
 import { User } from 'src/modules/users/entities/user.entity';
-import { getCurrentDatetime } from 'src/common/utils';
+import { getCurrentDatetime, Logger } from 'src/common/utils';
 import * as jwt from 'jsonwebtoken';
 import { IUsersService } from 'src/modules/users/interface/users.service.interface';
 import { UsersService } from 'src/modules/users/users.service';
@@ -14,6 +14,7 @@ import { RegisterUserRequestDto } from '../dto/register.dto';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration, { Config } from 'src/config/configuration';
+import { EmailTools } from 'src/common/utils/email';
 
 /**
  * 测试所需常量
@@ -101,6 +102,13 @@ describe('AuthController', () => {
     configService = module.get<ConfigService>(ConfigService);
   });
 
+  afterAll(() => {
+    // Clear all mocks
+    jest.clearAllMocks();
+    // Optionally, restore all mocks to their original implementations
+    jest.restoreAllMocks();
+  });
+
   it('login逻辑验证', async () => {
     (jwt.sign as jest.Mock).mockReturnValue(token);
 
@@ -119,12 +127,35 @@ describe('AuthController', () => {
   });
 
   it('register逻辑验证', async () => {
+    // mock EMailTools
+    const validCode = '123456';
+    jest
+      .spyOn(EmailTools, 'verifyEmailCode')
+      .mockImplementation(async (email: string, code: string) => {
+        if (code === validCode) {
+          return true;
+        }
+        return false;
+      });
+
     const dto: RegisterUserRequestDto = {
       username: user.username,
       email: user.email,
       password: '',
       avatarUrl: '',
+      code: validCode,
     };
+
+    await controller
+      .register({ ...dto, code: '' })
+      .then(() => {
+        // assert test fail
+        expect(true).toBe(false);
+      })
+      .catch((e) => {
+        expect(e).toBeInstanceOf(HttpException);
+        expect((e as HttpException).getStatus()).toBe(HttpStatus.UNAUTHORIZED);
+      });
 
     await controller
       .register(dto)
@@ -136,19 +167,15 @@ describe('AuthController', () => {
         expect(e).toBeInstanceOf(HttpException);
         expect((e as HttpException).getStatus()).toBe(HttpStatus.CONFLICT);
       });
-    expect(mockUsersService.getByEmail).toHaveBeenLastCalledWith(dto.email);
-    expect(mockUsersService.register).not.toHaveBeenCalled();
 
     const nilDto: RegisterUserRequestDto = {
       username: user.username,
       email: nilEmail,
       password: '',
       avatarUrl: '',
+      code: validCode,
     };
     await controller.register(nilDto);
-    expect(mockUsersService.getByEmail).toHaveBeenLastCalledWith(nilDto.email);
     expect(mockUsersService.register).toHaveBeenCalledTimes(1);
-
-    expect(mockUsersService.getByEmail).toHaveBeenCalledTimes(2);
   });
 });

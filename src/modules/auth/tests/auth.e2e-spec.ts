@@ -13,6 +13,9 @@ import { HttpExceptionFilter } from 'src/common/filters/http-exception.filter';
 import { ResTransformInterceptor } from 'src/common/interceptors/res-transform.interceptors';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration, { Config } from 'src/config/configuration';
+import { EmailTools } from 'src/common/utils/email';
+
+const validCode = '123456';
 
 describe('AuthController (e2e)', () => {
   let app: INestApplication;
@@ -45,6 +48,15 @@ describe('AuthController (e2e)', () => {
     app.useGlobalInterceptors(new ResTransformInterceptor());
     await app.init();
     configService = app.get<ConfigService>(ConfigService);
+
+    jest
+      .spyOn(EmailTools, 'verifyEmailCode')
+      .mockImplementation(async (email: string, code: string) => {
+        if (code === validCode) {
+          return true;
+        }
+        return false;
+      });
   });
 
   beforeEach(async () => {
@@ -53,6 +65,7 @@ describe('AuthController (e2e)', () => {
 
   afterAll(async () => {
     await initDatabase(configService.get<Config['database']>('database'));
+    jest.restoreAllMocks();
     await app.close();
   });
 
@@ -67,6 +80,7 @@ describe('AuthController (e2e)', () => {
       email,
       password,
       avatarUrl,
+      code: validCode,
     };
 
     const partialUserVo: Partial<UserVo> = {
@@ -97,6 +111,7 @@ describe('AuthController (e2e)', () => {
       email: 'not email',
       password,
       avatarUrl,
+      code: validCode,
     };
     const badRequestResgiterRes = await request(app.getHttpServer())
       .post('/auth/register')
@@ -115,6 +130,7 @@ describe('AuthController (e2e)', () => {
       email,
       password,
       avatarUrl,
+      code: validCode,
     };
 
     const correctLoginDto: LoginUserRequestDto = {
