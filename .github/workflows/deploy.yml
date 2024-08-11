@@ -29,7 +29,7 @@ jobs:
         echo "JWT_SECRET=${{secrets.JWT_SECRET}}" >> .env.production
         echo "" >> .env.production
         echo "AVATAR_DIR=/usr/local/chat/avatars" >> .env.production
-        echo "AVATAR_URL=http://imjoye.chat/avatars" >> .env.production
+        echo "AVATAR_URL=http://47.113.144.108/avatars" >> .env.production
         echo "" >> .env.production
         echo "REDIS_HOST=127.0.0.1"
         echo "REDIS_PORT=6379"
