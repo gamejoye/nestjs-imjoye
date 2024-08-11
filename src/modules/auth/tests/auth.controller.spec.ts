@@ -6,7 +6,7 @@ import { LocalStrategy } from '../local.strategy';
 import { JwtStrategy } from '../jwt.strategy';
 import { LoginUserRequestDto } from '../dto/login.dto';
 import { User } from 'src/modules/users/entities/user.entity';
-import { getCurrentDatetime, Logger } from 'src/common/utils';
+import { getCurrentDatetime } from 'src/common/utils';
 import * as jwt from 'jsonwebtoken';
 import { IUsersService } from 'src/modules/users/interface/users.service.interface';
 import { UsersService } from 'src/modules/users/users.service';

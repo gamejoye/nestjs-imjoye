@@ -28,7 +28,6 @@ import {
   ApiBaseResult,
   ApiCreatedResponseResult,
 } from 'src/common/types/response.type';
-import { Logger } from 'src/common/utils';
 import { ConfigService } from '@nestjs/config';
 import { Config } from 'src/config/configuration';
 import { EmailTools } from 'src/common/utils/email';
@@ -42,7 +41,7 @@ export class AuthController {
   constructor(
     private configService: ConfigService,
     private usersService: UsersService,
-  ) { }
+  ) {}
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
