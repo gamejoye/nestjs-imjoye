@@ -39,17 +39,17 @@ jobs:
         run: npm run lint
       - name: Transfer .env.test file
         run: |
-          echo "DATABASE_TYPE=${{secrets.TEST_DATABASE_TYPE}}" >> .env.test
-          echo "DATABASE_PORT=${{secrets.TEST_DATABASE_PORT}}" >> .env.test
-          echo "DATABASE_HOST=${{secrets.TEST_DATABASE_HOST}}" >> .env.test
-          echo "DATABASE_USERNAME=${{secrets.TEST_DATABASE_USERNAME}}" >> .env.test
-          echo "DATABASE_PASSWORD=${{secrets.TEST_DATABASE_PASSWORD}}" >> .env.test
-          echo "DATABASE_DATABASE=${{secrets.TEST_DATABASE_DATABASE}}" >> .env.test
+          echo "DATABASE_TYPE=mysql" >> .env.test
+          echo "DATABASE_PORT=3306" >> .env.test
+          echo "DATABASE_HOST=127.0.0.1" >> .env.test
+          echo "DATABASE_USERNAME=root" >> .env.test
+          echo "DATABASE_PASSWORD=root" >> .env.test
+          echo "DATABASE_DATABASE=imjoye" >> .env.test
           echo "REDIS_HOST=127.0.0.1"
           echo "REDIS_PORT=6379"
           echo "REDIS_DB=0"
-          echo "JWT_SECRET=${{secrets.TEST_JWT_SECRET}}" >> .env.test
-          echo "PASS=${{secrets.PASS}} >> .env.test"
+          echo "JWT_SECRET=cF6qn3LvaZAcLE8veLVpdGO_t4COnVWM" >> .env.test
+          echo "PASS=abcdefghijklmnop >> .env.test"
       - name: Run the test
         run: npm run test
       - name: Run e2e test
@@ -61,8 +61,8 @@ jobs:
       mysql:
         image: mysql:8.0.27
         env:
-          MYSQL_DATABASE: ${{secrets.TEST_DATABASE_DATABASE}}
-          MYSQL_ROOT_PASSWORD: ${{secrets.TEST_DATABASE_PASSWORD}}
+          MYSQL_DATABASE: imjoye
+          MYSQL_ROOT_PASSWORD: root
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -84,17 +84,17 @@ jobs:
       run: npm ci
     - name: Transfer .env.test file
       run: |
-        echo "DATABASE_TYPE=${{secrets.TEST_DATABASE_TYPE}}" >> .env.test
-        echo "DATABASE_PORT=${{secrets.TEST_DATABASE_PORT}}" >> .env.test
-        echo "DATABASE_HOST=${{secrets.TEST_DATABASE_HOST}}" >> .env.test
-        echo "DATABASE_USERNAME=${{secrets.TEST_DATABASE_USERNAME}}" >> .env.test
-        echo "DATABASE_PASSWORD=${{secrets.TEST_DATABASE_PASSWORD}}" >> .env.test
-        echo "DATABASE_DATABASE=${{secrets.TEST_DATABASE_DATABASE}}" >> .env.test
-        echo "JWT_SECRET=${{secrets.TEST_JWT_SECRET}}" >> .env.test
-        echo "REDIS_HOST=127.0.0.1"
-        echo "REDIS_PORT=6379"
-        echo "REDIS_DB=0"
-        echo "PASS=${{secrets.PASS}} >> .env.test"
+        echo "DATABASE_TYPE=mysql" >> .env.test
+          echo "DATABASE_PORT=3306" >> .env.test
+          echo "DATABASE_HOST=127.0.0.1" >> .env.test
+          echo "DATABASE_USERNAME=root" >> .env.test
+          echo "DATABASE_PASSWORD=root" >> .env.test
+          echo "DATABASE_DATABASE=imjoye" >> .env.test
+          echo "REDIS_HOST=127.0.0.1"
+          echo "REDIS_PORT=6379"
+          echo "REDIS_DB=0"
+          echo "JWT_SECRET=cF6qn3LvaZAcLE8veLVpdGO_t4COnVWM" >> .env.test
+          echo "PASS=abcdefghijklmnop >> .env.test"
     - name: Build
       run: npm run build
     - name: Generate OpenApi
