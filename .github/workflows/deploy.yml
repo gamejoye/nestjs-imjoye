@@ -19,12 +19,12 @@ jobs:
         node-version: ${{matrix.node-version}}
     - name: Transfer .env.production file
       run: |
-        echo "DATABASE_TYPE=${{secrets.DATABASE_TYPE}}" >> .env.production
-        echo "DATABASE_PORT=${{secrets.DATABASE_PORT}}" >> .env.production
-        echo "DATABASE_HOST=${{secrets.DATABASE_HOST}}" >> .env.production
-        echo "DATABASE_USERNAME=${{secrets.DATABASE_USERNAME}}" >> .env.production
+        echo "DATABASE_TYPE=mysql" >> .env.production
+        echo "DATABASE_PORT=3306" >> .env.production
+        echo "DATABASE_HOST=127.0.0.1" >> .env.production
+        echo "DATABASE_USERNAME=root" >> .env.production
         echo "DATABASE_PASSWORD=${{secrets.DATABASE_PASSWORD}}" >> .env.production
-        echo "DATABASE_DATABASE=${{secrets.DATABASE_DATABASE}}" >> .env.production
+        echo "DATABASE_DATABASE=imjoye" >> .env.production
         echo "" >> .env.production
         echo "JWT_SECRET=${{secrets.JWT_SECRET}}" >> .env.production
         echo "" >> .env.production
@@ -41,8 +41,8 @@ jobs:
       with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SOURCE: "."
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          REMOTE_HOST: 47.113.144.108
+          REMOTE_USER: root
           TARGET: "/usr/local/chat/nestjs-chat"
           EXCLUDE: "node_modules/"
           SCRIPT_BEFORE: |
