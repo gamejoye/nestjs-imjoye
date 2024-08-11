@@ -31,9 +31,9 @@ jobs:
         echo "AVATAR_DIR=/usr/local/chat/avatars" >> .env.production
         echo "AVATAR_URL=http://47.113.144.108/avatars" >> .env.production
         echo "" >> .env.production
-        echo "REDIS_HOST=127.0.0.1"
-        echo "REDIS_PORT=6379"
-        echo "REDIS_DB=0"
+        echo "REDIS_HOST=127.0.0.1" >> .env.production
+        echo "REDIS_PORT=6379" >> .env.production
+        echo "REDIS_DB=0" >> .env.production
         echo "" >> .env.production
         echo "PASS=${{secrets.PASS}} >> .env.production"
     - name: Deploy to Server
