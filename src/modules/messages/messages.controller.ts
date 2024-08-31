@@ -12,7 +12,6 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiExtraModels,
-  ApiHeader,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -22,7 +21,7 @@ import { IAddMessageDto } from './dto/add-message.dto';
 import { WsGatewayService } from '../ws-gateway/ws-gateway.service';
 import { MessageVo } from './vo/message.vo';
 import { transformMessage } from './vo/utils';
-import { GetMessagesByChatroomIdDto } from './dto/get-messages-by-chatroom-id.dto';
+import { GetMessagesDto } from './dto/get-messages-by-chatroom-id.dto';
 import { JwtGuard } from '../auth/jwt.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { User } from '../users/entities/user.entity';
@@ -32,9 +31,8 @@ import {
   ApiCreatedResponseResult,
   ApiOkResponseResult,
 } from 'src/common/types/response.type';
-import { BasePaging } from 'src/common/types/base.dto';
-import { Logger } from 'src/common/utils';
 import { PagingMessagesVo } from './vo/pagine-messages.vo';
+import { Logger } from 'src/common/utils';
 
 @ApiExtraModels(ApiBaseResult)
 @ApiTags('messages')
@@ -63,10 +61,8 @@ export class MessagesController {
   })
   async getMessagesByChatroomId(
     @GetUser() user: User,
-    @Query() { room_id: roomId }: GetMessagesByChatroomIdDto,
-    @Query() paging: BasePaging,
+    @Query() { room_id: roomId, oldest_message_id, page_size }: GetMessagesDto,
   ): Promise<PagingMessagesVo> {
-    Logger.log('paging: ', paging);
     const chatroom = await this.chatroomsService.getByChatroomId(
       user.id,
       roomId,
@@ -74,13 +70,16 @@ export class MessagesController {
     if (!chatroom) {
       throw new HttpException('聊天室不存在', HttpStatus.NOT_FOUND);
     }
-    const [total, messages] = await Promise.all([
-      this.messagesService.countAll(roomId),
-      this.messagesService.getByPaging(roomId, paging),
-    ]);
+    const messages = await this.messagesService.getByOldestPaging(roomId, {
+      oldest_message_id,
+      page_size: page_size + 1,
+    });
+    Logger.log('msgs: ', messages)
     return {
-      total,
-      messages: messages.map((message) => transformMessage(message)),
+      more: messages.length === page_size + 1,
+      messages: messages
+        .slice(0, Math.min(messages.length, page_size))
+        .map((message) => transformMessage(message)),
     };
   }
 

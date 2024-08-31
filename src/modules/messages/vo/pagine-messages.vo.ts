@@ -3,10 +3,10 @@ import { MessageVo } from './message.vo';
 
 export class PagingMessagesVo {
   @ApiProperty({
-    example: 100,
-    description: '消息总数',
+    example: true,
+    description: '是否还有未获取的消息',
   })
-  total: number;
+  more: boolean;
 
   @ApiProperty({
     description: '消息内容',

@@ -13,6 +13,7 @@ import { User } from '../users/entities/user.entity';
 import { Chatroom } from '../chatrooms/entities/chatroom.entity';
 import { UserChatroom } from '../chatrooms/entities/user-chatroom.entity';
 import { BasePaging } from 'src/common/types/base.dto';
+import { GetMessagesDto } from './dto/get-messages-by-chatroom-id.dto';
 
 @Injectable()
 export class MessagesService implements IMessagesService {
@@ -25,7 +26,29 @@ export class MessagesService implements IMessagesService {
     protected chatroomRepository: Repository<Chatroom>,
     @Inject(USER_CHATROOM_REPOSITORY)
     protected userChatroomRepository: Repository<UserChatroom>,
-  ) {}
+  ) { }
+  async getByOldestPaging(
+    chatroomId: number,
+    paging: Pick<GetMessagesDto, 'oldest_message_id' | 'page_size'>,
+  ): Promise<Array<Message>> {
+    const { oldest_message_id, page_size } = paging;
+    let queryBuilder = this.messagesRepository
+      .createQueryBuilder('message')
+      .innerJoinAndSelect('message.chatroom', 'chatroom')
+      .innerJoinAndSelect('message.from', 'user')
+      .where('message.chatroom.id = :chatroomId', { chatroomId })
+      .orderBy('message.id', 'DESC')
+      .limit(page_size);
+
+    if (oldest_message_id) {
+      queryBuilder = queryBuilder.andWhere('message.id < :oldestMessageId', {
+        oldestMessageId: oldest_message_id,
+      });
+    }
+
+    const messages = await queryBuilder.getMany();
+    return messages;
+  }
   countAll(chatroomId: number): Promise<number> {
     return this.messagesRepository.count({
       where: { chatroom: { id: chatroomId } },
