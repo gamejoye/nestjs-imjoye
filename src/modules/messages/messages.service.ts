@@ -12,6 +12,7 @@ import { getCurrentDatetime } from 'src/common/utils/times';
 import { User } from '../users/entities/user.entity';
 import { Chatroom } from '../chatrooms/entities/chatroom.entity';
 import { UserChatroom } from '../chatrooms/entities/user-chatroom.entity';
+import { BasePaging } from 'src/common/types/base.dto';
 
 @Injectable()
 export class MessagesService implements IMessagesService {
@@ -25,6 +26,11 @@ export class MessagesService implements IMessagesService {
     @Inject(USER_CHATROOM_REPOSITORY)
     protected userChatroomRepository: Repository<UserChatroom>,
   ) {}
+  countAll(chatroomId: number): Promise<number> {
+    return this.messagesRepository.count({
+      where: { chatroom: { id: chatroomId } },
+    });
+  }
   async addMessage(partialMessage: DeepPartial<Message>): Promise<Message> {
     const chatroom = await this.chatroomRepository.findOne({
       where: {
@@ -77,13 +83,20 @@ export class MessagesService implements IMessagesService {
       .orderBy('message.createTime', 'DESC');
     return await query.getOne();
   }
-  async getByPaging(chatroomId: number): Promise<Message[]> {
+  async getByPaging(
+    chatroomId: number,
+    paging: BasePaging,
+  ): Promise<Message[]> {
+    const { _start, _end, _order, _sort } = paging;
+    const skip = _start;
+    const amount = _end - _start;
     const query = this.messagesRepository
       .createQueryBuilder('message')
       .innerJoinAndSelect('message.chatroom', 'chatroom')
       .innerJoinAndSelect('message.from', 'user')
       .where('chatroom.id = :chatroomId', { chatroomId })
       .orderBy('message.createTime', 'DESC');
+    query.orderBy(`message.${_sort}`, _order).skip(skip).take(amount);
     return await query.getMany();
   }
 }

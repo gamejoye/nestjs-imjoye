@@ -9,8 +9,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiExtraModels,
+  ApiHeader,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -30,6 +32,9 @@ import {
   ApiCreatedResponseResult,
   ApiOkResponseResult,
 } from 'src/common/types/response.type';
+import { BasePaging } from 'src/common/types/base.dto';
+import { Logger } from 'src/common/utils';
+import { PagingMessagesVo } from './vo/pagine-messages.vo';
 
 @ApiExtraModels(ApiBaseResult)
 @ApiTags('messages')
@@ -39,14 +44,14 @@ export class MessagesController {
     protected readonly messagesService: MessagesService,
     protected readonly chatroomsService: ChatroomsService,
     protected readonly wsService: WsGatewayService,
-  ) {}
+  ) { }
   @Get()
   @UseGuards(JwtGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: '根据roomId获取消息' })
   @ApiOkResponseResult({
-    model: MessageVo,
+    model: PagingMessagesVo,
     description: '成功获取聊天室消息',
-    isArray: true,
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
@@ -59,7 +64,9 @@ export class MessagesController {
   async getMessagesByChatroomId(
     @GetUser() user: User,
     @Query() { room_id: roomId }: GetMessagesByChatroomIdDto,
-  ): Promise<Array<MessageVo>> {
+    @Query() paging: BasePaging,
+  ): Promise<PagingMessagesVo> {
+    Logger.log('paging: ', paging);
     const chatroom = await this.chatroomsService.getByChatroomId(
       user.id,
       roomId,
@@ -67,8 +74,14 @@ export class MessagesController {
     if (!chatroom) {
       throw new HttpException('聊天室不存在', HttpStatus.NOT_FOUND);
     }
-    const messages = await this.messagesService.getByPaging(roomId);
-    return messages.map((message) => transformMessage(message));
+    const [total, messages] = await Promise.all([
+      this.messagesService.countAll(roomId),
+      this.messagesService.getByPaging(roomId, paging),
+    ]);
+    return {
+      total,
+      messages: messages.map((message) => transformMessage(message)),
+    };
   }
 
   @Post()
