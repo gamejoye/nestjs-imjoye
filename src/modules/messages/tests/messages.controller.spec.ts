@@ -16,6 +16,10 @@ import { ChatroomsService } from 'src/modules/chatrooms/chatrooms.service';
 import { ConfigModule } from '@nestjs/config';
 import configuration from 'src/config/configuration';
 import { BasePaging } from 'src/common/types/base.dto';
+import { GetMessagesDto } from '../dto/get-messages-by-chatroom-id.dto';
+import { PagingMessagesVo } from '../vo/pagine-messages.vo';
+import { MessageVo } from '../vo/message.vo';
+import { transformMessage } from '../vo/utils';
 
 /**
  * 测试所需常量
@@ -78,6 +82,7 @@ const messages: Array<Message> = [
 
 const mockMessagesService: Partial<IMessagesService> = {
   getByPaging: jest.fn(),
+  getByOldestPaging: jest.fn(),
   addMessage: jest.fn(),
   countAll: jest.fn(),
 };
@@ -128,20 +133,29 @@ describe('MessagesController', () => {
   });
 
   it('getMessagesByChatroomId逻辑验证', async () => {
-    const paging: BasePaging = {
-      _start: 0,
-      _end: 10,
-      _sort: 'id',
-      _order: 'ASC',
+    const paging: GetMessagesDto = {
+      room_id: chatroom.id,
+      page_size: 10,
     };
-    (mockMessagesService.getByPaging as jest.Mock).mockImplementation(
-      (chatroomId: number, paging: BasePaging) => {
-        if (chatroom.id !== chatroomId) return [];
-        return messages
-          .slice(paging._start, Math.min(messages.length, paging._end))
-          .sort((m1, m2) => {
-            return paging._sort === 'ASC' ? m1.id - m2.id : m2.id - m1.id;
-          });
+    (mockMessagesService.getByOldestPaging as jest.Mock).mockImplementation(
+      function (chatroomId: number, paging: GetMessagesDto): Array<MessageVo> {
+        if (chatroom.id !== chatroomId) {
+          return [];
+        }
+        const messageVos: Array<MessageVo> = [];
+        for (
+          let i = messages.length - 1;
+          i >= 0 && messageVos.length < paging.page_size + 1;
+          i--
+        ) {
+          if (
+            paging.oldest_message_id === undefined ||
+            messages[i].id < paging.oldest_message_id
+          ) {
+            messageVos.push(transformMessage(messages[i]));
+          }
+        }
+        return messageVos;
       },
     );
     (mockChatroomsService.getByChatroomId as jest.Mock).mockResolvedValue(
@@ -150,15 +164,14 @@ describe('MessagesController', () => {
     (mockMessagesService.countAll as jest.Mock).mockResolvedValue(
       messages.length,
     );
-    await controller.getMessagesByChatroomId(
-      user,
-      { room_id: chatroom.id },
-      paging,
-    );
-    expect(mockMessagesService.getByPaging).toHaveBeenCalledTimes(1);
-    expect(mockMessagesService.getByPaging).toHaveBeenCalledWith(
+    await controller.getMessagesByChatroomId(user, paging);
+    expect(mockMessagesService.getByOldestPaging).toHaveBeenCalledTimes(1);
+    expect(mockMessagesService.getByOldestPaging).toHaveBeenCalledWith(
       chatroom.id,
-      paging,
+      {
+        oldest_message_id: paging.oldest_message_id,
+        page_size: paging.page_size + 1,
+      },
     );
   });
 

@@ -25,15 +25,14 @@ import {
   initDatabase,
 } from 'src/common/utils';
 import { Message } from '../entities/message.entity';
-import { GetMessagesByChatroomIdDto } from '../dto/get-messages-by-chatroom-id.dto';
+import { GetMessagesDto } from '../dto/get-messages-by-chatroom-id.dto';
 import { IAddMessageDto } from '../dto/add-message.dto';
 import { transformMessage } from '../vo/utils';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration, { Config } from 'src/config/configuration';
-import { BasePaging } from 'src/common/types/base.dto';
 import { PagingMessagesVo } from '../vo/pagine-messages.vo';
 
-describe('ChatroomController (e2e)', () => {
+describe('MessageController (e2e)', () => {
   let app: INestApplication;
   let configService: ConfigService;
   let messagesRepository: Repository<Message>;
@@ -115,12 +114,6 @@ describe('ChatroomController (e2e)', () => {
     const messageSorter = (msg1: Message, msg2: Message) => {
       return msg2.id - msg1.id;
     };
-    const paging: BasePaging = {
-      _start: 1,
-      _end: 11,
-      _order: 'DESC',
-      _sort: 'id',
-    };
     /**
      * 正常流程
      */
@@ -132,35 +125,35 @@ describe('ChatroomController (e2e)', () => {
       });
       const userId = uc.user.id;
       const authorization = getAuthorization(userId);
-      const query: GetMessagesByChatroomIdDto = {
+      const query: GetMessagesDto = {
         room_id: chatroom.id,
+        page_size: 10,
       };
       const response = await request(app.getHttpServer())
         .get(`/messages`)
-        .query({ ...query, ...paging })
+        .query({ ...query })
         .set('Authorization', authorization);
       expect(response.status).toBe(HttpStatus.OK);
-      const { total, messages: messageVos }: PagingMessagesVo =
+      const { more, messages: messageVos }: PagingMessagesVo =
         response.body.data;
       for (let i = 0; i < messageVos.length - 1; i++) {
         const vo1 = messageVos[i];
         const vo2 = messageVos[i + 1];
         expect(vo1.id).toBeGreaterThanOrEqual(vo2.id);
       }
-      expect(messageVos.length).toBe(
-        Math.min(paging._end, total) - paging._start,
-      );
       const messages = await messagesRepository.find({
         where: { chatroom: { id: chatroom.id } },
         relations: ['from', 'chatroom'],
         order: {
           id: 'DESC',
         },
-        skip: paging._start,
-        take: paging._end - paging._start,
+        take: query.page_size + 1,
       });
+      expect(more).toBe(messages.length === query.page_size + 1);
       expect(
-        messages.map((message) => transformMessage(message)),
+        messages
+          .slice(0, Math.min(messages.length, query.page_size))
+          .map((message) => transformMessage(message)),
       ).toMatchObject(messageVos);
     }
 
@@ -172,12 +165,13 @@ describe('ChatroomController (e2e)', () => {
     // 1. chatroom不存在的NotFound
     const nonExisintChatroomId =
       await getChatroomNonExistingId(chatroomsRepository);
-    const notFoundQuery: GetMessagesByChatroomIdDto = {
+    const notFoundQuery: GetMessagesDto = {
       room_id: nonExisintChatroomId,
+      page_size: 10,
     };
     const notFoundResponse = await request(app.getHttpServer())
       .get(`/messages`)
-      .query({ ...notFoundQuery, ...paging })
+      .query({ ...notFoundQuery })
       .set('Authorization', authorization);
     expect(notFoundResponse.status).toBe(HttpStatus.NOT_FOUND);
     // 2. user不在chatroom的NotFound
@@ -188,11 +182,11 @@ describe('ChatroomController (e2e)', () => {
     );
     expect(nonExistingUserChatrooms.length).toBeGreaterThan(0);
     for (const { userId, chatroomId } of nonExistingUserChatrooms) {
-      const dto: GetMessagesByChatroomIdDto = { room_id: chatroomId };
+      const dto: GetMessagesDto = { room_id: chatroomId, page_size: 10 };
       const authorization = getAuthorization(userId);
       const notFoundResponse = await request(app.getHttpServer())
         .get(`/messages`)
-        .query({ ...dto, ...paging })
+        .query({ ...dto })
         .set('Authorization', authorization);
       expect(notFoundResponse.status).toBe(HttpStatus.NOT_FOUND);
     }
@@ -202,10 +196,10 @@ describe('ChatroomController (e2e)', () => {
      */
     const badRoomIds = ['', 'not a Number', NaN, undefined, null];
     for (const badRoomId of badRoomIds) {
-      const badQuery = { room_id: badRoomId };
+      const badQuery = { room_id: badRoomId, page_size: 10 };
       const badRequestResponse = await request(app.getHttpServer())
         .get(`/messages`)
-        .query({ ...badQuery, ...paging })
+        .query({ ...badQuery })
         .set('Authorization', authorization);
       expect(badRequestResponse.status).toBe(HttpStatus.BAD_REQUEST);
     }
@@ -213,10 +207,10 @@ describe('ChatroomController (e2e)', () => {
     /**
      * 未认证流程
      */
-    const query: GetMessagesByChatroomIdDto = { room_id: 1 };
+    const query: GetMessagesDto = { room_id: 1, page_size: 10 };
     const unauthorizedResponse = await request(app.getHttpServer())
       .get(`/messages`)
-      .query({ ...query, ...paging });
+      .query({ ...query });
     expect(unauthorizedResponse.status).toBe(HttpStatus.UNAUTHORIZED);
   });
 
