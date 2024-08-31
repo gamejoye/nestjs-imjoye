@@ -26,7 +26,7 @@ export class MessagesService implements IMessagesService {
     protected chatroomRepository: Repository<Chatroom>,
     @Inject(USER_CHATROOM_REPOSITORY)
     protected userChatroomRepository: Repository<UserChatroom>,
-  ) { }
+  ) {}
   async getByOldestPaging(
     chatroomId: number,
     paging: Pick<GetMessagesDto, 'oldest_message_id' | 'page_size'>,

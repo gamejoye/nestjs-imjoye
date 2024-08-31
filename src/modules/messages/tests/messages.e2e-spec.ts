@@ -111,9 +111,6 @@ describe('MessageController (e2e)', () => {
   });
 
   it('GET /messages with some parameters', async () => {
-    const messageSorter = (msg1: Message, msg2: Message) => {
-      return msg2.id - msg1.id;
-    };
     /**
      * 正常流程
      */

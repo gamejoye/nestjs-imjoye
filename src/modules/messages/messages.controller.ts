@@ -42,7 +42,7 @@ export class MessagesController {
     protected readonly messagesService: MessagesService,
     protected readonly chatroomsService: ChatroomsService,
     protected readonly wsService: WsGatewayService,
-  ) { }
+  ) {}
   @Get()
   @UseGuards(JwtGuard)
   @ApiBearerAuth()
@@ -74,7 +74,7 @@ export class MessagesController {
       oldest_message_id,
       page_size: page_size + 1,
     });
-    Logger.log('msgs: ', messages)
+    Logger.log('msgs: ', messages);
     return {
       more: messages.length === page_size + 1,
       messages: messages

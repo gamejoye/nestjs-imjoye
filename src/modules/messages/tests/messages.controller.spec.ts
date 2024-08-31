@@ -15,9 +15,7 @@ import { IAddMessageDto } from '../dto/add-message.dto';
 import { ChatroomsService } from 'src/modules/chatrooms/chatrooms.service';
 import { ConfigModule } from '@nestjs/config';
 import configuration from 'src/config/configuration';
-import { BasePaging } from 'src/common/types/base.dto';
 import { GetMessagesDto } from '../dto/get-messages-by-chatroom-id.dto';
-import { PagingMessagesVo } from '../vo/pagine-messages.vo';
 import { MessageVo } from '../vo/message.vo';
 import { transformMessage } from '../vo/utils';
 
