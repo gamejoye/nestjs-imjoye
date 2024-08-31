@@ -916,6 +916,26 @@
             "schema": {
               "type": "number"
             }
+          },
+          {
+            "name": "oldest_message_id",
+            "required": false,
+            "in": "query",
+            "example": 2,
+            "description": "最后一条消息的id",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page_size",
+            "required": true,
+            "in": "query",
+            "example": 2,
+            "description": "拉取的消息的数量",
+            "schema": {
+              "type": "number"
+            }
           }
         ],
         "responses": {
@@ -931,10 +951,7 @@
                     {
                       "properties": {
                         "data": {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/components/schemas/MessageVo"
-                          }
+                          "$ref": "#/components/schemas/PagingMessagesVo"
                         }
                       },
                       "required": [
@@ -955,6 +972,11 @@
         },
         "tags": [
           "messages"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
         ]
       },
       "post": {
@@ -1451,6 +1473,27 @@
           "code",
           "password",
           "avatarUrl"
+        ]
+      },
+      "PagingMessagesVo": {
+        "type": "object",
+        "properties": {
+          "more": {
+            "type": "boolean",
+            "example": true,
+            "description": "是否还有未获取的消息"
+          },
+          "messages": {
+            "description": "消息内容",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MessageVo"
+            }
+          }
+        },
+        "required": [
+          "more",
+          "messages"
         ]
       },
       "IAddMessageChatroomDto": {
