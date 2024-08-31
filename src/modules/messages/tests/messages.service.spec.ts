@@ -28,6 +28,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { ChatroomsService } from 'src/modules/chatrooms/chatrooms.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration, { Config } from 'src/config/configuration';
+import { BasePaging } from 'src/common/types/base.dto';
 
 describe('MessagesService', () => {
   let service: MessagesService;
@@ -73,22 +74,33 @@ describe('MessagesService', () => {
   it('getByPaging work correctly', async () => {
     const chatrooms = await chatroomsRepository.find();
     const messageSorter = (msg1: Message, msg2: Message) => {
-      const t1 = new Date(msg1.createTime).getTime();
-      const t2 = new Date(msg2.createTime).getTime();
-      if (t1 == t2) return msg2.id - msg1.id;
-      return t2 - t1;
+      return msg2.id - msg1.id;
     };
     for (const chatroom of chatrooms) {
       /**
-       * 按照createTime从大到小排序
+       * 按照id从大到小排序
        */
-      const messages = (
+      const paging: BasePaging = {
+        _start: 0,
+        _end: 3,
+        _sort: 'id',
+        _order: 'DESC',
+      };
+      let messages = (
         await messagesRepository.find({
           where: { chatroom: { id: chatroom.id } },
           relations: ['from', 'chatroom'],
         })
       ).sort(messageSorter);
-      const messagesToBeTested = await service.getByPaging(chatroom.id);
+      messages = messages.slice(
+        paging._start,
+        Math.min(messages.length, paging._end),
+      );
+      const total = await service.countAll(chatroom.id);
+      const messagesToBeTested = await service.getByPaging(chatroom.id, paging);
+      expect(messagesToBeTested.length).toBe(
+        Math.min(total, paging._end - paging._start),
+      );
       for (let i = 0; i < messagesToBeTested.length - 1; i++) {
         const msg1 = messagesToBeTested[i];
         const msg2 = messagesToBeTested[i + 1];

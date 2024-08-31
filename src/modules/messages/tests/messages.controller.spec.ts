@@ -15,6 +15,7 @@ import { IAddMessageDto } from '../dto/add-message.dto';
 import { ChatroomsService } from 'src/modules/chatrooms/chatrooms.service';
 import { ConfigModule } from '@nestjs/config';
 import configuration from 'src/config/configuration';
+import { BasePaging } from 'src/common/types/base.dto';
 
 /**
  * 测试所需常量
@@ -78,6 +79,7 @@ const messages: Array<Message> = [
 const mockMessagesService: Partial<IMessagesService> = {
   getByPaging: jest.fn(),
   addMessage: jest.fn(),
+  countAll: jest.fn(),
 };
 
 const mockWsGatewayService: Partial<WsGatewayService> = {
@@ -126,13 +128,38 @@ describe('MessagesController', () => {
   });
 
   it('getMessagesByChatroomId逻辑验证', async () => {
-    (mockMessagesService.getByPaging as jest.Mock).mockResolvedValue(messages);
+    const paging: BasePaging = {
+      _start: 0,
+      _end: 10,
+      _sort: 'id',
+      _order: 'ASC',
+    };
+    (mockMessagesService.getByPaging as jest.Mock).mockImplementation(
+      (chatroomId: number, paging: BasePaging) => {
+        if (chatroom.id !== chatroomId) return [];
+        return messages
+          .slice(paging._start, Math.min(messages.length, paging._end))
+          .sort((m1, m2) => {
+            return paging._sort === 'ASC' ? m1.id - m2.id : m2.id - m1.id;
+          });
+      },
+    );
     (mockChatroomsService.getByChatroomId as jest.Mock).mockResolvedValue(
       chatroom,
     );
-    await controller.getMessagesByChatroomId(user, { room_id: chatroom.id });
+    (mockMessagesService.countAll as jest.Mock).mockResolvedValue(
+      messages.length,
+    );
+    await controller.getMessagesByChatroomId(
+      user,
+      { room_id: chatroom.id },
+      paging,
+    );
     expect(mockMessagesService.getByPaging).toHaveBeenCalledTimes(1);
-    expect(mockMessagesService.getByPaging).toHaveBeenCalledWith(chatroom.id);
+    expect(mockMessagesService.getByPaging).toHaveBeenCalledWith(
+      chatroom.id,
+      paging,
+    );
   });
 
   it('addMessage逻辑验证', async () => {
